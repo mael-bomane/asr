@@ -22,17 +22,39 @@ pub struct Lock {
     pub lock_bump: u8,
     pub vault_bump: u8,
     pub name: String,
+    pub seasons: Vec<Season>,
 }
 
 impl Lock {
     pub const LEN: usize = DISCRIMINATOR_LENGTH
         + PUBLIC_KEY_LENGTH * 2 // creator, mint 
         + 1
-        + 1 * 2 // threshold 51 => 100
+        + 1 // threshold 51 => 100
         + 8 * 4 // approved, rejected, min 
-        + TIMESTAMP_LENGTH * 4
+        + TIMESTAMP_LENGTH * 5
         + BUMP_LENGTH * 2 // bumps
-        + VECTOR_LENGTH_PREFIX * 2
+        + VECTOR_LENGTH_PREFIX 
         + STRING_LENGTH_PREFIX
         + MAX_LOCKER_NAME_LENGTH;
+}
+
+#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
+pub struct Season {
+    pub season: u8,
+    pub asr: Vec<ASR>,
+    pub season_end: i64, // 0 = asr, 1 = ve
+}
+
+impl Season {
+    pub const LEN: usize = 1 + VECTOR_LENGTH_PREFIX;
+}
+
+#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
+pub struct ASR {
+    pub mint: Pubkey,
+    pub amount: u64,
+}
+
+impl ASR {
+    pub const LEN: usize = PUBLIC_KEY_LENGTH + 8;
 }

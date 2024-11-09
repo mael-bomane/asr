@@ -1,8 +1,8 @@
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
-use crate::Lock;
 use crate::{constants::*, errors::ErrorCode, state::Analytics};
+use crate::{Lock, Season};
 
 use anchor_lang::prelude::*;
 
@@ -35,7 +35,7 @@ pub struct LockNew<'info> {
     #[account(
         init,
         payer = signer,
-        seeds = [b"vault", signer.key().as_ref(), mint.key().as_ref()],
+        seeds = [b"vault", lock.key().as_ref(), mint.key().as_ref()],
         token::mint = mint,
         token::authority = auth,
         bump
@@ -111,6 +111,11 @@ impl<'info> LockNew<'info> {
         lock.creator = self.signer.key();
         lock.mint = self.mint.key();
         lock.config = config;
+        lock.seasons.push(Season {
+            season: 0,
+            season_end: Clock::get()?.unix_timestamp + THREE_MONTH_IN_SECONDS,
+            asr: Vec::new(),
+        });
         lock.voting_period = voting_period;
         lock.lock_duration = lock_duration;
         lock.threshold = threshold;
@@ -129,7 +134,7 @@ impl<'info> LockNew<'info> {
 
     pub fn update_analytics(&mut self) -> Result<()> {
         let analytics = &mut self.analytics;
-        analytics.lockers += 1;
+        analytics.locks += 1;
         Ok(())
     }
 }

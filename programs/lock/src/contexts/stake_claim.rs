@@ -131,6 +131,10 @@ impl<'info> StakeClaim<'info> {
             signer_seeds,
         );
 
-        transfer(cpi, amount_to_claim)
+        transfer(cpi, amount_to_claim)?;
+
+        lock.total_deposits -= amount_to_claim;
+
+        Ok(())
     }
 }

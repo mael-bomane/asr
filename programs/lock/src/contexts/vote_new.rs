@@ -75,8 +75,10 @@ impl<'info> VoteNew<'info> {
         let mut choice_voting_power = choice.voting_power;
         choice_voting_power += voting_power;
 
+        let season = lock.seasons.len() as u8 - 1;
         
         let vote = Vote {
+            season,
             poll: index,
             voting_power,
             choice: id,

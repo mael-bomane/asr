@@ -35,6 +35,19 @@ impl User {
             .sum()
     }
 
+    pub fn user_season_points(&self, lock: &Lock) -> f64 {
+        self.votes
+            .iter()
+            .map(|vote| {
+                if vote.season == lock.seasons.len() as u8 - 1 {
+                    vote.voting_power
+                } else {
+                    0f64
+                }
+            })
+            .sum()
+    }
+
     pub fn voting_power(&self, lock: &Lock) -> f64 {
         // active staking rewards (asr) math
         if lock.config == 0 {
@@ -90,6 +103,7 @@ impl Deposit {
 
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
 pub struct Vote {
+    pub season: u8,
     pub poll: u64,
     pub voting_power: f64,
     pub choice: u8,
@@ -97,7 +111,8 @@ pub struct Vote {
 }
 
 impl Vote {
-    pub const LEN: usize = 8 * 2 // poll, voting_power 
-        + 1 // enum
+    pub const LEN: usize = 1 // season
+        + 8 * 2 // id, voting_power 
+        + BUMP_LENGTH
         + TIMESTAMP_LENGTH;
 }

@@ -1,3 +1,5 @@
+pub mod asr_claim;
+pub mod asr_deposit;
 pub mod initialize;
 pub mod lock_new;
 pub mod poll_execute;
@@ -8,6 +10,8 @@ pub mod stake_deactivate;
 pub mod stake_new;
 pub mod vote_new;
 
+pub use asr_claim::*;
+pub use asr_deposit::*;
 pub use initialize::*;
 pub use lock_new::*;
 pub use poll_execute::*;

@@ -70,4 +70,8 @@ pub mod lock {
         ctx.accounts.vote_new(index, id)?;
         ctx.accounts.update_analytics()
     }
+
+    pub fn asr_deposit(ctx: Context<ASRDeposit>, amount: u64) -> Result<()> {
+        ctx.accounts.asr_deposit(amount)
+    }
 }

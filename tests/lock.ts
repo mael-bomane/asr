@@ -100,7 +100,7 @@ describe("lock", () => {
 
   const vault = PublicKey.findProgramAddressSync(
     // seeds = [b"vault", creator.key().as_ref(), mint.key().as_ref()]
-    [Buffer.from("vault"), rpc == "https://api.devnet.solana.com" ? wallet.publicKey.toBytes() : user1.publicKey.toBytes(), mint.toBytes()],
+    [Buffer.from("vault"), lock.toBytes(), mint.toBytes()],
     program.programId
   )[0];
 
@@ -180,7 +180,7 @@ describe("lock", () => {
         token,
         user1Ata.address,
         user1.publicKey,
-        100 * 1 * 10 ** decimals
+        200 * 1 * 10 ** decimals
       );
       console.log(`https://explorer.solana.com/tx/${user1MintTo}?cluster=devnet`);
       let user1TokenAmount = await connection.getTokenAccountBalance(user1Ata.address);
@@ -359,6 +359,29 @@ describe("lock", () => {
           console.log(debug)
         });
     }
+  });
+
+  it("user1 deposit asr tokens", async () => {
+    await program.methods.asrDeposit(min)
+      .accountsStrict({
+        creator: user1.publicKey,
+        signerAta: user1Ata.address,
+        mint,
+        lock,
+        vault,
+        auth,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.lock.fetch(lock);
+        console.log(debug);
+      });
   });
 
   it("register user1 to lock", async () => {

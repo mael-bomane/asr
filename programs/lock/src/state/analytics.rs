@@ -5,7 +5,7 @@ use crate::constants::*;
 #[account]
 pub struct Analytics {
     pub vault: Pubkey,
-    pub lockers: u64,
+    pub locks: u64,
     pub polls: u64,
     pub votes: u64,
     pub approved: u64,
@@ -17,10 +17,6 @@ pub struct Analytics {
 }
 
 impl Analytics {
-    pub const LEN: usize = DISCRIMINATOR_LENGTH
-        + PUBLIC_KEY_LENGTH * 2 // token, vault
-        + 8 * 5 // daos, polls, approved, rejected, points 
-        + TIMESTAMP_LENGTH // created_at
-        + BUMP_LENGTH * 2
-        + VECTOR_LENGTH_PREFIX; // bump
+    pub const LEN: usize =
+        DISCRIMINATOR_LENGTH + PUBLIC_KEY_LENGTH + 8 * 6 + TIMESTAMP_LENGTH + BUMP_LENGTH * 2;
 }
