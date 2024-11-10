@@ -1,12 +1,11 @@
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
-use crate::{Analytics, Lock, User};
+use crate::{errors::ErrorCode, Analytics, Claim, Lock, User};
 
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(amount: u64)]
 pub struct ASRClaim<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -26,7 +25,8 @@ pub struct ASRClaim<'info> {
         mut,
         has_one = owner,
         seeds = [b"user", lock.key().as_ref(), owner.key().as_ref()],
-        bump = user.bump
+        bump = user.bump,
+        constraint = !user.claims.iter().any(|i| i.mint == mint.key()) @ ErrorCode::UserAlreadyClaimedThis
     )]
     pub user: Box<Account<'info, User>>,
     #[account(
@@ -56,12 +56,28 @@ pub struct ASRClaim<'info> {
 }
 
 impl<'info> ASRClaim<'info> {
-    pub fn asr_claim(&mut self, amount: u64) -> Result<()> {
+    pub fn asr_claim(&mut self) -> Result<()> {
         let lock = &mut self.lock;
 
+        let season = &lock.seasons[lock.seasons.len() as usize - 1];
+        let asr = season
+            .asr
+            .clone()
+            .into_iter()
+            .find(|asr| asr.mint == self.mint.key())
+            .unwrap();
+
+        let total_tokens = asr.amount;
         let user = &mut self.user;
 
-        let voting_power = user.user_season_points(&lock);
+        let user_season_points = user.user_season_points(&lock);
+
+        let user_ratio = user_season_points
+            .checked_mul(100)
+            .unwrap()
+            .div_ceil(season.points);
+
+        let amount = user_ratio.checked_mul(total_tokens).unwrap().div_ceil(100);
 
         let accounts = Transfer {
             from: self.vault.to_account_info(),
@@ -82,7 +98,15 @@ impl<'info> ASRClaim<'info> {
             accounts,
             signer_seeds,
         );
+        transfer(cpi, amount)?;
 
-        transfer(cpi, amount_to_claim)
+        user.claims.push(Claim {
+            season: season.season,
+            mint: self.mint.key(),
+            amount: amount as u64,
+            created_at: Clock::get()?.unix_timestamp,
+        });
+
+        Ok(())
     }
 }

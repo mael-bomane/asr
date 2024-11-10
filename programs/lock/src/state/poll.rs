@@ -7,7 +7,7 @@ use {
 pub struct Poll {
     pub id: u64,
     pub summoner: Pubkey,
-    pub round: u8,
+    pub season: u8,
     pub created_at: i64,
     pub executed: bool,
     pub bump: u8,
@@ -32,7 +32,7 @@ impl Poll {
         + MAX_TITLE_LENGTH
         + VECTOR_LENGTH_PREFIX;
 
-    pub fn result(&self, lock: &Lock) -> (Option<Choice>, bool) {
+    pub fn result(&self, lock: &Lock) -> (Option<Choice>, bool, u64) {
         let mut highest = 0f64;
         let mut total_power = 0f64;
 
@@ -45,6 +45,7 @@ impl Poll {
 
         // ensure we pass the quorum
         let min = lock.quorum as f64 * lock.total_deposits as f64 / 100.0;
+        // let min = lock.quorum.checked_mul(lock.total_deposits).unwrap().div_ceil(100);
 
         // get result choice with the most voting power
         let result = self
@@ -56,10 +57,10 @@ impl Poll {
 
         // quorum pass
         if total_power >= min {
-            (Some(result), true)
+            (Some(result), true, total_power as u64)
         // quorum doesn't pass
         } else {
-            (None, false)
+            (None, false, total_power as u64)
         }
     }
 }

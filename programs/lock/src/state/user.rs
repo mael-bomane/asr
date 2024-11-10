@@ -12,6 +12,7 @@ pub struct User {
     pub bump: u8,
     pub deposits: Vec<Deposit>,
     pub votes: Vec<Vote>,
+    pub claims: Vec<Claim>,
 }
 
 impl User {
@@ -35,14 +36,14 @@ impl User {
             .sum()
     }
 
-    pub fn user_season_points(&self, lock: &Lock) -> f64 {
+    pub fn user_season_points(&self, lock: &Lock) -> u64 {
         self.votes
             .iter()
             .map(|vote| {
                 if vote.season == lock.seasons.len() as u8 - 1 {
-                    vote.voting_power
+                    vote.voting_power as u64
                 } else {
-                    0f64
+                    0u64
                 }
             })
             .sum()
@@ -111,8 +112,22 @@ pub struct Vote {
 }
 
 impl Vote {
+    pub const LEN: usize = 1 * 2 // season, choice
+        + 8 * 2 // poll, voting_power 
+        + TIMESTAMP_LENGTH;
+}
+
+#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
+pub struct Claim {
+    pub season: u8,
+    pub mint: Pubkey,
+    pub amount: u64,
+    pub created_at: i64,
+}
+
+impl Claim {
     pub const LEN: usize = 1 // season
-        + 8 * 2 // id, voting_power 
-        + BUMP_LENGTH
+        + PUBLIC_KEY_LENGTH
+        + 8 
         + TIMESTAMP_LENGTH;
 }

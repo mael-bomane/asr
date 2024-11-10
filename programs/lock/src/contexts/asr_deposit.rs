@@ -57,11 +57,12 @@ impl<'info> ASRDeposit<'info> {
 
         let now = Clock::get()?.unix_timestamp;
 
-        let mut season = lock.seasons[lock.seasons.len()].clone();
+        let mut season = lock.seasons[lock.seasons.len() - 1].clone();
 
         if now > season.season_end {
             lock.seasons.push(Season {
                 season: season.season + 1,
+                points: 0,
                 season_end: now + THREE_MONTH_IN_SECONDS,
                 asr: vec![ASR {
                     mint: self.mint.key(),
@@ -85,8 +86,6 @@ impl<'info> ASRDeposit<'info> {
 
         let cpi = CpiContext::new(self.token_program.to_account_info(), accounts);
 
-        transfer(cpi, amount)?;
-
-        Ok(())
+        transfer(cpi, amount)
     }
 }

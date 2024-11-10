@@ -46,4 +46,6 @@ pub enum ErrorCode {
     ConfigUnrecognized,
     #[msg("Instruction Unavailable For This Lock")]
     InstructionUnavailableForThisLock,
+    #[msg("User Already Claimed This")]
+    UserAlreadyClaimedThis,
 }

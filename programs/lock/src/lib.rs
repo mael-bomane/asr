@@ -74,4 +74,8 @@ pub mod lock {
     pub fn asr_deposit(ctx: Context<ASRDeposit>, amount: u64) -> Result<()> {
         ctx.accounts.asr_deposit(amount)
     }
+
+    pub fn asr_claim(ctx: Context<ASRClaim>) -> Result<()> {
+        ctx.accounts.asr_claim()
+    }
 }

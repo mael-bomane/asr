@@ -113,6 +113,7 @@ impl<'info> LockNew<'info> {
         lock.config = config;
         lock.seasons.push(Season {
             season: 0,
+            points: 0,
             season_end: Clock::get()?.unix_timestamp + THREE_MONTH_IN_SECONDS,
             asr: Vec::new(),
         });

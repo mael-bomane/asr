@@ -644,6 +644,8 @@ describe("lock", () => {
         .then(async () => {
           const debug = await program.account.poll.fetch(poll);
           console.log(debug);
+          const dg = await program.account.lock.fetch(lock);
+          console.log(dg);
         })
       , 5000);
   }).timeout(6000);
@@ -668,31 +670,69 @@ describe("lock", () => {
 
   it("user1 claim his deactivated staked deposits", async () => {
     setTimeout(async () => {
-      try {
-        await program.methods.stakeClaim()
-          .accountsStrict({
-            owner: user1.publicKey,
-            auth,
-            lock,
-            user: user1Pda,
-            signerAta: user1Ata.address,
-            mint,
-            vault: user1Vault,
-            analytics,
-            systemProgram: SYSTEM_PROGRAM_ID,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-          })
-          .signers([user1])
-          .rpc()
-          .then(confirmTx);
-      } catch (error) {
-        console.log(error);
-      }
-
-
+      await program.methods.stakeClaim()
+        .accountsStrict({
+          owner: user1.publicKey,
+          auth,
+          lock,
+          user: user1Pda,
+          signerAta: user1Ata.address,
+          mint,
+          vault: user1Vault,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+        })
+        .signers([user1])
+        .rpc()
+        .then(confirmTx);
     }, 6000)
   }).timeout(7000);
+
+  it("user1 claim his deactivated staked deposits", async () => {
+    setTimeout(async () => {
+      await program.methods.stakeClaim()
+        .accountsStrict({
+          owner: user1.publicKey,
+          auth,
+          lock,
+          user: user1Pda,
+          signerAta: user1Ata.address,
+          mint,
+          vault: user1Vault,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+        })
+        .signers([user1])
+        .rpc()
+        .then(confirmTx);
+    }, 6000)
+  }).timeout(7000);
+
+  it("user1 claim his asr rewards for season 1", async () => {
+    setTimeout(async () => {
+      await program.methods.asrClaim()
+        .accountsStrict({
+          owner: user1.publicKey,
+          user: user1Pda,
+          auth,
+          lock,
+          signerAta: user1Ata.address,
+          vault,
+          mint,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+        })
+        .signers([user1])
+        .rpc()
+        .then(confirmTx);
+    }, 7000)
+  }).timeout(8000);
 
   after(async () => {
     setTimeout(async () => {
@@ -703,6 +743,9 @@ describe("lock", () => {
       );
       const debug = await program.account.lock.fetch(lock);
       console.log(debug);
+      debug.seasons.map(season => console.log("asr rewards : ", season.asr));
+      const tokens = await connection.getTokenAccountBalance(vault);
+      console.log(`asr vault now have ${tokens.value.uiAmount}`)
       const dgb = await program.account.user.fetch(user1Pda);
       console.log(dgb)
 

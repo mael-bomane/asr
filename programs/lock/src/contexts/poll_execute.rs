@@ -51,7 +51,7 @@ impl<'info> PollExecute<'info> {
         let poll = &mut self.poll;
         let analytics = &mut self.analytics;
         
-        let (result, is_approved) = poll.result(&lock);
+        let (result, is_approved, total_power) = poll.result(&lock);
 
         match is_approved {
             true => {
@@ -69,6 +69,12 @@ impl<'info> PollExecute<'info> {
                 poll.result = None;
             }
         }
+
+        let mut season = lock.seasons.clone().into_iter().find(|season| season.season == poll.season).unwrap();
+        season.points += total_power;
+
+        let _ = std::mem::replace(&mut lock.seasons[season.season as usize], season);
+
         Ok(())
     }
 }
