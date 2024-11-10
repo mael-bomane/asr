@@ -44,22 +44,10 @@ impl<'info> PollNew<'info> {
         title: String,
         choices: Vec<Choice>,
     ) -> Result<()> {
-        // pub creator: Pubkey,
-        // pub mint: Pubkey,
-        // pub time: Time,
-        // pub threshold: u8,
-        // pub approved: u64,
-        // pub rejected: u64,
-        // pub created_at: i64,
-        // pub bump: u8,
-        // pub name: String,
-        // pub polls: Vec<Poll>,
-        // pub users: Vec<User>,
-        // pub deposits: Vec<Deposit>,
         if title.len() > MAX_TITLE_LENGTH {
-            return err!(ErrorCode::PollTitleEmpty);
-        } else if title.len() == 0 {
             return err!(ErrorCode::PollTitleTooLong);
+        } else if title.len() == 0 {
+            return err!(ErrorCode::PollTitleEmpty);
         }
 
         let user = &mut self.user;

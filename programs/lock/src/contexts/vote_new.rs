@@ -1,7 +1,7 @@
 use {
     crate::{
         errors::ErrorCode,
-        state::{Analytics, Poll, User, Vote, Lock, Choice, Deposit}
+        state::{Analytics, Choice, Deposit, Lock, Poll, User, Vote, Claim},
     },
     anchor_lang::prelude::*
 };
@@ -15,7 +15,7 @@ pub struct VoteNew<'info> {
     #[account(
         mut,
         has_one = owner,
-        realloc = User::LEN + ( user.deposits.len() + 1 * Deposit::LEN ) + (user.votes.len() + 1 * Vote::LEN),
+        realloc = User::LEN + user.deposits.len() * Deposit::LEN  +  (user.votes.len() +1 ) * Vote::LEN + user.claims.len() * Claim::LEN,
         realloc::zero = false,
         realloc::payer = owner,
         seeds = [b"user", lock.key().as_ref(), owner.key().as_ref()],

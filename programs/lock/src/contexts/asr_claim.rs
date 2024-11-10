@@ -2,6 +2,7 @@ use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
 use crate::{errors::ErrorCode, Analytics, Claim, Lock, User};
+use crate::{Deposit, Vote};
 
 use anchor_lang::prelude::*;
 
@@ -24,6 +25,9 @@ pub struct ASRClaim<'info> {
     #[account(
         mut,
         has_one = owner,
+        realloc = User::LEN + user.deposits.len() * Deposit::LEN +  user.votes.len() * Vote::LEN + ((user.claims.len() + 1) * Claim::LEN),
+        realloc::zero = false,
+        realloc::payer = owner,
         seeds = [b"user", lock.key().as_ref(), owner.key().as_ref()],
         bump = user.bump,
         constraint = !user.claims.iter().any(|i| i.mint == mint.key()) @ ErrorCode::UserAlreadyClaimedThis

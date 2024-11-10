@@ -3,7 +3,7 @@ use anchor_spl::{
     token::{transfer, Mint, Token, TokenAccount, Transfer},
 };
 
-use crate::{errors::ErrorCode, Analytics, Deposit, Lock, User, Vote};
+use crate::{errors::ErrorCode, Analytics, Claim, Deposit, Lock, User, Vote};
 
 use anchor_lang::prelude::*;
 
@@ -26,7 +26,7 @@ pub struct StakeNew<'info> {
     pub lock: Box<Account<'info, Lock>>,
     #[account(
         mut,
-        realloc = User::LEN + ( user.deposits.len() + 1 * Deposit::LEN ) + ( user.votes.len() * Vote::LEN),
+        realloc = User::LEN + ( (user.deposits.len() + 1 )* Deposit::LEN ) +  user.votes.len() * Vote::LEN + user.claims.len() * Claim::LEN,
         realloc::zero = false,
         realloc::payer = owner,
         seeds = [b"user", lock.key().as_ref(), owner.key().as_ref()],

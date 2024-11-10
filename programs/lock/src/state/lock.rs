@@ -47,7 +47,7 @@ pub struct Season {
 }
 
 impl Season {
-    pub const LEN: usize = 1 + VECTOR_LENGTH_PREFIX;
+    pub const LEN: usize = 1 + 8 + VECTOR_LENGTH_PREFIX + TIMESTAMP_LENGTH;
 }
 
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
