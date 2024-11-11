@@ -23,7 +23,7 @@ pub struct PollNew<'info> {
     #[account(
         init,
         payer = owner,
-        space = Poll::LEN,
+        space = Poll::LEN + choices.len() * Choice::LEN,
         seeds = [b"poll", lock.key().as_ref(), (lock.polls + 1).to_le_bytes().as_ref()],
         bump
     )]

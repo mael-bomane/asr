@@ -33,8 +33,8 @@ impl Poll {
         + VECTOR_LENGTH_PREFIX;
 
     pub fn result(&self, lock: &Lock) -> (Option<Choice>, bool, u64) {
-        let mut highest = 0f64;
-        let mut total_power = 0f64;
+        let mut highest = 0u64;
+        let mut total_power = 0u64;
 
         for choice in &self.choices {
             if choice.voting_power > highest {
@@ -43,8 +43,12 @@ impl Poll {
             total_power += choice.voting_power
         }
 
+        let quorum = lock.quorum as u64;
         // ensure we pass the quorum
-        let min = lock.quorum as f64 * lock.total_deposits as f64 / 100.0;
+        let min = quorum
+            .checked_mul(lock.total_deposits)
+            .unwrap()
+            .div_ceil(100);
         // let min = lock.quorum.checked_mul(lock.total_deposits).unwrap().div_ceil(100);
 
         // get result choice with the most voting power
@@ -57,10 +61,10 @@ impl Poll {
 
         // quorum pass
         if total_power >= min {
-            (Some(result), true, total_power as u64)
+            (Some(result), true, total_power)
         // quorum doesn't pass
         } else {
-            (None, false, total_power as u64)
+            (None, false, total_power)
         }
     }
 }
@@ -75,7 +79,7 @@ pub enum Status {
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
 pub struct Choice {
     pub id: u8,
-    pub voting_power: f64,
+    pub voting_power: u64,
     pub title: String,
 }
 

@@ -20,6 +20,22 @@ pub struct ASRDeposit<'info> {
     #[account(
         mut,
         has_one = creator,
+        realloc = Lock::LEN 
+        + (
+            if Clock::get()?.unix_timestamp > lock.seasons[lock.seasons.len() - 1].season_end {
+                (lock.seasons.len() + 1) * Season::LEN
+            } else {
+                lock.seasons.len() * Season::LEN
+        })
+        + (
+            if lock.seasons[lock.seasons.len() - 1].asr.iter().any(|i| i.mint == mint.key()) {
+                lock.total_asr() * ASR::LEN
+            } else {
+            (lock.total_asr() + 1 ) * ASR::LEN
+            }
+        ),
+        realloc::zero = false,
+        realloc::payer = creator,
         seeds = [b"lock", creator.key().as_ref(), mint.key().as_ref()],
         bump = lock.lock_bump
     )]

@@ -486,12 +486,12 @@ describe("lock", () => {
       [
         {
           id: 0,
-          votingPower: 0,
+          votingPower: new BN(0),
           title: "yes",
         },
         {
           id: 1,
-          votingPower: 0,
+          votingPower: new BN(0),
           title: "no",
         },
       ],

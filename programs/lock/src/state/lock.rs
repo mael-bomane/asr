@@ -36,6 +36,10 @@ impl Lock {
         + VECTOR_LENGTH_PREFIX 
         + STRING_LENGTH_PREFIX
         + MAX_LOCKER_NAME_LENGTH;
+
+    pub fn total_asr(&self) -> usize {
+        self.seasons.iter().map(|season| season.asr.len()).sum()
+    }
 }
 
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]

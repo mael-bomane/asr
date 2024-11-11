@@ -37,15 +37,9 @@ pub struct Register<'info> {
 
 impl<'info> Register<'info> {
     pub fn register(&mut self, bumps: &RegisterBumps) -> Result<()> {
-        // pub owner: Pubkey,
-        // pub lock: Pubkey,
-        // pub points: f64,
-        // pub created_at: i64,
-        // pub bump: u8,
-        // pub deposits: Vec<Deposit>,
         let user = &mut self.user;
         user.owner = self.owner.key();
-        user.points = 0f64;
+        user.points = 0u64;
         user.bump = bumps.user;
         user.deposits = Vec::new();
 

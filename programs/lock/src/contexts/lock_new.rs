@@ -19,7 +19,7 @@ pub struct LockNew<'info> {
     pub auth: UncheckedAccount<'info>,
     #[account(
         init,
-        space = Lock::LEN,
+        space = Lock::LEN + Season::LEN,
         payer = signer,
         seeds = [b"lock", signer.key().as_ref(), mint.key().as_ref()],
         bump
@@ -64,19 +64,6 @@ impl<'info> LockNew<'info> {
         min: u64,
         name: String,
     ) -> Result<()> {
-        // pub creator: Pubkey,
-        // pub mint: Pubkey,
-        // pub voting_period: i64,
-        // pub lock_duration: i64,
-        // pub threshold: u8,
-        // pub approved: u64,
-        // pub rejected: u64,
-        // pub created_at: i64,
-        // pub bump: u8,
-        // pub name: String,
-        // pub polls: Vec<Poll>,
-        // pub users: Vec<User>,
-        // pub deposits: Vec<Deposit>,
         if name.len() > MAX_LOCKER_NAME_LENGTH {
             return err!(ErrorCode::LockerNameTooLong);
         } else if name.len() == 0 {

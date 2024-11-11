@@ -35,18 +35,6 @@ pub struct PollExecute<'info> {
 
 impl<'info> PollExecute<'info> {
     pub fn poll_execute(&mut self) -> Result<()> {
-        // pub creator: Pubkey,
-        // pub mint: Pubkey,
-        // pub time: Time,
-        // pub threshold: u8,
-        // pub approved: u64,
-        // pub rejected: u64,
-        // pub created_at: i64,
-        // pub bump: u8,
-        // pub name: String,
-        // pub polls: Vec<Poll>,
-        // pub users: Vec<User>,
-        
         let lock = &mut self.lock;
         let poll = &mut self.poll;
         let analytics = &mut self.analytics;

@@ -7,7 +7,7 @@ use crate::state::Lock;
 #[account]
 pub struct User {
     pub owner: Pubkey,
-    pub points: f64,
+    pub points: u64,
     pub created_at: i64,
     pub bump: u8,
     pub deposits: Vec<Deposit>,
@@ -49,18 +49,18 @@ impl User {
             .sum()
     }
 
-    pub fn voting_power(&self, lock: &Lock) -> f64 {
+    pub fn voting_power(&self, lock: &Lock) -> u64 {
         // active staking rewards (asr) math
         if lock.config == 0 {
             self.deposits
                 .iter()
                 .map(|deposit| {
                     if !deposit.deactivating {
-                        deposit.amount as f64
+                        deposit.amount
                     } else {
                         // y = 100%
                         // x = x*100/y
-                        deposit.amount as f64 * 100.0 / deposit.expires_at as f64
+                        deposit.amount.checked_mul(100).unwrap().div_ceil(deposit.expires_at as u64)
                     }
                 })
                 .sum()
@@ -73,15 +73,15 @@ impl User {
                         // y = 100%
                         // x = z
                         // z = x*100/y
-                        deposit.amount as f64 * 100.0 / deposit.expires_at as f64
+                        deposit.amount.checked_mul(100).unwrap().div_ceil(deposit.expires_at as u64)
                     } else {
-                        0f64
+                        0u64
                     }
                 })
                 .sum()
         // unimplemented
         } else {
-            0f64
+            0u64
         }
     }
 }
@@ -106,7 +106,7 @@ impl Deposit {
 pub struct Vote {
     pub season: u8,
     pub poll: u64,
-    pub voting_power: f64,
+    pub voting_power: u64,
     pub choice: u8,
     pub created_at: i64,
 }
