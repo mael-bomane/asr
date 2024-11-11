@@ -180,7 +180,7 @@ describe("lock", () => {
         token,
         user1Ata.address,
         user1.publicKey,
-        200 * 1 * 10 ** decimals
+        300 * 1 * 10 ** decimals
       );
       console.log(`https://explorer.solana.com/tx/${user1MintTo}?cluster=devnet`);
       let user1TokenAmount = await connection.getTokenAccountBalance(user1Ata.address);
@@ -384,6 +384,35 @@ describe("lock", () => {
       });
   });
 
+  it("user1 deposit asr tokens again", async () => {
+    await program.methods.asrDeposit(min)
+      .accountsStrict({
+        creator: user1.publicKey,
+        signerAta: user1Ata.address,
+        mint,
+        lock,
+        vault,
+        auth,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.lock.fetch(lock);
+        console.log(debug.seasons.map(season => {
+          console.log(`asr rewards for season ${season.season}`, season.asr)
+          season.asr.map(r => {
+            console.log(r.amount.toString())
+          })
+        }));
+      });
+  });
+
+
   it("register user1 to lock", async () => {
     await program.methods.register()
       .accountsStrict({
@@ -398,7 +427,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
+        const debug = await program.account.user.fetch(user1Pda);
         console.log(debug);
       });
   });
@@ -642,13 +671,14 @@ describe("lock", () => {
         .rpc()
         .then(confirmTx)
         .then(async () => {
+          console.log("NOW IN SEASON 2");
           const debug = await program.account.poll.fetch(poll);
           console.log(debug);
           const dg = await program.account.lock.fetch(lock);
           console.log(dg);
         })
-      , 5000);
-  }).timeout(6000);
+      , 16000);
+  }).timeout(17000);
 
   it("user1 deactivate his staked deposits", async () => {
     await program.methods.stakeDeactivate()
@@ -687,8 +717,8 @@ describe("lock", () => {
         .signers([user1])
         .rpc()
         .then(confirmTx);
-    }, 6000)
-  }).timeout(7000);
+    }, 7000)
+  }).timeout(8000);
 
   it("rejects : user1 tries claim twice his deactivated staked deposits", async () => {
     setTimeout(async () => {
@@ -714,8 +744,8 @@ describe("lock", () => {
         console.log(error.error.errorCode.code)
         assert.strictEqual("NoDepositsReadyToClaimForThisUserInThisLocker", error.error.errorCode.code)
       }
-    }, 7000);
-  }).timeout(8000);
+    }, 8000);
+  }).timeout(9000);
 
   it("user1 claim his asr rewards for season 1", async () => {
     setTimeout(async () => {
@@ -735,13 +765,17 @@ describe("lock", () => {
         })
         .signers([user1])
         .rpc()
-        .then(confirmTx);
-    }, 6000)
-  }).timeout(7000);
+        .then(confirmTx)
+        .then(async () => {
+          const debug = await program.account.user.fetch(user1Pda);
+          console.log(debug)
+        });
+    }, 18000)
+  }).timeout(19000);
 
   it("reject : user1 tries claim twice his asr rewards for season 1", async () => {
-    setTimeout(async () => {
-      try {
+    await assert.rejects((async () => {
+      setTimeout(async () => {
         await program.methods.asrClaim()
           .accountsStrict({
             owner: user1.publicKey,
@@ -759,12 +793,13 @@ describe("lock", () => {
           .signers([user1])
           .rpc()
           .then(confirmTx)
-      } catch (error) {
-        console.log(error.error.errorCode.code)
-        assert.strictEqual("UserAlreadyClaimedThis", error.error.errorCode.code)
-      }
-    }, 7000);
-  }).timeout(8000);
+      }, 20000);
+    })(), (err: any) => {
+      console.log(err);
+      console.log(err.error.errorCode.code)
+      assert.strictEqual("UserAlreadyClaimedThis", err.error.errorCode.code)
+    });
+  }).timeout(21000);
 
   after(async () => {
     setTimeout(async () => {

@@ -63,7 +63,7 @@ impl<'info> ASRClaim<'info> {
     pub fn asr_claim(&mut self) -> Result<()> {
         let lock = &mut self.lock;
 
-        let season = &lock.seasons[lock.seasons.len() as usize - 1];
+        let season = &lock.seasons[lock.seasons.len() as usize - 2];
         let asr = season
             .asr
             .clone()

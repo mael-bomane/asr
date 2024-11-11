@@ -1,6 +1,5 @@
 use crate::{
-    errors::ErrorCode,
-    state::{Analytics, Poll, Lock, Status},
+    constants::THREE_MONTH_IN_SECONDS, errors::ErrorCode, state::{Analytics, Lock, Poll, Status}, Season, ASR
 };
 
 use anchor_lang::prelude::*;
@@ -11,9 +10,17 @@ pub struct PollExecute<'info> {
     pub owner: Signer<'info>,
     #[account(
         mut,
+        realloc = Lock::LEN 
+        + (if Clock::get()?.unix_timestamp > lock.seasons[lock.seasons.len() - 1].season_end {
+            (lock.seasons.len() + 1) * Season::LEN
+        } else {
+            lock.seasons.len() * Season::LEN
+        })
+        + lock.total_asr() * ASR::LEN,
+        realloc::zero = false,
+        realloc::payer = owner,
         seeds = [b"lock", lock.creator.as_ref(), lock.mint.as_ref()],
         bump = lock.lock_bump, 
-        // constraint = Clock::get()?.unix_timestamp > ( locker.polls[usize::from(index as usize)].created_at + locker.voting_period ) @ ErrorCode::WaitForVotingPeriodToEnd
     )]
     pub lock: Box<Account<'info, Lock>>,
     #[account(
@@ -60,6 +67,16 @@ impl<'info> PollExecute<'info> {
 
         let mut season = lock.seasons.clone().into_iter().find(|season| season.season == poll.season).unwrap();
         season.points += total_power;
+
+        let now = Clock::get()?.unix_timestamp;
+        if now > season.season_end {
+            lock.seasons.push(Season {
+                season: season.season + 1,
+                points: 0,
+                asr: Vec::new(),
+                season_end: now + THREE_MONTH_IN_SECONDS
+            })
+        }
 
         let _ = std::mem::replace(&mut lock.seasons[season.season as usize], season);
 
