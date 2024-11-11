@@ -2,28 +2,6 @@ import Link from "next/link";
 import { getSEOTags } from "@/lib/seo";
 import config from "@/config";
 
-// CHATGPT PROMPT TO GENERATE YOUR TERMS & SERVICES — replace with your own data 👇
-
-// 1. Go to https://chat.openai.com/
-// 2. Copy paste bellow
-// 3. Replace the data with your own (if needed)
-// 4. Paste the answer from ChatGPT directly in the <pre> tag below
-
-// You are an excellent lawyer.
-
-// I need your help to write a simple Terms & Services for my website. Here is some context:
-// - Website: https://shipfa.st
-// - Name: ShipFast
-// - Contact information: marc@shipfa.st
-// - Description: A JavaScript code boilerplate to help entrepreneurs launch their startups faster
-// - Ownership: when buying a package, users can download code to create apps. They own the code but they do not have the right to resell it. They can ask for a full refund within 7 day after the purchase.
-// - User data collected: name, email and payment information
-// - Non-personal data collection: web cookies
-// - Link to privacy-policy: https://shipfa.st/privacy-policy
-// - Governing Law: France
-// - Updates to the Terms: users will be updated by email
-
-// Please write a simple Terms & Services for my site. Add the current date. Do not add or explain your reasoning. Answer:
 
 export const metadata = getSEOTags({
   title: `Terms and Conditions | ${config.appName}`,
@@ -37,7 +15,6 @@ const TOS = () => {
         <Link href="/" className="btn btn-ghost">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
             fill="currentColor"
             className="w-5 h-5"
           >
@@ -50,46 +27,39 @@ const TOS = () => {
           Back
         </Link>
         <h1 className="text-3xl font-extrabold pb-6">
-          Terms and Conditions for {config.appName}
+          {config.appName} privacy policy
         </h1>
 
         <pre
           className="leading-relaxed whitespace-pre-wrap"
           style={{ fontFamily: "sans-serif" }}
         >
-          {`Last Updated: September 26, 2023
+          {`Last Updated: November 11, 2024
 
-Welcome to ShipFast!
+Welcome to Monolith (https://monolith.haus). By accessing or using our website, services, and related platforms (collectively referred to as "Services"), you agree to comply with and be bound by the following Terms & Services.
 
-These Terms of Service ("Terms") govern your use of the ShipFast website at https://shipfa.st ("Website") and the services provided by ShipFast. By using our Website and services, you agree to these Terms.
+    Description of Services Monolith provides active staking rewards and voting escrow creation tools on the Solana blockchain and soon other blockchains (currently in Devnet). It is an open-source project developed as part of the Soon Genesis Hackathon. For hackathon details, visit Soon Genesis Hackathon.
 
-1. Description of ShipFast
+    No Warranty The Services are provided "as-is" without any warranty or guarantee of any kind. Monolith does not guarantee the accuracy, reliability, or availability of the Services, and use of the Services is at your own risk.
 
-ShipFast is a platform that offers a JavaScript code boilerplate to assist entrepreneurs in launching their startups more efficiently.
+    User Data Collection
+        Personal Data: We collect IP addresses for rate-limiting purposes on our API routes. We also collect wallet addresses and token amounts for analytics.
+        Non-Personal Data: We use cookies to collect non-personal data for improving site functionality. By using our Services, you consent to our use of cookies.
+        For more details on how we handle your data, please refer to our Privacy Policy.
 
-2. Ownership and Usage Rights
+    Use of Services You agree not to use the Services for any illegal, harmful, or unauthorized activities, including but not limited to unauthorized access to the platform or its data.
 
-When you purchase a package from ShipFast, you gain the right to download and use the code provided for creating applications. You own the code you create but do not have the right to resell it. We offer a full refund within 7 days of purchase, as specified in our refund policy.
+    Ownership and Intellectual Property Monolith is an open-source project. All intellectual property related to the Services is owned by the developers or third parties. By using the Services, you do not acquire any rights to these intellectual properties.
 
-3. User Data and Privacy
+    Limitation of Liability To the maximum extent permitted by applicable law, Monolith shall not be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in connection with your use of the Services.
 
-We collect and store user data, including name, email, and payment information, as necessary to provide our services. For details on how we handle your data, please refer to our Privacy Policy at https://shipfa.st/privacy-policy.
+    Updates to Terms Monolith may update these Terms & Services from time to time. Any changes will be reflected on our Privacy Policy page. You are encouraged to review the Terms regularly.
 
-4. Non-Personal Data Collection
+    Governing Law These Terms & Services are not governed by any specific jurisdiction or law.
 
-We use web cookies to collect non-personal data for the purpose of improving our services and user experience.
+    Contact Information If you have any questions about these Terms & Services, please contact us at support@monolith.haus.
 
-5. Governing Law
-
-These Terms are governed by the laws of France.
-
-6. Updates to the Terms
-
-We may update these Terms from time to time. Users will be notified of any changes via email.
-
-For any questions or concerns regarding these Terms of Service, please contact us at marc@shipfa.st.
-
-Thank you for using ShipFast!`}
+By using Monolith’s Services, you acknowledge that you have read, understood, and agree to be bound by these Terms & Services.`}
         </pre>
       </div>
     </main>

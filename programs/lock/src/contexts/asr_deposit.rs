@@ -21,19 +21,16 @@ pub struct ASRDeposit<'info> {
         mut,
         has_one = creator,
         realloc = Lock::LEN 
-        + (
-            if Clock::get()?.unix_timestamp > lock.seasons[lock.seasons.len() - 1].season_end {
-                (lock.seasons.len() + 1) * Season::LEN
-            } else {
-                lock.seasons.len() * Season::LEN
+        + (if Clock::get()?.unix_timestamp > lock.seasons[lock.seasons.len() - 1].season_end {
+            (lock.seasons.len() + 1) * Season::LEN
+        } else {
+            lock.seasons.len() * Season::LEN
         })
-        + (
-            if lock.seasons[lock.seasons.len() - 1].asr.iter().any(|i| i.mint == mint.key()) {
-                lock.total_asr() * ASR::LEN
-            } else {
+        + (if lock.seasons[lock.seasons.len() - 1].asr.iter().any(|i| i.mint == mint.key()) {
+            lock.total_asr() * ASR::LEN
+        } else {
             (lock.total_asr() + 1 ) * ASR::LEN
-            }
-        ),
+        }),
         realloc::zero = false,
         realloc::payer = creator,
         seeds = [b"lock", creator.key().as_ref(), mint.key().as_ref()],
@@ -75,6 +72,7 @@ impl<'info> ASRDeposit<'info> {
 
         let mut season = lock.seasons[lock.seasons.len() - 1].clone();
 
+        // create new season if current season ended
         if now > season.season_end {
             lock.seasons.push(Season {
                 season: season.season + 1,
@@ -86,11 +84,17 @@ impl<'info> ASRDeposit<'info> {
                 }],
             });
         } else {
-            season.asr.push(ASR {
-                mint: self.mint.key(),
-                amount,
-            });
-
+            if season.asr.iter().any(|i| i.mint == self.mint.key()) {
+                let mut asr: ASR = season.asr.iter().find(|i| i.mint == self.mint.key()).unwrap().clone();
+                let index = season.asr.iter().position(|i| i.mint == self.mint.key()).unwrap().clone();
+                asr.amount += amount;
+                let _ = std::mem::replace(&mut season.asr[index], asr);
+            } else {
+                season.asr.push(ASR {
+                    mint: self.mint.key(),
+                    amount,
+                });
+            }
             let _ = std::mem::replace(&mut lock.seasons[season.season as usize], season);
         }
 

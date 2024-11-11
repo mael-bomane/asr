@@ -27,46 +27,39 @@ const PrivacyPolicy = () => {
           back
         </Link>
         <h1 className="text-3xl font-extrabold pb-6">
-          privacy policy for {config.appName}
+          {config.appName} privacy policy
         </h1>
 
         <pre
           className="leading-relaxed whitespace-pre-wrap"
           style={{ fontFamily: "sans-serif" }}
         >
-          {`Last Updated: 2024-11-07
+          {`Last Updated: November 11, 2024
 
-At monolith (accessible from https://monolith.haus), we respect your privacy and are committed to protecting your personal information. This Privacy Policy explains how we collect, use, and protect your data when you visit our website.
-1. Information We Collect
+Welcome to Monolith (https://monolith.haus). By accessing or using our website, services, and related platforms (collectively referred to as "Services"), you agree to comply with and be bound by the following Terms & Services.
 
-We collect the following types of data from users of our website:
+    Description of Services Monolith provides active staking rewards and voting escrow creation tools on the Solana blockchain and soon other blockchains (currently in Devnet). It is an open-source project developed as part of the Soon Genesis Hackathon. For hackathon details, visit Soon Genesis Hackathon.
 
-Personal Data:
+    No Warranty The Services are provided "as-is" without any warranty or guarantee of any kind. Monolith does not guarantee the accuracy, reliability, or availability of the Services, and use of the Services is at your own risk.
 
-    Wallet Public Address: We collect your wallet public address to provide certain functionalities on the website.
-    GitHub Account Details: If you connect your GitHub account, we collect relevant details associated with your account to enhance the user experience.
+    User Data Collection
+        Personal Data: We collect IP addresses for rate-limiting purposes on our API routes. We also collect wallet addresses and token amounts for analytics.
+        Non-Personal Data: We use cookies to collect non-personal data for improving site functionality. By using our Services, you consent to our use of cookies.
+        For more details on how we handle your data, please refer to our Privacy Policy.
 
-Non-Personal Data:
+    Use of Services You agree not to use the Services for any illegal, harmful, or unauthorized activities, including but not limited to unauthorized access to the platform or its data.
 
-    Web Cookies: We use cookies to improve your user experience by remembering preferences and tracking website usage.
+    Ownership and Intellectual Property Monolith is an open-source project. All intellectual property related to the Services is owned by the developers or third parties. By using the Services, you do not acquire any rights to these intellectual properties.
 
-2. Purpose of Data Collection
+    Limitation of Liability To the maximum extent permitted by applicable law, Monolith shall not be liable for any direct, indirect, incidental, special, or consequential damages arising out of or in connection with your use of the Services.
 
-The data we collect is used to improve your experience on our website and ensure the functionality of certain features. We do not use this data for any other purposes.
-3. Data Sharing
+    Updates to Terms Monolith may update these Terms & Services from time to time. Any changes will be reflected on our Privacy Policy page. You are encouraged to review the Terms regularly.
 
-We do not share any personal or non-personal data with third parties. Your information is solely used within the scope of enhancing your experience on monolith.
-4. Children's Privacy
+    Governing Law These Terms & Services are not governed by any specific jurisdiction or law.
 
-We do not knowingly collect any personal data from children under the age of 13. If we become aware that we have inadvertently collected data from a child, we will take steps to remove that information from our records.
-5. Updates to This Privacy Policy
+    Contact Information If you have any questions about these Terms & Services, please contact us at support@monolith.haus.
 
-We may update this Privacy Policy from time to time to reflect changes in our practices or for other operational, legal, or regulatory reasons. Users will be notified of any changes via email.
-6. Contact Information
-
-If you have any questions or concerns about this Privacy Policy, please contact us at:
-
-Email: support@monolith.haus`}
+By using Monolith’s Services, you acknowledge that you have read, understood, and agree to be bound by these Terms & Services.`}
         </pre>
       </div>
     </main>

@@ -9,8 +9,6 @@ import { usePathname } from 'next/navigation'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import config from "@/config";
 import logo from "@/app/icon.png";
-import { useRecoilState } from "recoil";
-import { monolithState } from "@/store/monoliths";
 import { MonolithContext } from "./MonolithContextProvider";
 
 const links: {

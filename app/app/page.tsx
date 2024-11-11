@@ -8,7 +8,7 @@ export default function Home() {
       <Suspense>
         <Header />
       </Suspense>
-      <main className="flex flex-col justify-center grow bg-base-100 ">
+      <main className="w-full flex flex-col items-center justify-center grow bg-[#000]">
         <Hero />
       </main>
     </div>
