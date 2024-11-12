@@ -71,8 +71,6 @@ export const MonolithProvider = ({ children }: { children: ReactNode }) => {
         .catch((error) => {
           console.log(error)
         })
-    } else {
-      console.log("no program :<")
     }
   }, [publicKey, program])
 

@@ -163,24 +163,79 @@ export const Monolith: FC<Props> = ({ address }) => {
             >
               {ellipsis(lock.creator.toString())}
             </Link>
-
             </h2>
-            <div className="w-full max-w-4xl flex justify-around">
+            <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
               <Card
-                className={`px-4 bg-base-100 text-base-content rounded-box flex items-center justify-between mb-2 gap-4`}
+                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
               >
-                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Total Staked MONO </CardTitle>
-                <CardDescription className="border-l text-xs px-2 text-center text-white font-semibold">{
+                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Total Staked MONO</CardTitle>
+                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
                   //@ts-ignore
                   lock && tokenInfo && lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals)
                 } MONO</CardDescription>
               </Card>
               <Card
-                className={`px-4 bg-base-100 text-base-content rounded-box flex items-center justify-between mb-2 gap-4`}
+                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
               >
                 <CardTitle className="text-xs px-2 text-center text-success font-semibold">Unique Addresses</CardTitle>
-                <CardDescription className="border-l text-xs px-2 text-center text-white font-semibold">{users && users.length > 0 ? users.length : 0}</CardDescription>
+                <CardDescription className="text-xs px-2 text-center text-white font-semibold">
+                  {users && users.length > 0 ? users.length : 0}
+                </CardDescription>
               </Card>
+            </div>
+
+            <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
+              <Card
+                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
+              >
+                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Mint</CardTitle>
+                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
+                  lock && <Link
+                    href={`https://explorer.solana.com/address/${lock.creator.toString()}?cluster=devnet`}
+                    className="underline"
+                    target="_blank"
+                  >
+                    {ellipsis(lock.mint.toString())}
+                  </Link>
+                }</CardDescription>
+              </Card>
+              <Card
+                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
+              >
+                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Min Voting Power To Create Proposals</CardTitle>
+                <CardDescription className="text-xs px-2 text-center text-white font-semibold">
+                  {
+                    lock && tokenInfo && `${lock.min.toNumber() / (1 * 10 ** tokenInfo.decimals)}`
+                  }
+                </CardDescription>
+              </Card>
+            </div>
+            <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
+              <Card
+                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
+              >
+                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Quorum</CardTitle>
+                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
+                  lock && lock.quorum
+                } %</CardDescription>
+              </Card>
+              <Card
+                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
+              >
+                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Approval Threshold</CardTitle>
+                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
+                  lock && lock.threshold
+                } %</CardDescription>
+              </Card>
+              <Card
+                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
+              >
+                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Locker Type</CardTitle>
+                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
+                  lock && `${lock.config == 0 ? 'Active Staking Rewards' : lock.config == 1 ? 'Voting Escrow' : ''}`
+                }</CardDescription>
+              </Card>
+
             </div>
             <div className="w-full md:max-w-4xl flex flex-col md:flex-row items-center justify-center md:justify-around md:space-x-8">
               <Card
