@@ -67,7 +67,7 @@ export const CreateForm: FC = () => {
         // min: BN,
         // name: string
 
-        const instruction = await LockNew(publicKey, mint, signerAta, inputs.config, inputs.votingPeriod, inputs.lockDuration, inputs.threshold, inputs.quorum, inputs.min, inputs.name);
+        const instruction = await LockNew(publicKey, mint, signerAta, inputs.config, new BN(inputs.votingPeriod), new BN(inputs.lockDuration), inputs.threshold, inputs.quorum, new BN(inputs.min), inputs.name);
 
 
         // Get the lates block hash to use on our transaction and confirmation
@@ -121,17 +121,7 @@ export const CreateForm: FC = () => {
         <div className="flex w-full items-start justify-start">
           <RadioGroup id="time" defaultValue="TwentyFourHours" onValueChange={(e) => {
             console.log(e);
-            switch (e) {
-              case 'TwentyFourHours': {
-                setVotingPeriod({ TwentyFourHours: {} })
-              }
-              case 'FourtyEightHours': {
-                setVotingPeriod({ FourtyEightHours: {} })
-              }
-              case 'OneWeek': {
-                setVotingPeriod({ OneWeek: {} })
-              }
-            }
+
           }}>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value={"TwentyFourHours"} id="TwentyFourHours" />
@@ -180,17 +170,6 @@ export const CreateForm: FC = () => {
         <div className="flex w-full items-start justify-start">
           <RadioGroup id="time" defaultValue="TwentyFourHours" onValueChange={(e) => {
             console.log(e);
-            switch (e) {
-              case 'TwentyFourHours': {
-                setVotingPeriod({ TwentyFourHours: {} })
-              }
-              case 'FourtyEightHours': {
-                setVotingPeriod({ FourtyEightHours: {} })
-              }
-              case 'OneWeek': {
-                setVotingPeriod({ OneWeek: {} })
-              }
-            }
           }}>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value={"TwentyFourHours"} id="TwentyFourHours" />

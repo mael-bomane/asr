@@ -20,12 +20,12 @@ const links: {
       label: "home",
     },
     {
-      href: "/summon",
-      label: "summon",
+      href: "/create",
+      label: "create",
     },
     {
-      href: "/leaderboard",
-      label: "leaderboard",
+      href: "/explore",
+      label: "explore",
     },
   ];
 

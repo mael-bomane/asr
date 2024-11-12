@@ -184,7 +184,7 @@ export const Monolith: FC<Props> = ({ address }) => {
             </div>
             <div className="w-full md:max-w-4xl flex flex-col md:flex-row items-center justify-center md:justify-around md:space-x-8">
               <Card
-                className={`w-full p-8 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
+                className={`w-full p-8 bg-base-100 text-base-content rounded-xl flex flex-col items-center justify-center space-y-4`}
               >
                 <CardTitle className="w-full px-2 text-center border-b pb-4">
                   <div className="text-xl font-extrabold text-success tracking-wide">Active Staking Rewards</div>

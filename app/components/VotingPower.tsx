@@ -204,6 +204,9 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                   onClick={() => {
                     setIsStake(true);
                     setIsUnStake(false);
+                    if (isUnStake) {
+                      setValue('amount', 0);
+                    }
                   }}
                 >
                   stake
@@ -215,6 +218,9 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                   onClick={() => {
                     setIsStake(false);
                     setIsUnStake(true);
+                    if (isStake) {
+                      setValue('amount', 0);
+                    }
                   }}
                 >
                   unstake
@@ -228,7 +234,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                   className="btn btn-xs"
                   onClick={(e) => {
                     e.preventDefault();
-                    setValue('amount', isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : ((currentUser.deposits.reduce((acc: any, obj: any) => {
+                    setValue('amount', isStake ? (userTokenAmount ? (userTokenAmount.uiAmount / 2) : 0) : ((currentUser.deposits.reduce((acc: any, obj: any) => {
                       return acc + obj.amount.toNumber();
                     }, 0) / 2) / (1 * 10 ** tokenInfo.decimals)))
                   }}
