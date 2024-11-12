@@ -1,9 +1,9 @@
-import { Monolith } from '@/types';
+import { Lock } from '@/types';
 import { atom } from 'recoil'
 
 type MonolithState = {
-  monoliths: Monolith[]
-  current: Monolith | null
+  monoliths: Lock[]
+  current: Lock | null
 }
 export const defaultMonolith: MonolithState = {
   monoliths: [],
