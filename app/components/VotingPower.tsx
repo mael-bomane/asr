@@ -191,7 +191,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
           }</span>
         </div>
         <p className="px-2 text-base-content text-xs text-center mt-4">Lock MONO tokens to receive your voting power. <Link href="/docs" className="underline">Learn more</Link></p>
-        {currentUser ? (
+        {publicKey && currentUser ? (
           <div
             className="w-full bg-[#121212] p-8 flex flex-col mt-4 rounded-xl"
           >
@@ -270,30 +270,29 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
           </div>
         ) : (
           <div className="w-full bg-[#121212] p-8 flex flex-col mt-4 rounded-xl text-sm text-center">
-            you are not registered to this locker
+            {publicKey ? "Register To Locker" : "Connect Your Wallet"}
           </div>
         )}
       </CardTitle>
       <CardDescription className="w-full p-2">
-        {
-          currentUser ? (
-            <button
-              className={cn("btn btn-lg w-full mx-auto", {
-                "btn-disabled": !userTokenAmount || loading,
-              })}
-              type="submit"
-            >
-              <span className={cn('', {
-                "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500": isStake || isUnStake,
-              })}>{userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : 'insufficient MONO'}</span>
-            </button>
-          ) : (
-            <button className="w-full btn btn-lg mx-auto"
-              onClick={onClickRegister}
-            >
-              register to this locker
-            </button>
-          )
+        {publicKey && currentUser ? (
+          <button
+            className={cn("btn btn-lg w-full mx-auto", {
+              "btn-disabled": !userTokenAmount || loading,
+            })}
+            type="submit"
+          >
+            <span className={cn('', {
+              "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500": isStake || isUnStake,
+            })}>{userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : 'insufficient MONO'}</span>
+          </button>
+        ) : (
+          <button className="w-full btn btn-lg mx-auto"
+            onClick={onClickRegister}
+          >
+            {publicKey ? "Register To Locker" : "Connect Your Wallet"}
+          </button>
+        )
         }
       </CardDescription>
     </form>

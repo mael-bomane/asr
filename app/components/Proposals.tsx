@@ -1,13 +1,16 @@
 "use client"
 
-import { FaChevronUp, FaChevronDown } from "react-icons/fa";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { FaChevronUp, FaChevronDown, FaPlusCircle } from "react-icons/fa";
 import { Card } from "./ui/card"
 import { Progress } from "./ui/progress"
 
-import type { FC } from "react"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { useRouter } from "next/navigation";
 import { Poll, Lock } from "@/types";
+
+import type { FC } from "react"
+import { FaMagnifyingGlass } from "react-icons/fa6";
 
 type Props = {
   lock: Lock | null
@@ -18,14 +21,18 @@ export const Proposals: FC<Props> = ({ lock, proposals }) => {
   const router = useRouter();
   return (
     <div className="w-full bg-[#000] text-base-content space-y-4 rounded-xl">
-      <div className="px-6 space-y-2 py-4 w-full flex justify-between">
-        <h3 className="font-bold text-lg lg:text-3xl tracking-tight">
-          proposals
+      <div className="px-6 w-full flex items-center justify-between">
+        <h3 className="font-bold text-lg lg:text-xl flex justify-center items-center space-x-4">
+          <span>Proposals</span>
+          <Link href={`/proposal/create`} className="button"><FaPlusCircle className="w-5 h-5" /></Link>
         </h3>
-        <input />
+        <div className="flex justify-center items-center space-x-2">
+          <FaMagnifyingGlass className="w-5 h-5" />
+          <input placeholder="Search Proposal ..." className="text-right pr-4" />
+        </div>
       </div>
       <Table className="overflow-x-scroll">
-        <TableCaption>{lock && lock.name} proposals</TableCaption>
+        <TableCaption>{lock && lock.name} Proposals</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="">Title</TableHead>

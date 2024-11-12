@@ -71,7 +71,6 @@ const Header = () => {
               unoptimized
             />
             <span className="font-extrabold text-lg text-white">{config.appName}</span>
-
           </Link>
         </div>
         {/* Burger button to open menu on mobile */}
@@ -126,15 +125,21 @@ const Header = () => {
         {/* CTA on large screens */}
         <div className="hidden lg:flex lg:justify-end lg:flex-1 flex items-center justify-center pt-4">
           <div className="w-full flex items-center justify-end space-x-8">
-            <Link href={`https://x.com/@${config.xTwitter}`} target="_blank">
-              <FaXTwitter className="w-8 h-8 text-base-content" />
-            </Link>
-            <Link href={`https://discord.gg/${config.discord}`} target="_blank">
-              <IoLogoDiscord className="w-8 h-8 text-base-content" />
-            </Link>
-            <Link href={`https://github.com/${config.github}`} target="_blank">
-              <IoLogoGithub className="w-8 h-8 text-base-content" />
-            </Link>
+            {config.xTwitter &&
+              <Link href={`https://x.com/@${config.xTwitter}`} target="_blank">
+                <FaXTwitter className="w-8 h-8 text-base-content" />
+              </Link>
+            }
+            {config.discord &&
+              <Link href={`https://discord.gg/${config.discord}`} target="_blank">
+                <IoLogoDiscord className="w-8 h-8 text-base-content" />
+              </Link>
+            }
+            {config.github &&
+              <Link href={`https://github.com/${config.github}`} target="_blank">
+                <IoLogoGithub className="w-8 h-8 text-base-content" />
+              </Link>
+            }
           </div>
           <div className="w-full flex items-around justify-center space-x-8">
             {cta}
