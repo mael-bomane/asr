@@ -39,13 +39,13 @@ export const Proposals: FC<Props> = ({ proposals }) => {
           {proposals.length > 0 && proposals.map((proposal, i) => (
             <TableRow key={i}
               onClick={() => {
-                router.push(`/proposal/${proposal.pda}`)
+                router.push(`/proposal/${proposal.id}`)
               }}
               className="cursor-pointer"
             >
               <TableCell className="font-medium">
                 <div>{proposal.title}</div>
-                <div>{proposal.text}</div>
+                {/*<div>{proposal.text}</div>*/}
               </TableCell>
               <TableCell className="text-center">-</TableCell>
               <TableCell className="text-center">
@@ -54,14 +54,16 @@ export const Proposals: FC<Props> = ({ proposals }) => {
                 </div>
               </TableCell>
               <TableCell>
-                <Progress value={proposal.votes} />
+                <Progress value={proposal.choices.length} />
               </TableCell>
               <TableCell className="text-left">
+                {/* @ts-ignore */}
                 <div>{proposal.createdAt}</div>
                 <div>17:31 PM</div>
               </TableCell>
               <TableCell className="text-left">
-                <div>{proposal.endsAt}</div>
+                {/* @ts-ignore */}
+                <div>{proposal.createdAt}</div>
                 <div>17:31 PM</div>
               </TableCell>
             </TableRow>
