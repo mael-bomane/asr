@@ -10,6 +10,8 @@ import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import config from "@/config";
 import logo from "@/app/icon.png";
 import { MonolithContext } from "./MonolithContextProvider";
+import { IoLogoDiscord, IoLogoGithub } from "react-icons/io5";
+import { FaXTwitter } from "react-icons/fa6";
 
 const links: {
   href: string;
@@ -122,7 +124,22 @@ const Header = () => {
         </div>
 
         {/* CTA on large screens */}
-        <div className="hidden lg:flex lg:justify-end lg:flex-1">{cta}</div>
+        <div className="hidden lg:flex lg:justify-end lg:flex-1 flex items-center justify-center pt-4">
+          <div className="w-full flex items-center justify-end space-x-8">
+            <Link href={`https://github.com/${config.github}`} target="_blank">
+              <FaXTwitter className="w-8 h-8 text-base-content" />
+            </Link>
+            <Link href={''} target="_blank">
+              <IoLogoDiscord className="w-8 h-8 text-base-content" />
+            </Link>
+            <Link href={''} target="_blank">
+              <IoLogoGithub className="w-8 h-8 text-base-content" />
+            </Link>
+          </div>
+          <div className="w-full flex items-around justify-center space-x-8">
+            {cta}
+          </div>
+        </div>
       </nav>
 
       {/* Mobile menu, show/hide based on menu state. */}

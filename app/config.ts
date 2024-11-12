@@ -2,8 +2,10 @@ import themes from "daisyui/src/theming/themes";
 import { ConfigProps } from "./types/config";
 
 const config = {
-  appName: "monolith.haus",
+  appName: "monolith",
   appDescription: "active staking reward & voting escrow",
+  github: "monolith-xyz",
+  discord: "",
   domainName: "monolith.haus",
   aws: {
     bucket: "bucket-name",

@@ -26,6 +26,8 @@ export interface ConfigProps {
   appName: string;
   appDescription: string;
   domainName: string;
+  github?: string;
+  discord?: string;
   crisp: {
     id?: string;
     onlyShowOnRoutes?: string[];
