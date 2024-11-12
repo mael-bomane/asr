@@ -25,7 +25,7 @@ export const Proposals: FC<Props> = ({ lock, proposals }) => {
         <input />
       </div>
       <Table className="overflow-x-scroll">
-        <TableCaption>A list of your recent invoices.</TableCaption>
+        <TableCaption>{lock && lock.name} proposals</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="">Title</TableHead>
