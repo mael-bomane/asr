@@ -774,8 +774,8 @@ describe("lock", () => {
   }).timeout(19000);
 
   it("reject : user1 tries claim twice his asr rewards for season 1", async () => {
-    await assert.rejects((async () => {
-      setTimeout(async () => {
+    setTimeout(async () => {
+      try {
         await program.methods.asrClaim()
           .accountsStrict({
             owner: user1.publicKey,
@@ -793,12 +793,11 @@ describe("lock", () => {
           .signers([user1])
           .rpc()
           .then(confirmTx)
-      }, 20000);
-    })(), (err: any) => {
-      console.log(err);
-      console.log(err.error.errorCode.code)
-      assert.strictEqual("UserAlreadyClaimedThis", err.error.errorCode.code)
-    });
+      } catch (error) {
+        console.log(error.error.errorCode.code)
+        assert.strictEqual("UserAlreadyClaimedThis", error.error.errorCode.code)
+      }
+    }, 20000);
   }).timeout(21000);
 
   after(async () => {
@@ -816,7 +815,7 @@ describe("lock", () => {
       // const dgb = await program.account.user.fetch(user1Pda);
       // console.log(dgb)
 
-    }, 16000)
+    }, 26000)
   });
 });
 

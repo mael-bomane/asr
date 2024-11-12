@@ -36,11 +36,11 @@ impl User {
             .sum()
     }
 
-    pub fn user_season_points(&self, lock: &Lock) -> u64 {
+    pub fn user_season_points(&self, lock: &Lock, season: u8) -> u64 {
         self.votes
             .iter()
             .map(|vote| {
-                if vote.season == lock.seasons.len() as u8 - 1 {
+                if vote.season == season {
                     vote.voting_power as u64
                 } else {
                     0u64

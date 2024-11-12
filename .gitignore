@@ -2,7 +2,8 @@
 .DS_Store
 target
 **/*.rs.bk
+**/*.crates
 app
-node_modules
+**/node_modules
 test-ledger
 .yarn

@@ -10,7 +10,7 @@ import { PublicKey, SystemProgram, TransactionMessage, TransactionSignature, Ver
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "react-hot-toast";
-import { BN } from "bn.js";
+import BN, { BN } from "bn.js";
 
 import { MonolithContext } from "./MonolithContextProvider";
 import { Slider } from "./ui/slider";
@@ -18,6 +18,7 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
 import type { FC } from "react";
 import { useRouter } from "next/navigation";
+import { LockNew } from "@/lib/program/new";
 
 export const SummonForm: FC = () => {
   const { publicKey, sendTransaction } = useWallet();
@@ -29,11 +30,14 @@ export const SummonForm: FC = () => {
   const [votingPeriod, setVotingPeriod] = useState<Object>({ oneWeek: {} });
 
   type Inputs = {
-    summoner: PublicKey
+    signer: PublicKey
     mint: PublicKey
-    time: number
+    config: number
+    votingPeriod: BN
+    lockDuration: BN
     threshold: number
-    minPollTokens: number
+    quorum: number
+    min: BN
     name: string
   }
 
@@ -52,43 +56,20 @@ export const SummonForm: FC = () => {
         setLoading(true)
         const mint = new PublicKey(inputs.mint);
         const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
-        console.log("signer ata : ", signerAta.toString())
+        console.log("signer ata : ", signerAta.toString());
+        // signer: PublicKey,
+        // mint: PublicKey,
+        // signerAta: Address,
+        // config: number,
+        // votingPeriod: BN,
+        // lockDuration: BN,
+        // threshold: number,
+        // quorum: number,
+        // min: BN,
+        // name: string
 
-        const analytics = PublicKey.findProgramAddressSync(
-          [Buffer.from("analytics")],
-          program.programId
-        )[0];
+        const instruction = await LockNew(publicKey, mint, signerAta, inputs.config, inputs.votingPeriod, inputs.lockDuration, inputs.threshold, inputs.quorum, inputs.min, inputs.name);
 
-        const auth = PublicKey.findProgramAddressSync(
-          [Buffer.from("auth"), analytics.toBytes()],
-          program.programId
-        )[0];
-
-        const monolith = PublicKey.findProgramAddressSync(
-          // seeds = [b"monolith", summoner.key().as_ref(), mint.key().as_ref()]
-          [Buffer.from("monolith"), publicKey.toBytes(), mint.toBytes()],
-          program.programId
-        )[0];
-
-        const vault = PublicKey.findProgramAddressSync(
-          // seeds = [b"vault", creator.key().as_ref(), mint.key().as_ref()]
-          [Buffer.from("vault"), publicKey.toBytes(), mint.toBytes()],
-          program.programId
-        )[0];
-
-        const instructions = await program.methods.monolithNew(votingPeriod, threshold, new BN(inputs.minPollTokens * 1 * 10 ** 6), inputs.name)
-          .accountsStrict({
-            summoner: publicKey,
-            auth,
-            monolith,
-            signerAta,
-            vault,
-            mint,
-            analytics,
-            systemProgram: SystemProgram.programId,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-          }).instruction().catch((error: any) => console.log(error));
 
         // Get the lates block hash to use on our transaction and confirmation
         let latestBlockhash = await connection.getLatestBlockhash()
@@ -97,7 +78,7 @@ export const SummonForm: FC = () => {
         const messageV0 = new TransactionMessage({
           payerKey: publicKey,
           recentBlockhash: latestBlockhash.blockhash,
-          instructions: [instructions],
+          instructions: [instruction],
         }).compileToV0Message();
 
         // Create a new VersionedTransacction to support the v0 message
@@ -112,8 +93,6 @@ export const SummonForm: FC = () => {
         console.log(signature);
 
         toast.success(`success, redirecting you shortly :\ntx : ${signature}`);
-
-        router.push(`/monolith/${monolith.toString()}`);
 
       } catch (error) {
         console.log(error);
@@ -139,6 +118,32 @@ export const SummonForm: FC = () => {
         <Image src={"/sith.gif"} width={33} height={33} alt="pepe wizard" className="ml-4 transform -scale-x-100" unoptimized />
       </div>
       <div className="w-full flex flex-col items-center justify-center space-y-4 grow">
+        <Label htmlFor="time" className="self-start md:text-xl font-extrabold">monolith type : </Label>
+        <div className="flex w-full items-start justify-start">
+          <RadioGroup id="time" defaultValue="TwentyFourHours" onValueChange={(e) => {
+            console.log(e);
+            switch (e) {
+              case 'TwentyFourHours': {
+                setVotingPeriod({ TwentyFourHours: {} })
+              }
+              case 'FourtyEightHours': {
+                setVotingPeriod({ FourtyEightHours: {} })
+              }
+              case 'OneWeek': {
+                setVotingPeriod({ OneWeek: {} })
+              }
+            }
+          }}>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value={"TwentyFourHours"} id="TwentyFourHours" />
+              <Label htmlFor="time" className="self-start md:text-xl font-extrabold">active staking rewards</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value={"FourtyEightHours"} id="FourtyEightHours" />
+              <Label htmlFor="time" className="self-start md:text-xl font-extrabold">voting escrow</Label>
+            </div>
+          </RadioGroup>
+        </div>
         <Label htmlFor="name" className="self-start md:text-xl font-extrabold">monolith name : {errors.name && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
 
         <Input placeholder="ex : monolith.haus" id="name" type="text"
@@ -152,12 +157,12 @@ export const SummonForm: FC = () => {
           id="mint"
           {...register("mint", { required: true })}
         />
-        <Label htmlFor="threshold" className="self-start md:text-xl font-extrabold">min. tokens to create poll {errors.minPollTokens && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
+        <Label htmlFor="threshold" className="self-start md:text-xl font-extrabold">min. tokens to create poll {errors.min && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
         <Input
           type="number"
           placeholder="ex : 100"
           id="minPollTokens"
-          {...register("minPollTokens", { required: true })}
+          {...register("min", { required: true })}
         />
 
         <Label htmlFor="threshold" className="self-start md:text-xl font-extrabold">approval threshold : {threshold}%</Label>
@@ -201,7 +206,7 @@ export const SummonForm: FC = () => {
               <Label htmlFor="time" className="self-start md:text-xl font-extrabold">1 week</Label>
             </div>
           </RadioGroup>
-          {errors.time && <div className="text-error">this field is required</div>}
+          {errors.votingPeriod && <div className="text-error">this field is required</div>}
         </div>
       </div>
       <Button className="cursor-pointer" size="lg" type="submit">summon</Button>

@@ -1,6 +1,12 @@
+import { Proposals } from "@/components/Proposals";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSEOTags } from "@/lib/seo";
 import { createClient } from "@/lib/supabase/client";
 import Image from "next/image";
+import Link from "next/link";
+import { IoDiamond, IoWallet } from "react-icons/io5";
+import { Input } from "@/components/ui/input";
+import { Monolith } from "@/components/Monolith";
 
 
 export async function generateMetadata({
@@ -9,20 +15,19 @@ export async function generateMetadata({
   params: { address: string };
 }) {
 
-  const { username, bio, image } = await getUser(params.username);
 
   return getSEOTags({
-    title: username,
-    description: bio,
+    title: `/monolith/${params.address}`,
+    description: `/monolith/${params.address}`,
     canonicalUrlRelative: `/monolith/${params.address}`,
     extraTags: {
       openGraph: {
-        title: username,
-        description: bio,
+        title: `/monolith/${params.address}`,
+        description: `/monolith/${params.address}`,
         url: `/monolith/${params.address}`,
         images: [
           {
-            url: image,
+            url: `/monolith/${params.address}.png`,
             width: 1200,
             height: 660,
           },
@@ -34,18 +39,15 @@ export async function generateMetadata({
   });
 }
 
-export default async function Monolith({
+export default async function MonolithPage({
   params,
 }: {
   params: { address: string };
 }) {
-  const user = await getUser(params.username);
 
   return (
-    <section className="my-6 md:my-10 max-w-[800px] p-4">
-      <h1 className="text-3xl md:text-3xl font-extrabold flex">{user.username} work !
-        <Image src={"/hacker.gif"} width={40} height={40} alt="thonk" className="ml-4 rounded-full" />
-      </h1>
-    </section>
+    <main className="w-full md:max-w-7xl mx-auto flex flex-col items-center justify-center grow border rounded-xl">
+      <Monolith address={params.address} />
+    </main >
   );
 }

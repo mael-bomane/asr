@@ -5,58 +5,114 @@ import { Card } from "./ui/card"
 import { Progress } from "./ui/progress"
 
 import type { FC } from "react"
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { useRouter } from "next/navigation";
 
 type Props = {
   // proposals: Proposal[]
+  monolith: string
 }
 
-export const Proposals: FC = () => {
+export const Proposals: FC<Props> = ({ monolith }) => {
+  const router = useRouter();
   return (
-    <div className="bg-[#000] text-base-content space-y-4 rounded-xl">
-      <div className="px-6 space-y-2 py-4">
-        <h3 className="font-bold text-xl lg:text-3xl tracking-tight">
-          stake &amp; vote
+    <div className="w-full bg-[#000] text-base-content space-y-4 rounded-xl">
+      <div className="px-6 space-y-2 py-4 w-full flex justify-between">
+        <h3 className="font-bold text-lg lg:text-3xl tracking-tight">
+          {monolith} proposals
         </h3>
-        <p className="opacity-80">users stake tokens to create &amp; vote on polls</p>
+        <input />
       </div>
-      <div className="px-6 max-w-[600px] flex flex-col gap-4 overflow-y-scroll pb-8">
-        {[
-          {
-            title: "MIP 3",
-            text: "tokenomics",
-            votes: 12,
-          },
-          {
-            title: "MIP 2",
-            text: "security audit",
-            votes: 1,
-          },
-          {
-            title: "MIP 1",
-            text: "deploy to mainnet",
-            votes: 48,
-          },
-        ].map((proposal, i) => (
-          <Card
-            className={`p-4 bg-base-100 text-base-content rounded-box flex justify-between mb-2 gap-4`}
-            key={i}
-          >
-            <div className="w-full flex flex-col space-y-2">
-              <p className="font-extrabold">{proposal.title}</p>
-              <p className="text-base-content-secondary">
-                {proposal.text}
-              </p>
-              <Progress value={proposal.votes} />
-            </div>
-            <div
-              className="px-4 py-3 rounded-box text-center text-lg duration-150 border border-transparent bg-primary text-base-content-secondary flex flex-col space-y-2 items-center justify-center"
+      <Table className="overflow-x-scroll">
+        <TableCaption>A list of your recent invoices.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="">Title</TableHead>
+            <TableHead className="text-center">Voted</TableHead>
+            <TableHead className="text-center">Status</TableHead>
+            <TableHead className="text-left">Results</TableHead>
+            <TableHead className="text-left">Start</TableHead>
+            <TableHead className="text-left">End</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {[
+            {
+              title: "MIP 3",
+              text: "tokenomics",
+              pda: "qlskdjqklsjdlkqsjd",
+              votes: 12,
+              createdAt: "24 October 2024 - 4:20pm",
+              endsAt: "25 October 2024 - 4:20pm",
+              choices: [{
+                id: 0,
+                title: "yes"
+              }, {
+                id: 1, title: "no"
+              }],
+            },
+            {
+              title: "MIP 2",
+              text: "security audit",
+              pda: "qlskdjqklsjdlkqsjd",
+              votes: 1,
+              createdAt: "24 October 2024 - 4:20pm",
+              endsAt: "25 October 2024 - 4:20pm",
+              choices: [{
+                id: 0,
+                title: "yes"
+              }, {
+                id: 1, title: "no"
+              }],
+            },
+            {
+              title: "MIP 1",
+              text: "deploy to mainnet",
+              votes: 48,
+              createdAt: "24 October 2024 - 4:20pm",
+              endsAt: "25 October 2024 - 4:20pm",
+              choices: [{
+                id: 0,
+                title: "yes"
+              }, {
+                id: 1, title: "no"
+              }],
+            },
+          ].map((proposal, i) => (
+            <TableRow key={i}
+              onClick={() => {
+                router.push(`/proposal/${proposal.pda}`)
+              }}
+              className="cursor-pointer"
             >
-              <FaChevronUp className="w-4 h-4 ease-in-out duration-150 -translate-y-0.5 hover:translate-y-0 cursor-pointer hover:text-success" />
-              <span className="">{proposal.votes}</span>
-              <FaChevronDown className="w-4 h-4 ease-in-out duration-150 -translate-y-0.5 hover:translate-y-0 cursor-pointer hover:text-error" />
-            </div>
-          </Card>
-        ))}
+              <TableCell className="font-medium">
+                <div>{proposal.title}</div>
+                <div>{proposal.text}</div>
+              </TableCell>
+              <TableCell className="text-center">-</TableCell>
+              <TableCell className="text-center">
+                <div className="badge p-4">
+                  Voting
+                </div>
+              </TableCell>
+              <TableCell>
+                <Progress value={proposal.votes} />
+              </TableCell>
+              <TableCell className="text-left">
+                <div>{proposal.createdAt}</div>
+                <div>17:31 PM</div>
+              </TableCell>
+              <TableCell className="text-left">
+                <div>{proposal.endsAt}</div>
+                <div>17:31 PM</div>
+              </TableCell>
+            </TableRow>
+          ))}
+
+
+        </TableBody>
+      </Table>
+      <div className="px-6 max-w-[600px] flex flex-col gap-4 overflow-y-scroll pb-8">
       </div>
     </div>
   )

@@ -74,7 +74,7 @@ impl<'info> ASRClaim<'info> {
         let total_tokens = asr.amount;
         let user = &mut self.user;
 
-        let user_season_points = user.user_season_points(&lock);
+        let user_season_points = user.user_season_points(&lock, season.season);
 
         let user_ratio = user_season_points
             .checked_mul(100)
