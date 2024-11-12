@@ -2,7 +2,7 @@
 
 import React, { createContext, useState, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
-import type { Analytics, Monolith, Deposit } from '@/types'
+import type { Analytics, Lock } from '@/types'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { Address, AnchorProvider, Program } from '@coral-xyz/anchor'
 import { IDL } from '@/constants/idl'
@@ -12,8 +12,8 @@ import { PROGRAM_ID } from '@/constants'
 interface MonolithContext {
   program: Program<IDL> | null
   analytics: Analytics | null
-  monoliths: Monolith[] | null
-  monolith: Monolith | null
+  monoliths: Lock[] | null
+  monolith: Lock | null
 }
 
 export const MonolithContext = createContext<MonolithContext>({
@@ -35,8 +35,8 @@ export const MonolithProvider = ({ children }: { children: ReactNode }) => {
 
   const [program, setProgram] = useState<Program<IDL> | null>(null)
   const [analytics, setAnalytics] = useState<Analytics | null>(null)
-  const [monolith, setMonolith] = useState<Monolith | null>(null)
-  const [monoliths, setMonoliths] = useState<Monolith[] | null>(null)
+  const [monolith, setMonolith] = useState<Lock | null>(null)
+  const [monoliths, setMonoliths] = useState<Lock[] | null>(null)
 
   const value = {
     program,
@@ -47,10 +47,9 @@ export const MonolithProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!program) {
-      const { solana } = window;
-
-      const provider = new AnchorProvider(connection, solana, opts.preflightCommitment);
-      setProgram(new Program(IDL, provider));
+      setProgram(new Program(IDL, {
+        connection
+      }));
     }
 
   }, [publicKey])
