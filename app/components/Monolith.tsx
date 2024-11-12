@@ -13,16 +13,15 @@ import type { FC } from "react";
 import { Proposals } from "./Proposals";
 import { getMint, getTokenMetadata, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { VotingPower } from "./VotingPower";
+import Link from "next/link";
+import { ellipsis } from "@/lib/utils";
+
+import { TokenInfo } from "@/types";
 
 type Props = {
   address: string
 };
 
-type TokenInfo = {
-  mint: PublicKey,
-  decimals: number
-
-}
 
 export const Monolith: FC<Props> = ({ address }) => {
 
@@ -30,11 +29,17 @@ export const Monolith: FC<Props> = ({ address }) => {
   const { publicKey } = useWallet();
 
   const [lock, setLock] = useState<Lock | null>(null);
+  const [season, setSeason] = useState(null);
+
+  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
+
   const [users, setUsers] = useState<User[] | null>(null);
+
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
+
   const [proposals, setProposals] = useState<Poll[]>([]);
-  const [season, setSeason] = useState(null);
+
 
   useEffect(() => {
     const fetchMonolith = async () => {
@@ -54,7 +59,13 @@ export const Monolith: FC<Props> = ({ address }) => {
             "confirmed",
             TOKEN_PROGRAM_ID,
           );
-          console.log(mintInfo)
+          console.log(mintInfo);
+          if (mintInfo) {
+            setTokenInfo({
+              mint: mintInfo.address,
+              decimals: mintInfo.decimals
+            })
+          }
           const metadata = await getTokenMetadata(
             connection,
             res.mint, // Mint Account address
@@ -138,20 +149,30 @@ export const Monolith: FC<Props> = ({ address }) => {
 
 
   return (
-    <section className="my-6 md:my-10 w-full flex flex-col justify-center items-center md:p-4 bg-[#000] text-base-content space-y-8">
+    <section className="my-6 md:my-10 w-full flex flex-col justify-center items-center md:p-4 bg-[#000] text-base-content space-y-4">
       {
         lock ? (
           <>
             <h1 className="text-3xl md:text-3xl font-extrabold flex">
               {lock.name}
             </h1>
+            <h2>created by <Link
+              href={`https://explorer.solana.com/address/${lock.creator.toString()}?cluster=devnet`}
+              className="underline"
+              target="_blank"
+            >
+              {ellipsis(lock.creator.toString())}
+            </Link>
+
+            </h2>
             <div className="w-full max-w-4xl flex justify-around">
               <Card
                 className={`px-4 bg-base-100 text-base-content rounded-box flex items-center justify-between mb-2 gap-4`}
               >
                 <CardTitle className="text-xs px-2 text-center text-success font-semibold">Total Staked MONO </CardTitle>
                 <CardDescription className="border-l text-xs px-2 text-center text-white font-semibold">{
-                  lock.totalDeposits.toNumber() / (1 * 10 ** 6)
+                  //@ts-ignore
+                  lock && tokenInfo && lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals)
                 } MONO</CardDescription>
               </Card>
               <Card
@@ -199,7 +220,7 @@ export const Monolith: FC<Props> = ({ address }) => {
                 <CardDescription className="px-2 text-center">
                 </CardDescription>
               </Card>
-              <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} />
+              <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} tokenInfo={tokenInfo} />
             </div>
             <Proposals proposals={proposals} />
 

@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 
 
 import type { FC } from "react"
-import type { User, Lock } from "@/types";
+import type { User, Lock, TokenInfo } from "@/types";
 import { cn } from "@/lib/utils";
 import { stakeIx } from "@/lib/program/stake";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -30,12 +30,16 @@ type Props = {
   currentUserLoading: boolean
   lock: Lock
   address: string
+  tokenInfo: TokenInfo
 }
 
-export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, address }) => {
+export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, address, tokenInfo }) => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [loading, setLoading] = useState<boolean>(false);
+  const [isStake, setIsStake] = useState<boolean>(true);
+  const [isUnStake, setIsUnStake] = useState<boolean>(false);
+
   type UserTokenAmount = {
     value: string
     decimals: number
@@ -88,6 +92,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
   const {
     register,
     handleSubmit,
+    setValue,
     watch,
     formState: { errors },
   } = useForm<Inputs>();
@@ -174,10 +179,11 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
       <CardTitle className="px-2 border-b pb-4 self-start w-full">
         <div className="text-lg font-extrabold">Voting Power</div>
         <div className="mt-4 flex w-full items-center space-x-4">
-          <IoDiamond className="w-6 h-6" /> <span className="text-xl font-extrabold"> {currentUser ? (
-            <>{currentUser.deposits.reduce((acc, obj) => {
-              return acc + obj.amount.toNumber();
-            }, 0) / (1 * 10 ** 6)}
+          <IoDiamond className="w-6 h-6" /> <span className="text-xl font-extrabold"> {currentUser && tokenInfo ? (
+            <>
+              {currentUser.deposits.reduce((acc: any, obj: any) => {
+                return acc + obj.amount.toNumber();
+              }, 0) / (1 * 10 ** tokenInfo.decimals)}
             </>
           ) : (
             <>0</>
@@ -191,19 +197,62 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
           >
             <div className="w-full flex">
               <div className="flex justify-around items-center text-xs w-[25%]">
-                <div className="cursor-pointer">stake</div>
-                <div className="cursor-pointer">unstake</div>
+                <div
+                  className={cn("cursor-pointer", {
+                    "text-success font-extrabold": isStake
+                  })}
+                  onClick={() => {
+                    setIsStake(true);
+                    setIsUnStake(false);
+                  }}
+                >
+                  stake
+                </div>
+                <div
+                  className={cn("cursor-pointer", {
+                    "text-success font-extrabold": isUnStake
+                  })}
+                  onClick={() => {
+                    setIsStake(false);
+                    setIsUnStake(true);
+                  }}
+                >
+                  unstake
+                </div>
               </div>
               <div className="text-xs flex flex-1 grow w-full justify-end space-x-2">
-                <div className="flex items-center justify-center"><IoWallet className="w-4 h-4" /> <span>{userTokenAmount ? userTokenAmount.uiAmount : 0} MONO</span></div>
-                <button className="btn btn-xs">HALF</button>
-                <button className="btn btn-xs">MAX</button>
+                <div className="flex items-center justify-center"><IoWallet className="w-4 h-4" /> <span>{`${isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (`${currentUser.deposits.reduce((acc: any, obj: any) => {
+                  return acc + obj.amount.toNumber();
+                }, 0) / (1 * 10 ** tokenInfo.decimals)} Staked`)}`} MONO</span></div>
+                <button
+                  className="btn btn-xs"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setValue('amount', isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : ((currentUser.deposits.reduce((acc: any, obj: any) => {
+                      return acc + obj.amount.toNumber();
+                    }, 0) / 2) / (1 * 10 ** tokenInfo.decimals)))
+                  }}
+                >
+                  HALF
+                </button>
+                <button
+                  className="btn btn-xs"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setValue('amount', isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (currentUser.deposits.reduce((acc: any, obj: any) => {
+                      return acc + obj.amount.toNumber();
+                    }, 0) / (1 * 10 ** tokenInfo.decimals)))
+
+                  }}
+                >
+                  MAX
+                </button>
               </div>
             </div>
             <div className="w-full flex mt-4 justify-center items-center">
               <button className="btn btn-sm text-xs">
                 <Image src={logo} width={30} height={30} alt="mono token" className="rounded-full" />
-                MONO
+                {isUnStake ? 'Staked ' : ''} MONO
               </button>
               <Input
                 type="number"
@@ -228,12 +277,14 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
               })}
               type="submit"
             >
-              {userTokenAmount && userTokenAmount.uiAmount > 0 ? 'stake' : 'insufficient MONO'}
+              {userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : 'insufficient MONO'}
             </button>
           ) : (
             <button className="w-full btn btn-lg mx-auto"
               onClick={onClickRegister}
-            >register to this locker</button>
+            >
+              register to this locker
+            </button>
           )
         }
       </CardDescription>

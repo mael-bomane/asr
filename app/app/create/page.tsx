@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import { Suspense } from "react";
-import { SummonForm } from "@/components/SummonForm";
+import { CreateForm } from "@/components/CreateForm";
 
 export const dynamic = "force-dynamic";
 

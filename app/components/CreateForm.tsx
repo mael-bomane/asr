@@ -3,9 +3,6 @@
 import Image from "next/image";
 import { useContext, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Button } from "./ui/button";
 import { PublicKey, SystemProgram, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
@@ -14,30 +11,32 @@ import { BN } from "bn.js";
 
 import { MonolithContext } from "./MonolithContextProvider";
 import { Slider } from "./ui/slider";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
 import type { FC } from "react";
 import { useRouter } from "next/navigation";
 import { LockNew } from "@/lib/program/new";
 
-export const SummonForm: FC = () => {
+export const CreateForm: FC = () => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
-  const { program } = useContext(MonolithContext);
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [threshold, setThreshold] = useState<number>(50);
-  const [votingPeriod, setVotingPeriod] = useState<Object>({ oneWeek: {} });
+  const [votingPeriod, setVotingPeriod] = useState<number>(86400);
 
   type Inputs = {
     signer: PublicKey
     mint: PublicKey
     config: number
-    votingPeriod: BN
-    lockDuration: BN
+    votingPeriod: number
+    lockDuration: number
     threshold: number
     quorum: number
-    min: BN
+    min: number
     name: string
   }
 
