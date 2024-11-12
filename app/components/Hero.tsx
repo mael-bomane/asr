@@ -12,6 +12,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { MONOLITH_ID, program, PROGRAM_ID } from "@/constants";
 import { VotingPower } from "./VotingPower";
 import { PublicKey } from "@solana/web3.js";
+import { ellipsis } from "@/lib/utils";
 
 const Hero = () => {
 
@@ -139,21 +140,33 @@ const Hero = () => {
 
   return (
     <section className="w-full mx-auto flex flex-col items-center justify-center px-8 py-8 text-base-content">
-      <section className="max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 py-8 lg:py-20 text-base-content">
-        <div className="max-w-7xl w-full flex flex-col gap-10 lg:gap-14 items-center justify-center text-center lg:text-left lg:items-start">
+      <section className="max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 py-8 text-base-content">
+        <div className="max-w-7xl w-full flex flex-col gap-10 lg:gap-14 items-center justify-center text-center">
           <h1 className="flex flex-col justify-center items-center font-extrabold text-2xl lg:text-4xl md:-mb-4">
-            active staking rewards,<br />
-            incentivized vote.
+            Active Staking Rewards,<br />
+            Incentivized Vote.
           </h1>
           <Link href="/create" className="btn btn- btn-wide btn-primary">
-            create your locker
+            Create Locker
           </Link>
         </div>
-        <div className="lg:w-full flex flex-col">
-          <div className="max-w-3xl">
-            <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
-          </div>
-          <Proposals proposals={proposals} />
+        <div className="lg:w-full flex flex-col justify-center items-center space-y-4">
+          {lock ? (
+            <>
+              <h1 className="text-3xl md:text-3xl font-extrabold flex">
+                {lock.name}
+              </h1>
+              <h2>created by <Link
+                href={`https://explorer.solana.com/address/${lock.creator.toString()}?cluster=devnet`}
+                className="underline"
+                target="_blank"
+              >
+                {ellipsis(lock.creator.toString())}
+              </Link>
+              </h2></>
+          ) : (<></>)}
+          <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
+          <Proposals proposals={proposals} lock={lock} />
         </div>
       </section>
     </section>

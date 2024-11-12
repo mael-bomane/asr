@@ -277,7 +277,7 @@ export const Monolith: FC<Props> = ({ address }) => {
               </Card>
               <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} tokenInfo={tokenInfo} />
             </div>
-            <Proposals proposals={proposals} />
+            <Proposals proposals={proposals} lock={lock} />
 
           </>
         ) : <>not found</>

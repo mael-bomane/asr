@@ -7,13 +7,14 @@ import { Progress } from "./ui/progress"
 import type { FC } from "react"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { useRouter } from "next/navigation";
-import { Poll } from "@/types";
+import { Poll, Lock } from "@/types";
 
 type Props = {
+  lock: Lock | null
   proposals: Poll[]
 }
 
-export const Proposals: FC<Props> = ({ proposals }) => {
+export const Proposals: FC<Props> = ({ lock, proposals }) => {
   const router = useRouter();
   return (
     <div className="w-full bg-[#000] text-base-content space-y-4 rounded-xl">

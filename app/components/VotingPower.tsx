@@ -167,19 +167,19 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
 
       })
     }
-  }, [publicKey])
+  }, [publicKey, lock])
 
   return (
 
     <form
       onSubmit={handleSubmit(onSubmit)}
 
-      className={`w-full p-8 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
+      className={`max-w-[500px] mx-auto w-full p-8 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
     >
-      <CardTitle className="px-2 border-b pb-4 self-start w-full">
+      <CardTitle className="px-2 pb-4 self-start w-full">
         <div className="text-lg font-extrabold">Voting Power</div>
         <div className="mt-4 flex w-full items-center space-x-4">
-          <IoDiamond className="w-6 h-6" /> <span className="text-xl font-extrabold"> {currentUser && tokenInfo ? (
+          <IoDiamond className="w-6 h-6" /> <span className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500"> {currentUser && tokenInfo ? (
             <>
               {currentUser.deposits.reduce((acc: any, obj: any) => {
                 return acc + obj.amount.toNumber();
@@ -199,7 +199,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
               <div className="flex justify-around items-center text-xs w-[25%]">
                 <div
                   className={cn("cursor-pointer", {
-                    "text-success font-extrabold": isStake
+                    "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold": isStake
                   })}
                   onClick={() => {
                     setIsStake(true);
@@ -213,7 +213,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                 </div>
                 <div
                   className={cn("cursor-pointer", {
-                    "text-success font-extrabold": isUnStake
+                    "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold": isUnStake
                   })}
                   onClick={() => {
                     setIsStake(false);
@@ -283,7 +283,9 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
               })}
               type="submit"
             >
-              {userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : 'insufficient MONO'}
+              <span className={cn('', {
+                "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500": isStake || isUnStake,
+              })}>{userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : 'insufficient MONO'}</span>
             </button>
           ) : (
             <button className="w-full btn btn-lg mx-auto"

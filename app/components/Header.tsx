@@ -15,18 +15,18 @@ const links: {
   href: string;
   label: string;
 }[] = [
-    {
-      href: "/",
-      label: "home",
-    },
-    {
-      href: "/create",
-      label: "create",
-    },
-    {
-      href: "/explore",
-      label: "explore",
-    },
+    // {
+    // href: "/",
+    // label: "home",
+    // },
+    // {
+    // href: "/create",
+    // label: "create",
+    // },
+    // {
+    // href: "/explore",
+    // label: "explore",
+    // },
   ];
 
 const cta: JSX.Element = <WalletMultiButton />
