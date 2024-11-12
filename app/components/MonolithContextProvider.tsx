@@ -2,21 +2,21 @@
 
 import React, { createContext, useState, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
-import type { Analytics, Lock } from '@/types'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { Address, AnchorProvider, Program } from '@coral-xyz/anchor'
+import { Program } from '@coral-xyz/anchor'
 import { IDL } from '@/constants/idl'
-import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js'
-import { PROGRAM_ID } from '@/constants'
+import { PublicKey } from '@solana/web3.js'
 
-interface MonolithContext {
+import type { Analytics, Lock } from '@/types'
+
+interface MonolithInterface {
   program: Program<IDL> | null
   analytics: Analytics | null
   monoliths: Lock[] | null
   monolith: Lock | null
 }
 
-export const MonolithContext = createContext<MonolithContext>({
+export const MonolithContext = createContext<MonolithInterface>({
   program: null,
   analytics: null,
   monolith: null,
