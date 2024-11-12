@@ -78,7 +78,7 @@ export const MonolithProvider = ({ children }: { children: ReactNode }) => {
     if (publicKey && analytics) {
       const fetchMonoliths = async () => {
         // @ts-ignore
-        return await program.account.monolith.all()
+        return await program.account.lock.all()
       }
       fetchMonoliths()
         .then((response) => {

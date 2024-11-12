@@ -105,7 +105,8 @@ export const CreateForm: FC = () => {
     }
 
   };
-  function getDuration(milli: number) {
+
+  const getDuration = (milli: number) => {
     let minutes = Math.floor(milli / 60000);
     let hours = Math.round(minutes / 60);
     let days = Math.round(hours / 24);
