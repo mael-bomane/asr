@@ -7,7 +7,7 @@ import { program } from "@/constants/program";
 
 
 
-export const register = async (
+export const registerIx = async (
   owner: PublicKey,
   lock: PublicKey,
   mint: PublicKey,

@@ -150,7 +150,9 @@ export const Monolith: FC<Props> = ({ address }) => {
                 className={`px-4 bg-base-100 text-base-content rounded-box flex items-center justify-between mb-2 gap-4`}
               >
                 <CardTitle className="text-xs px-2 text-center text-success font-semibold">Total Staked MONO </CardTitle>
-                <CardDescription className="border-l text-xs px-2 text-center text-white font-semibold">{lock.totalDeposits.toString()} MONO</CardDescription>
+                <CardDescription className="border-l text-xs px-2 text-center text-white font-semibold">{
+                  lock.totalDeposits.toNumber() / (1 * 10 ** 6)
+                } MONO</CardDescription>
               </Card>
               <Card
                 className={`px-4 bg-base-100 text-base-content rounded-box flex items-center justify-between mb-2 gap-4`}
