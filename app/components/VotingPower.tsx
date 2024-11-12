@@ -28,7 +28,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 type Props = {
   currentUser: User | null
   currentUserLoading: boolean
-  lock: Lock
+  lock: Lock | null
   address: string
   tokenInfo: TokenInfo
 }
@@ -154,7 +154,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
       const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
       return await connection.getTokenAccountBalance(signerAta);
     }
-    if (publicKey) {
+    if (lock && publicKey) {
       fetchUserBalance().then(res => {
         console.log("user token balance", res);
         if (res) {
