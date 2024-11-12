@@ -26,7 +26,7 @@ export const CreateForm: FC = () => {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [threshold, setThreshold] = useState<number>(50);
-  const [votingPeriod, setVotingPeriod] = useState<number>(86400);
+  const [votingPeriod, setVotingPeriod] = useState<number>(86400 * 1000);
 
   type Inputs = {
     signer: PublicKey
@@ -44,6 +44,7 @@ export const CreateForm: FC = () => {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<Inputs>();
 
@@ -104,6 +105,17 @@ export const CreateForm: FC = () => {
     }
 
   };
+  function getDuration(milli: number) {
+    let minutes = Math.floor(milli / 60000);
+    let hours = Math.round(minutes / 60);
+    let days = Math.round(hours / 24);
+
+    return (
+      (days && { value: days, unit: 'days' }) ||
+      (hours && { value: hours, unit: 'hours' }) ||
+      { value: minutes, unit: 'minutes' }
+    )
+  };
 
   return (
     <form className="w-full md:max-w-7xl grow w-full mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-[#000] text-base-content rounded-xl"
@@ -112,27 +124,30 @@ export const CreateForm: FC = () => {
       <div className="flex justify-center items-center">
         <Image src={"/sith.gif"} width={33} height={33} alt="pepe wizard" className="mr-4" unoptimized />
         <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">
-          summon
+          create a monolith
         </h1>
         <Image src={"/sith.gif"} width={33} height={33} alt="pepe wizard" className="ml-4 transform -scale-x-100" unoptimized />
       </div>
-      <div className="w-full flex flex-col items-center justify-center space-y-4 grow">
-        <Label htmlFor="time" className="self-start md:text-xl font-extrabold">monolith type : </Label>
-        <div className="flex w-full items-start justify-start">
-          <RadioGroup id="time" defaultValue="TwentyFourHours" onValueChange={(e) => {
-            console.log(e);
+      <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
 
+        <Label htmlFor="time" className="md:text-xl font-extrabold mt-4">monolith type : </Label>
+
+        <RadioGroup
+          className="flex w-full items-center justify-center"
+          id="config"
+          defaultValue="ActiveStakingRewards"
+          onValueChange={(e) => {
+            console.log(e);
           }}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value={"TwentyFourHours"} id="TwentyFourHours" />
-              <Label htmlFor="time" className="self-start md:text-xl font-extrabold">active staking rewards</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value={"FourtyEightHours"} id="FourtyEightHours" />
-              <Label htmlFor="time" className="self-start md:text-xl font-extrabold">voting escrow</Label>
-            </div>
-          </RadioGroup>
-        </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value={'0'} id="ActiveStakingRewards" />
+            <Label htmlFor="config" className="self-start md:text-xl font-extrabold">active staking rewards</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value={'1'} id="FourtyEightHours" />
+            <Label htmlFor="config" className="self-start md:text-xl font-extrabold">voting escrow</Label>
+          </div>
+        </RadioGroup>
         <Label htmlFor="name" className="self-start md:text-xl font-extrabold">monolith name : {errors.name && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
 
         <Input placeholder="ex : monolith.haus" id="name" type="text"
@@ -160,32 +175,26 @@ export const CreateForm: FC = () => {
           onValueChange={(e) => {
             console.log(e[0]);
             setThreshold(e[0])
+            setValue('threshold', e[0])
           }}
           min={50}
           max={100}
           step={1}
         />
         {errors.threshold && <div className="text-error">this field is required</div>}
-        <Label htmlFor="time" className="self-start md:text-xl font-extrabold">voting perdiod : </Label>
-        <div className="flex w-full items-start justify-start">
-          <RadioGroup id="time" defaultValue="TwentyFourHours" onValueChange={(e) => {
-            console.log(e);
-          }}>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value={"TwentyFourHours"} id="TwentyFourHours" />
-              <Label htmlFor="time" className="self-start md:text-xl font-extrabold">24h</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value={"FourtyEightHours"} id="FourtyEightHours" />
-              <Label htmlFor="time" className="self-start md:text-xl font-extrabold">48h</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RadioGroupItem value={"OneWeek"} id="OneWeek" />
-              <Label htmlFor="time" className="self-start md:text-xl font-extrabold">1 week</Label>
-            </div>
-          </RadioGroup>
-          {errors.votingPeriod && <div className="text-error">this field is required</div>}
-        </div>
+        <Label htmlFor="votingPeriod" className="self-start md:text-xl font-extrabold">voting period : {getDuration(votingPeriod).value} {getDuration(votingPeriod).unit}</Label>
+        <Slider id="votingPeriod"
+          defaultValue={[votingPeriod]}
+          onValueChange={(e) => {
+            console.log(e[0]);
+            setVotingPeriod(e[0])
+            setValue('votingPeriod', e[0])
+          }}
+          min={86400 * 1000}
+          max={86400 * 7 * 1000}
+          step={86400 * 1000}
+        />
+        {errors.votingPeriod && <div className="text-error">this field is required</div>}
       </div>
       <Button className="cursor-pointer" size="lg" type="submit">summon</Button>
     </form>

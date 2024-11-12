@@ -54,7 +54,6 @@ export const LockNew = async (
       signer,
       auth,
       lock,
-      //@ts-ignore
       signerAta,
       vault,
       mint,

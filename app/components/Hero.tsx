@@ -5,8 +5,13 @@ import Link from "next/link";
 import { Proposals } from "./Proposals";
 import config from "@/config";
 import logo from "@/app/icon.png";
+import { useState } from "react";
+import { Poll } from "@/types";
 
 const Hero = () => {
+
+  const [proposals, setProposals] = useState<Poll[]>([])
+
   return (
     <section className="w-full mx-auto flex flex-col items-center justify-center px-8 py-8 text-base-content border bg-[url('/lava.gif')]">
       {process.env.NODE_ENV == "development" ? (
@@ -32,7 +37,7 @@ const Hero = () => {
 
           </div>
           <div className="lg:w-full">
-            <Proposals />
+            <Proposals proposals={proposals} />
           </div>
 
         </section>)
