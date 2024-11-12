@@ -28,6 +28,7 @@ export interface ConfigProps {
   domainName: string;
   github?: string;
   discord?: string;
+  xTwitter?: string;
   crisp: {
     id?: string;
     onlyShowOnRoutes?: string[];

@@ -4,8 +4,9 @@ import { ConfigProps } from "./types/config";
 const config = {
   appName: "monolith",
   appDescription: "active staking reward & voting escrow",
-  github: "monolith-xyz",
+  github: "",
   discord: "",
+  xTwitter: "monolith_haus",
   domainName: "monolith.haus",
   aws: {
     bucket: "bucket-name",
