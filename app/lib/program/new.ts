@@ -1,14 +1,10 @@
-import { Address, BN, IdlAccounts, Program } from "@coral-xyz/anchor";
-import { IDL } from "@/constants/idl";
-import { PROGRAM_ID } from "@/constants/program";
-import { clusterApiUrl, Connection, PublicKey, SystemProgram } from "@solana/web3.js";
+import { Address, BN } from "@coral-xyz/anchor";
+import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
-export const program = new Program<IDL>(IDL, {
-  connection: new Connection(clusterApiUrl('devnet'))
-});
+import { program } from "@/constants/program";
 
-export type Lock = IdlAccounts<IDL>["Lock"];
+
 
 export const LockNew = async (
   signer: PublicKey,

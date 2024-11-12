@@ -36,7 +36,7 @@ impl User {
             .sum()
     }
 
-    pub fn user_season_points(&self, lock: &Lock, season: u8) -> u64 {
+    pub fn user_season_points(&self, season: u8) -> u64 {
         self.votes
             .iter()
             .map(|vote| {

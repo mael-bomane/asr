@@ -1,0 +1,141 @@
+"use client"
+
+import Image from "next/image";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react"
+
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+
+import { toast } from "react-hot-toast";
+
+import { register } from "@/lib/program/register";
+
+import { IoDiamond, IoWallet } from "react-icons/io5";
+import logo from "@/app/icon.png";
+
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+
+
+import type { FC } from "react"
+import type { User, Lock } from "@/types";
+
+type Props = {
+  currentUser: User | null
+  currentUserLoading: boolean
+  lock: Lock
+  address: string
+}
+
+export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, address }) => {
+  const { publicKey, sendTransaction } = useWallet();
+  const { connection } = useConnection();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [userTokenAmount, setuserTokenAmount] = useState();
+
+  const onClickRegister = useCallback(async () => {
+    let signature: TransactionSignature = '';
+    if (publicKey) {
+      try {
+        setLoading(true);
+        const mint = new PublicKey(lock.mint);
+        const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+        console.log("signer ata : ", signerAta.toString());
+
+        const instruction = await register(publicKey, new PublicKey(address), mint);
+
+        let latestBlockhash = await connection.getLatestBlockhash()
+
+        const messageV0 = new TransactionMessage({
+          payerKey: publicKey,
+          recentBlockhash: latestBlockhash.blockhash,
+          instructions: [instruction],
+        }).compileToV0Message();
+
+        const transation = new VersionedTransaction(messageV0)
+
+        signature = await sendTransaction(transation, connection);
+
+        await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
+
+        console.log(signature);
+
+        toast.success(`success:\ntx : ${signature}`);
+        setLoading(false)
+      } catch (error) {
+        console.log(error);
+        setLoading(false);
+      }
+    } else {
+      toast.error('please connect your wallet');
+    }
+  }, [publicKey]);
+
+  useEffect(() => {
+    const fetchUserBalance = async () => {
+      const mint = new PublicKey(lock.mint);
+      const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+      return await connection.getTokenAccountBalance(signerAta);
+    }
+    if (publicKey) {
+      fetchUserBalance().then(res => {
+        console.log("user token balance", res);
+      })
+    }
+  }, [publicKey])
+
+  return (
+
+    <Card
+      className={`w-full p-8 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
+    >
+      <CardTitle className="px-2 border-b pb-4 self-start w-full">
+        <div className="text-lg font-extrabold">Voting Power</div>
+        <div className="mt-4 flex w-full items-center space-x-4">
+          <IoDiamond className="w-6 h-6" /> <span className="text-xl font-extrabold"> 0</span>
+        </div>
+        <p className="px-2 text-base-content text-xs text-center mt-4">Lock MONO tokens to receive your voting power. <Link href="/docs" className="underline">Learn more</Link></p>
+        {currentUser ? (
+          <div className="w-full bg-[#121212] p-8 flex flex-col mt-4 rounded-xl">
+            <div className="w-full flex">
+              <div className="flex justify-around items-center text-xs w-[25%]">
+                <div className="cursor-pointer">stake</div>
+                <div className="cursor-pointer">unstake</div>
+              </div>
+              <div className="text-xs flex flex-1 grow w-full justify-end space-x-2">
+                <div className="flex items-center justify-center"><IoWallet className="w-4 h-4" /> <span>0 MONO</span></div>
+                <button className="btn btn-xs">HALF</button>
+                <button className="btn btn-xs">MAX</button>
+              </div>
+            </div>
+            <div className="w-full flex mt-4 justify-center items-center">
+              <button className="btn btn-sm text-xs">
+                <Image src={logo} width={30} height={30} alt="mono token" className="rounded-full" />
+                MONO
+              </button>
+              <Input type="number" placeholder="0.0" className="text-right border-none" />
+            </div>
+          </div>
+        ) : (
+          <div className="w-full bg-[#121212] p-8 flex flex-col mt-4 rounded-xl text-sm text-center">
+            you are not registered to this locker
+          </div>
+        )}
+      </CardTitle>
+      <CardDescription className="w-full p-2">
+        {
+          currentUser ? (
+            <button className="btn btn-lg">insufficient MONO</button>
+          ) : (
+            <button className="w-full btn btn-lg mx-auto"
+              onClick={onClickRegister}
+            >register to this locker</button>
+          )
+        }
+      </CardDescription>
+    </Card>
+  )
+}
+

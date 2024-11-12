@@ -8,7 +8,7 @@ mod state;
 use contexts::*;
 use state::*;
 
-declare_id!("4vqVPmSjNpfPhHpJi9FgMBnabKgK5oFyNJwgFnKtN4yp");
+declare_id!("asrMFZq2j6bA1RADnGM58txGVtSzMcDxxSVr57mQhLZ");
 
 #[program]
 pub mod lock {

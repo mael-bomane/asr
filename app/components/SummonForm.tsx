@@ -10,7 +10,7 @@ import { PublicKey, SystemProgram, TransactionMessage, TransactionSignature, Ver
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "react-hot-toast";
-import BN, { BN } from "bn.js";
+import { BN } from "bn.js";
 
 import { MonolithContext } from "./MonolithContextProvider";
 import { Slider } from "./ui/slider";

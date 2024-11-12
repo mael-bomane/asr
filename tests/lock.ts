@@ -233,31 +233,31 @@ describe("lock", () => {
     }
   });
 
-  it("initialize analytics", async () => {
-    if (rpc == "https://api.devnet.solana.com") {
-      await program.methods.initialize()
-        .accountsStrict({
-          signer: wallet.publicKey,
-          auth,
-          analytics,
-          systemProgram: SYSTEM_PROGRAM_ID
-        })
-        .signers([wallet.payer])
-        .rpc()
-        .then(confirmTx);
-    } else {
-      await program.methods.initialize()
-        .accountsStrict({
-          signer: user1.publicKey,
-          auth,
-          analytics,
-          systemProgram: SYSTEM_PROGRAM_ID
-        })
-        .signers([user1])
-        .rpc()
-        .then(confirmTx);
-    }
-  });
+  // it("initialize analytics", async () => {
+  //   if (rpc == "https://api.devnet.solana.com") {
+  //     await program.methods.initialize()
+  //       .accountsStrict({
+  //         signer: wallet.publicKey,
+  //         auth,
+  //         analytics,
+  //         systemProgram: SYSTEM_PROGRAM_ID
+  //       })
+  //       .signers([wallet.payer])
+  //       .rpc()
+  //       .then(confirmTx);
+  //   } else {
+  //     await program.methods.initialize()
+  //       .accountsStrict({
+  //         signer: user1.publicKey,
+  //         auth,
+  //         analytics,
+  //         systemProgram: SYSTEM_PROGRAM_ID
+  //       })
+  //       .signers([user1])
+  //       .rpc()
+  //       .then(confirmTx);
+  //   }
+  // });
 
   // it("create an active staking rewards locker, min poll threshold 50% , min. tokens to start poll 100", async () => {
   //   //   // await program.methods.daoCreate({ twentyFourHours: {} }, 51, new BN(100), "Monolith DAO")
@@ -309,10 +309,9 @@ describe("lock", () => {
   // });
 
   it("create voting escrow locker, lock time 1 year, min poll threshold 51% , min. tokens to start poll 100", async () => {
-    //   // await program.methods.daoCreate({ twentyFourHours: {} }, 51, new BN(100), "Monolith DAO")
     if (rpc == "https://api.devnet.solana.com") {
       console.log("running on devnet");
-      await program.methods.lockNew(0, week, new BN(86400 * 7 * 52), 51, 25, min, "SOON")
+      await program.methods.lockNew(0, day, new BN(0), 51, 25, min, "Monolith")
         .accountsStrict({
           signer: wallet.publicKey,
           auth,
@@ -361,444 +360,444 @@ describe("lock", () => {
     }
   });
 
-  it("user1 deposit asr tokens", async () => {
-    await program.methods.asrDeposit(min)
-      .accountsStrict({
-        creator: user1.publicKey,
-        signerAta: user1Ata.address,
-        mint,
-        lock,
-        vault,
-        auth,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-      })
-      .signers([user1])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
-        console.log(debug);
-      });
-  });
+  // it("user1 deposit asr tokens", async () => {
+  //   await program.methods.asrDeposit(min)
+  //     .accountsStrict({
+  //       creator: user1.publicKey,
+  //       signerAta: user1Ata.address,
+  //       mint,
+  //       lock,
+  //       vault,
+  //       auth,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //       tokenProgram: TOKEN_PROGRAM_ID,
+  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  //     })
+  //     .signers([user1])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.lock.fetch(lock);
+  //       console.log(debug);
+  //     });
+  // });
 
-  it("user1 deposit asr tokens again", async () => {
-    await program.methods.asrDeposit(min)
-      .accountsStrict({
-        creator: user1.publicKey,
-        signerAta: user1Ata.address,
-        mint,
-        lock,
-        vault,
-        auth,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-      })
-      .signers([user1])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
-        console.log(debug.seasons.map(season => {
-          console.log(`asr rewards for season ${season.season}`, season.asr)
-          season.asr.map(r => {
-            console.log(r.amount.toString())
-          })
-        }));
-      });
-  });
+  // it("user1 deposit asr tokens again", async () => {
+  //   await program.methods.asrDeposit(min)
+  //     .accountsStrict({
+  //       creator: user1.publicKey,
+  //       signerAta: user1Ata.address,
+  //       mint,
+  //       lock,
+  //       vault,
+  //       auth,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //       tokenProgram: TOKEN_PROGRAM_ID,
+  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  //     })
+  //     .signers([user1])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.lock.fetch(lock);
+  //       console.log(debug.seasons.map(season => {
+  //         console.log(`asr rewards for season ${season.season}`, season.asr)
+  //         season.asr.map(r => {
+  //           console.log(r.amount.toString())
+  //         })
+  //       }));
+  //     });
+  // });
 
 
-  it("register user1 to lock", async () => {
-    await program.methods.register()
-      .accountsStrict({
-        owner: user1.publicKey,
-        user: user1Pda,
-        auth,
-        lock,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user1])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.user.fetch(user1Pda);
-        console.log(debug);
-      });
-  });
+  // it("register user1 to lock", async () => {
+  //   await program.methods.register()
+  //     .accountsStrict({
+  //       owner: user1.publicKey,
+  //       user: user1Pda,
+  //       auth,
+  //       lock,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //     })
+  //     .signers([user1])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.user.fetch(user1Pda);
+  //       console.log(debug);
+  //     });
+  // });
 
-  it("user1 stake 100 tokens", async () => {
-    await program.methods.stakeNew(min)
-      .accountsStrict({
-        owner: user1.publicKey,
-        user: user1Pda,
-        auth,
-        lock,
-        signerAta: user1Ata.address,
-        vault: user1Vault,
-        mint,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-      })
-      .signers([user1])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
-        console.log(debug);
-        const user = await program.account.user.fetch(user1Pda);
-        console.log(user);
-      });
-  });
+  // it("user1 stake 100 tokens", async () => {
+  //   await program.methods.stakeNew(min)
+  //     .accountsStrict({
+  //       owner: user1.publicKey,
+  //       user: user1Pda,
+  //       auth,
+  //       lock,
+  //       signerAta: user1Ata.address,
+  //       vault: user1Vault,
+  //       mint,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //       tokenProgram: TOKEN_PROGRAM_ID,
+  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  //     })
+  //     .signers([user1])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.lock.fetch(lock);
+  //       console.log(debug);
+  //       const user = await program.account.user.fetch(user1Pda);
+  //       console.log(user);
+  //     });
+  // });
 
-  it("register user2 to lock", async () => {
-    await program.methods.register()
-      .accountsStrict({
-        owner: user2.publicKey,
-        user: user2Pda,
-        auth,
-        lock,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user2])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
-        console.log(debug);
-      });
-  });
+  // it("register user2 to lock", async () => {
+  //   await program.methods.register()
+  //     .accountsStrict({
+  //       owner: user2.publicKey,
+  //       user: user2Pda,
+  //       auth,
+  //       lock,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //     })
+  //     .signers([user2])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.lock.fetch(lock);
+  //       console.log(debug);
+  //     });
+  // });
 
-  it("user2 stake 50 tokens", async () => {
-    await program.methods.stakeNew(new BN(50 * 1 * 10 ** 6))
-      .accountsStrict({
-        owner: user2.publicKey,
-        user: user2Pda,
-        auth,
-        lock,
-        signerAta: user2Ata.address,
-        vault: user2Vault,
-        mint,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-      })
-      .signers([user2])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
-        console.log(debug);
-        const user = await program.account.user.fetch(user2Pda);
-        console.log(user)
-      });
-  });
+  // it("user2 stake 50 tokens", async () => {
+  //   await program.methods.stakeNew(new BN(50 * 1 * 10 ** 6))
+  //     .accountsStrict({
+  //       owner: user2.publicKey,
+  //       user: user2Pda,
+  //       auth,
+  //       lock,
+  //       signerAta: user2Ata.address,
+  //       vault: user2Vault,
+  //       mint,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //       tokenProgram: TOKEN_PROGRAM_ID,
+  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  //     })
+  //     .signers([user2])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.lock.fetch(lock);
+  //       console.log(debug);
+  //       const user = await program.account.user.fetch(user2Pda);
+  //       console.log(user)
+  //     });
+  // });
 
-  it("user1 start poll", async () => {
-    const title = "mainnet release";
-    const content = "i think we're ready !"
+  // it("user1 start poll", async () => {
+  //   const title = "mainnet release";
+  //   const content = "i think we're ready !"
 
-    console.log("title length : ", title.length)
-    console.log("content length : ", content.length)
+  //   console.log("title length : ", title.length)
+  //   console.log("content length : ", content.length)
 
-    await program.methods.pollNew(
-      title,
-      [
-        {
-          id: 0,
-          votingPower: new BN(0),
-          title: "yes",
-        },
-        {
-          id: 1,
-          votingPower: new BN(0),
-          title: "no",
-        },
-      ],
-    )
-      .accountsStrict({
-        owner: user1.publicKey,
-        poll,
-        lock,
-        user: user1Pda,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user1])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
-        console.log(debug);
-        const dbg = await program.account.poll.fetch(poll);
-        console.log(dbg);
-      });
-  });
+  //   await program.methods.pollNew(
+  //     title,
+  //     [
+  //       {
+  //         id: 0,
+  //         votingPower: new BN(0),
+  //         title: "yes",
+  //       },
+  //       {
+  //         id: 1,
+  //         votingPower: new BN(0),
+  //         title: "no",
+  //       },
+  //     ],
+  //   )
+  //     .accountsStrict({
+  //       owner: user1.publicKey,
+  //       poll,
+  //       lock,
+  //       user: user1Pda,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //     })
+  //     .signers([user1])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.lock.fetch(lock);
+  //       console.log(debug);
+  //       const dbg = await program.account.poll.fetch(poll);
+  //       console.log(dbg);
+  //     });
+  // });
 
-  it("user1 vote 'approve' on poll 0 /w 100 voting power", async () => {
-    await program.methods.voteNew(new BN(1), 0)
-      .accountsStrict({
-        owner: user1.publicKey,
-        user: user1Pda,
-        poll,
-        lock,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user1])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
-        console.log(debug);
-        const dbg = await program.account.poll.fetch(poll);
-        console.log(dbg);
-      });
-  });
+  // it("user1 vote 'approve' on poll 0 /w 100 voting power", async () => {
+  //   await program.methods.voteNew(new BN(1), 0)
+  //     .accountsStrict({
+  //       owner: user1.publicKey,
+  //       user: user1Pda,
+  //       poll,
+  //       lock,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //     })
+  //     .signers([user1])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.lock.fetch(lock);
+  //       console.log(debug);
+  //       const dbg = await program.account.poll.fetch(poll);
+  //       console.log(dbg);
+  //     });
+  // });
 
-  it("user1 tries voting twice", async () => {
-    await assert.rejects((async () => {
-      await program.methods.voteNew(new BN(1), 0)
-        .accountsStrict({
-          owner: user1.publicKey,
-          user: user1Pda,
-          poll,
-          lock,
-          analytics,
-          systemProgram: SYSTEM_PROGRAM_ID,
-        })
-        .signers([user1])
-        .rpc()
-        .then(confirmTx);
-    })());
-  });
+  // it("user1 tries voting twice", async () => {
+  //   await assert.rejects((async () => {
+  //     await program.methods.voteNew(new BN(1), 0)
+  //       .accountsStrict({
+  //         owner: user1.publicKey,
+  //         user: user1Pda,
+  //         poll,
+  //         lock,
+  //         analytics,
+  //         systemProgram: SYSTEM_PROGRAM_ID,
+  //       })
+  //       .signers([user1])
+  //       .rpc()
+  //       .then(confirmTx);
+  //   })());
+  // });
 
-  it("register user3 to lock", async () => {
-    await program.methods.register()
-      .accountsStrict({
-        owner: user3.publicKey,
-        user: user3Pda,
-        auth,
-        lock,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user3])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
-        console.log(debug);
-      });
-  });
+  // it("register user3 to lock", async () => {
+  //   await program.methods.register()
+  //     .accountsStrict({
+  //       owner: user3.publicKey,
+  //       user: user3Pda,
+  //       auth,
+  //       lock,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //     })
+  //     .signers([user3])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.lock.fetch(lock);
+  //       console.log(debug);
+  //     });
+  // });
 
-  it("user3 tries to vote without voting power", async () => {
-    await assert.rejects((async () => {
-      await program.methods.voteNew(new BN(1), 0)
-        .accountsStrict({
-          owner: user3.publicKey,
-          user: user3Pda,
-          poll,
-          lock,
-          analytics,
-          systemProgram: SYSTEM_PROGRAM_ID,
-        })
-        .signers([user3])
-        .rpc()
-        .then(confirmTx)
-    })()); // current function returns rejected promise
-  });
+  // it("user3 tries to vote without voting power", async () => {
+  //   await assert.rejects((async () => {
+  //     await program.methods.voteNew(new BN(1), 0)
+  //       .accountsStrict({
+  //         owner: user3.publicKey,
+  //         user: user3Pda,
+  //         poll,
+  //         lock,
+  //         analytics,
+  //         systemProgram: SYSTEM_PROGRAM_ID,
+  //       })
+  //       .signers([user3])
+  //       .rpc()
+  //       .then(confirmTx)
+  //   })()); // current function returns rejected promise
+  // });
 
-  it("user2 vote 'reject' on poll 0 /w 50 voting power", async () => {
-    await program.methods.voteNew(new BN(1), 1)
-      .accountsStrict({
-        owner: user2.publicKey,
-        user: user2Pda,
-        poll,
-        lock,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user2])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
-        console.log(debug);
-        const db = await program.account.poll.fetch(poll);
-        console.log(db);
-        const dgb = await program.account.user.fetch(user2Pda);
-        console.log(dgb);
-      });
-  });
+  // it("user2 vote 'reject' on poll 0 /w 50 voting power", async () => {
+  //   await program.methods.voteNew(new BN(1), 1)
+  //     .accountsStrict({
+  //       owner: user2.publicKey,
+  //       user: user2Pda,
+  //       poll,
+  //       lock,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //     })
+  //     .signers([user2])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.lock.fetch(lock);
+  //       console.log(debug);
+  //       const db = await program.account.poll.fetch(poll);
+  //       console.log(db);
+  //       const dgb = await program.account.user.fetch(user2Pda);
+  //       console.log(dgb);
+  //     });
+  // });
 
-  it("user1 tries to execute poll 0 before end of voting period", async () => {
-    await assert.rejects((async () => {
-      await program.methods.pollExecute()
-        .accountsStrict({
-          owner: user1.publicKey,
-          lock,
-          poll,
-          analytics,
-          systemProgram: SYSTEM_PROGRAM_ID,
-        })
-        .signers([user1])
-        .rpc()
-        .then(confirmTx)
-    })());
-  });
+  // it("user1 tries to execute poll 0 before end of voting period", async () => {
+  //   await assert.rejects((async () => {
+  //     await program.methods.pollExecute()
+  //       .accountsStrict({
+  //         owner: user1.publicKey,
+  //         lock,
+  //         poll,
+  //         analytics,
+  //         systemProgram: SYSTEM_PROGRAM_ID,
+  //       })
+  //       .signers([user1])
+  //       .rpc()
+  //       .then(confirmTx)
+  //   })());
+  // });
 
-  it("user1 execute poll 0 after end of voting period", async () => {
-    setTimeout(async () =>
-      await program.methods.pollExecute()
-        .accountsStrict({
-          owner: user1.publicKey,
-          lock,
-          poll,
-          analytics,
-          systemProgram: SYSTEM_PROGRAM_ID,
-        })
-        .signers([user1])
-        .rpc()
-        .then(confirmTx)
-        .then(async () => {
-          console.log("NOW IN SEASON 2");
-          const debug = await program.account.poll.fetch(poll);
-          console.log(debug);
-          const dg = await program.account.lock.fetch(lock);
-          console.log(dg);
-        })
-      , 16000);
-  }).timeout(17000);
+  // it("user1 execute poll 0 after end of voting period", async () => {
+  //   setTimeout(async () =>
+  //     await program.methods.pollExecute()
+  //       .accountsStrict({
+  //         owner: user1.publicKey,
+  //         lock,
+  //         poll,
+  //         analytics,
+  //         systemProgram: SYSTEM_PROGRAM_ID,
+  //       })
+  //       .signers([user1])
+  //       .rpc()
+  //       .then(confirmTx)
+  //       .then(async () => {
+  //         console.log("NOW IN SEASON 2");
+  //         const debug = await program.account.poll.fetch(poll);
+  //         console.log(debug);
+  //         const dg = await program.account.lock.fetch(lock);
+  //         console.log(dg);
+  //       })
+  //     , 16000);
+  // }).timeout(17000);
 
-  it("user1 deactivate his staked deposits", async () => {
-    await program.methods.stakeDeactivate()
-      .accountsStrict({
-        owner: user1.publicKey,
-        user: user1Pda,
-        lock,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user1])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.user.fetch(user1Pda);
-        console.log(debug);
-      });
-  });
+  // it("user1 deactivate his staked deposits", async () => {
+  //   await program.methods.stakeDeactivate()
+  //     .accountsStrict({
+  //       owner: user1.publicKey,
+  //       user: user1Pda,
+  //       lock,
+  //       analytics,
+  //       systemProgram: SYSTEM_PROGRAM_ID,
+  //     })
+  //     .signers([user1])
+  //     .rpc()
+  //     .then(confirmTx)
+  //     .then(async () => {
+  //       const debug = await program.account.user.fetch(user1Pda);
+  //       console.log(debug);
+  //     });
+  // });
 
-  it("user1 claim his deactivated staked deposits", async () => {
-    setTimeout(async () => {
-      await program.methods.stakeClaim()
-        .accountsStrict({
-          owner: user1.publicKey,
-          auth,
-          lock,
-          user: user1Pda,
-          signerAta: user1Ata.address,
-          mint,
-          vault: user1Vault,
-          analytics,
-          systemProgram: SYSTEM_PROGRAM_ID,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-        })
-        .signers([user1])
-        .rpc()
-        .then(confirmTx);
-    }, 7000)
-  }).timeout(8000);
+  // it("user1 claim his deactivated staked deposits", async () => {
+  //   setTimeout(async () => {
+  //     await program.methods.stakeClaim()
+  //       .accountsStrict({
+  //         owner: user1.publicKey,
+  //         auth,
+  //         lock,
+  //         user: user1Pda,
+  //         signerAta: user1Ata.address,
+  //         mint,
+  //         vault: user1Vault,
+  //         analytics,
+  //         systemProgram: SYSTEM_PROGRAM_ID,
+  //         tokenProgram: TOKEN_PROGRAM_ID,
+  //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  //       })
+  //       .signers([user1])
+  //       .rpc()
+  //       .then(confirmTx);
+  //   }, 7000)
+  // }).timeout(8000);
 
-  it("rejects : user1 tries claim twice his deactivated staked deposits", async () => {
-    setTimeout(async () => {
-      try {
-        await program.methods.stakeClaim()
-          .accountsStrict({
-            owner: user1.publicKey,
-            auth,
-            lock,
-            user: user1Pda,
-            signerAta: user1Ata.address,
-            mint,
-            vault: user1Vault,
-            analytics,
-            systemProgram: SYSTEM_PROGRAM_ID,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-          })
-          .signers([user1])
-          .rpc()
-          .then(confirmTx)
-      } catch (error) {
-        console.log(error.error.errorCode.code)
-        assert.strictEqual("NoDepositsReadyToClaimForThisUserInThisLocker", error.error.errorCode.code)
-      }
-    }, 8000);
-  }).timeout(9000);
+  // it("rejects : user1 tries claim twice his deactivated staked deposits", async () => {
+  //   setTimeout(async () => {
+  //     try {
+  //       await program.methods.stakeClaim()
+  //         .accountsStrict({
+  //           owner: user1.publicKey,
+  //           auth,
+  //           lock,
+  //           user: user1Pda,
+  //           signerAta: user1Ata.address,
+  //           mint,
+  //           vault: user1Vault,
+  //           analytics,
+  //           systemProgram: SYSTEM_PROGRAM_ID,
+  //           tokenProgram: TOKEN_PROGRAM_ID,
+  //           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  //         })
+  //         .signers([user1])
+  //         .rpc()
+  //         .then(confirmTx)
+  //     } catch (error) {
+  //       console.log(error.error.errorCode.code)
+  //       assert.strictEqual("NoDepositsReadyToClaimForThisUserInThisLocker", error.error.errorCode.code)
+  //     }
+  //   }, 8000);
+  // }).timeout(9000);
 
-  it("user1 claim his asr rewards for season 1", async () => {
-    setTimeout(async () => {
-      await program.methods.asrClaim()
-        .accountsStrict({
-          owner: user1.publicKey,
-          user: user1Pda,
-          auth,
-          lock,
-          signerAta: user1Ata.address,
-          vault,
-          mint,
-          analytics,
-          systemProgram: SYSTEM_PROGRAM_ID,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-        })
-        .signers([user1])
-        .rpc()
-        .then(confirmTx)
-        .then(async () => {
-          const debug = await program.account.user.fetch(user1Pda);
-          console.log(debug)
-        });
-    }, 18000)
-  }).timeout(19000);
+  // it("user1 claim his asr rewards for season 1", async () => {
+  //   setTimeout(async () => {
+  //     await program.methods.asrClaim()
+  //       .accountsStrict({
+  //         owner: user1.publicKey,
+  //         user: user1Pda,
+  //         auth,
+  //         lock,
+  //         signerAta: user1Ata.address,
+  //         vault,
+  //         mint,
+  //         analytics,
+  //         systemProgram: SYSTEM_PROGRAM_ID,
+  //         tokenProgram: TOKEN_PROGRAM_ID,
+  //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  //       })
+  //       .signers([user1])
+  //       .rpc()
+  //       .then(confirmTx)
+  //       .then(async () => {
+  //         const debug = await program.account.user.fetch(user1Pda);
+  //         console.log(debug)
+  //       });
+  //   }, 18000)
+  // }).timeout(19000);
 
-  it("reject : user1 tries claim twice his asr rewards for season 1", async () => {
-    setTimeout(async () => {
-      try {
-        await program.methods.asrClaim()
-          .accountsStrict({
-            owner: user1.publicKey,
-            user: user1Pda,
-            auth,
-            lock,
-            signerAta: user1Ata.address,
-            vault,
-            mint,
-            analytics,
-            systemProgram: SYSTEM_PROGRAM_ID,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-          })
-          .signers([user1])
-          .rpc()
-          .then(confirmTx)
-      } catch (error) {
-        console.log(error.error.errorCode.code)
-        assert.strictEqual("UserAlreadyClaimedThis", error.error.errorCode.code)
-      }
-    }, 20000);
-  }).timeout(21000);
+  // it("reject : user1 tries claim twice his asr rewards for season 1", async () => {
+  //   setTimeout(async () => {
+  //     try {
+  //       await program.methods.asrClaim()
+  //         .accountsStrict({
+  //           owner: user1.publicKey,
+  //           user: user1Pda,
+  //           auth,
+  //           lock,
+  //           signerAta: user1Ata.address,
+  //           vault,
+  //           mint,
+  //           analytics,
+  //           systemProgram: SYSTEM_PROGRAM_ID,
+  //           tokenProgram: TOKEN_PROGRAM_ID,
+  //           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  //         })
+  //         .signers([user1])
+  //         .rpc()
+  //         .then(confirmTx)
+  //     } catch (error) {
+  //       console.log(error.error.errorCode.code)
+  //       assert.strictEqual("UserAlreadyClaimedThis", error.error.errorCode.code)
+  //     }
+  //   }, 20000);
+  // }).timeout(21000);
 
   after(async () => {
     setTimeout(async () => {

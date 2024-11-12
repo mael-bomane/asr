@@ -3,7 +3,6 @@
 target
 **/*.rs.bk
 **/*.crates
-app
 **/node_modules
 test-ledger
 .yarn

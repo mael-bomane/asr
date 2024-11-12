@@ -7,19 +7,19 @@ import { Progress } from "./ui/progress"
 import type { FC } from "react"
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { useRouter } from "next/navigation";
+import { Poll } from "@/types";
 
 type Props = {
-  // proposals: Proposal[]
-  monolith: string
+  proposals: Poll[]
 }
 
-export const Proposals: FC<Props> = ({ monolith }) => {
+export const Proposals: FC<Props> = ({ proposals }) => {
   const router = useRouter();
   return (
     <div className="w-full bg-[#000] text-base-content space-y-4 rounded-xl">
       <div className="px-6 space-y-2 py-4 w-full flex justify-between">
         <h3 className="font-bold text-lg lg:text-3xl tracking-tight">
-          {monolith} proposals
+          proposals
         </h3>
         <input />
       </div>
@@ -36,49 +36,7 @@ export const Proposals: FC<Props> = ({ monolith }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {[
-            {
-              title: "MIP 3",
-              text: "tokenomics",
-              pda: "qlskdjqklsjdlkqsjd",
-              votes: 12,
-              createdAt: "24 October 2024 - 4:20pm",
-              endsAt: "25 October 2024 - 4:20pm",
-              choices: [{
-                id: 0,
-                title: "yes"
-              }, {
-                id: 1, title: "no"
-              }],
-            },
-            {
-              title: "MIP 2",
-              text: "security audit",
-              pda: "qlskdjqklsjdlkqsjd",
-              votes: 1,
-              createdAt: "24 October 2024 - 4:20pm",
-              endsAt: "25 October 2024 - 4:20pm",
-              choices: [{
-                id: 0,
-                title: "yes"
-              }, {
-                id: 1, title: "no"
-              }],
-            },
-            {
-              title: "MIP 1",
-              text: "deploy to mainnet",
-              votes: 48,
-              createdAt: "24 October 2024 - 4:20pm",
-              endsAt: "25 October 2024 - 4:20pm",
-              choices: [{
-                id: 0,
-                title: "yes"
-              }, {
-                id: 1, title: "no"
-              }],
-            },
-          ].map((proposal, i) => (
+          {proposals.length > 0 && proposals.map((proposal, i) => (
             <TableRow key={i}
               onClick={() => {
                 router.push(`/proposal/${proposal.pda}`)
