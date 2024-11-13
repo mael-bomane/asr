@@ -146,7 +146,7 @@ const Hero = () => {
             Active Staking Rewards,<br />
             Incentivized Vote.
           </h1>
-          <Link href="/create" className="btn btn- btn-wide btn-primary">
+          <Link href="/monolith/create" className="btn btn- btn-wide btn-primary">
             Create Locker
           </Link>
         </div>

@@ -9,7 +9,7 @@ import { program } from "@/constants/program";
 export const LockNew = async (
   signer: PublicKey,
   mint: PublicKey,
-  signerAta: Address,
+  signerAta: PublicKey,
   config: number,
   votingPeriod: BN,
   lockDuration: BN,
@@ -18,6 +18,16 @@ export const LockNew = async (
   min: BN,
   name: string
 ) => {
+  console.log("signer", signer.toString());
+  console.log("mint", mint.toString());
+  console.log("signerAta", signerAta.toString());
+  console.log("config", config);
+  console.log("votingPeriod", votingPeriod.toNumber());
+  console.log("lockDuration", lockDuration.toNumber());
+  console.log("threshold", threshold);
+  console.log("quorum", quorum);
+  console.log("min", min.toNumber());
+  console.log("name", name);
 
   const analytics = PublicKey.findProgramAddressSync(
     [Buffer.from("analytics")],
@@ -48,8 +58,10 @@ export const LockNew = async (
   //  quorum: u8,
   //  min: u64,
   //  name: String,
-  //@ts-ignore
-  return program.methods.lockNew(config, votingPeriod, lockDuration, threshold, quorum, min, name)
+  // await program.methods.lockNew(0, day, new BN(0), 51, 25, min, "SOON")
+  // @ts-ignore
+  //return await program.methods.lockNew(0, new BN(86400), new BN(0), 51, 25, min, "SOON")
+  return await program.methods.lockNew(config, votingPeriod, lockDuration, threshold, quorum, min, name)
     .accountsStrict({
       signer,
       auth,

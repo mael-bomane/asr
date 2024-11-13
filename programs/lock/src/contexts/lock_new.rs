@@ -107,6 +107,7 @@ impl<'info> LockNew<'info> {
         lock.voting_period = voting_period;
         lock.lock_duration = lock_duration;
         lock.threshold = threshold;
+        lock.quorum = quorum;
         lock.min = min;
         lock.total_deposits = 0;
         lock.approved = 0;

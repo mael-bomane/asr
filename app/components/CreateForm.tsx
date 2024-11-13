@@ -3,13 +3,12 @@
 import Image from "next/image";
 import { useContext, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { PublicKey, SystemProgram, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
-import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
+import { getAssociatedTokenAddress, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "react-hot-toast";
 import { BN } from "bn.js";
 
-import { MonolithContext } from "./MonolithContextProvider";
 import { Slider } from "./ui/slider";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -55,11 +54,12 @@ export const CreateForm: FC = () => {
       try {
         setLoading(true)
         const mint = new PublicKey(inputs.mint);
+        console.log("mint : ", mint.toString());
         const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
         console.log("signer ata : ", signerAta.toString());
         // signer: PublicKey,
         // mint: PublicKey,
-        // signerAta: Address,
+        // signerAta: PublicKey,
         // config: number,
         // votingPeriod: BN,
         // lockDuration: BN,
@@ -68,27 +68,38 @@ export const CreateForm: FC = () => {
         // min: BN,
         // name: string
 
-        const instruction = await LockNew(publicKey, mint, signerAta, inputs.config, new BN(inputs.votingPeriod), new BN(inputs.lockDuration), inputs.threshold, inputs.quorum, new BN(inputs.min), inputs.name);
+        const instruction = await LockNew(
+          publicKey,
+          mint,
+          signerAta,
+          inputs.config ?? 0,
+          new BN(inputs.votingPeriod ? (inputs.votingPeriod / 1000) : 86400),
+          new BN(inputs.lockDuration ? inputs.lockDuration : new BN(0)),
+          inputs.threshold,
+          inputs.quorum ?? 25,
+          new BN(inputs.min * 1 * 10 ** 9),
+          inputs.name
+        );
 
 
-        // Get the lates block hash to use on our transaction and confirmation
         let latestBlockhash = await connection.getLatestBlockhash()
 
-        // Create a new TransactionMessage with version and compile it to version 0
         const messageV0 = new TransactionMessage({
           payerKey: publicKey,
           recentBlockhash: latestBlockhash.blockhash,
           instructions: [instruction],
         }).compileToV0Message();
 
-        // Create a new VersionedTransacction to support the v0 message
         const transation = new VersionedTransaction(messageV0)
 
-        // Send transaction and await for signature
         signature = await sendTransaction(transation, connection);
 
-        // Await for confirmation
-        await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
+        try {
+          await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
+        } catch (error) {
+          console.log(error)
+          toast.error(`error :\n ${error}`);
+        }
 
         console.log(signature);
 
@@ -98,6 +109,7 @@ export const CreateForm: FC = () => {
         console.log(error);
 
         setLoading(false);
+        toast.error(`error :\n ${error}`);
       }
 
     } else {
@@ -119,19 +131,15 @@ export const CreateForm: FC = () => {
   };
 
   return (
-    <form className="w-full md:max-w-7xl grow w-full mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-[#000] text-base-content rounded-xl"
+    <form className="w-full md:max-w-7xl grow w-full mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-base-100 text-base-content rounded-xl"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="flex justify-center items-center">
-        <Image src={"/sith.gif"} width={33} height={33} alt="pepe wizard" className="mr-4" unoptimized />
-        <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">
-          create a monolith
-        </h1>
-        <Image src={"/sith.gif"} width={33} height={33} alt="pepe wizard" className="ml-4 transform -scale-x-100" unoptimized />
-      </div>
+      <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">
+        configure your monolith
+      </h1>
       <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
 
-        <Label htmlFor="time" className="md:text-xl font-extrabold mt-4">monolith type : </Label>
+        {/*<Label htmlFor="time" className="md:text-xl font-extrabold mt-4">monolith type : </Label>
 
         <RadioGroup
           className="flex w-full items-center justify-center"
@@ -148,7 +156,7 @@ export const CreateForm: FC = () => {
             <RadioGroupItem value={'1'} id="FourtyEightHours" />
             <Label htmlFor="config" className="self-start md:text-xl font-extrabold">voting escrow</Label>
           </div>
-        </RadioGroup>
+        </RadioGroup>*/}
         <Label htmlFor="name" className="self-start md:text-xl font-extrabold">monolith name : {errors.name && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
 
         <Input placeholder="ex : monolith.haus" id="name" type="text"
@@ -162,11 +170,11 @@ export const CreateForm: FC = () => {
           id="mint"
           {...register("mint", { required: true })}
         />
-        <Label htmlFor="threshold" className="self-start md:text-xl font-extrabold">min. tokens to create poll {errors.min && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
+        <Label htmlFor="min" className="self-start md:text-xl font-extrabold">min. tokens to create poll {errors.min && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
         <Input
           type="number"
           placeholder="ex : 100"
-          id="minPollTokens"
+          id="min"
           {...register("min", { required: true })}
         />
 
@@ -178,6 +186,7 @@ export const CreateForm: FC = () => {
             setThreshold(e[0])
             setValue('threshold', e[0])
           }}
+          {...register("threshold", { required: true })}
           min={50}
           max={100}
           step={1}
@@ -185,19 +194,20 @@ export const CreateForm: FC = () => {
         {errors.threshold && <div className="text-error">this field is required</div>}
         <Label htmlFor="votingPeriod" className="self-start md:text-xl font-extrabold">voting period : {getDuration(votingPeriod).value} {getDuration(votingPeriod).unit}</Label>
         <Slider id="votingPeriod"
-          defaultValue={[votingPeriod]}
+          defaultValue={[86400 * 1000]}
           onValueChange={(e) => {
             console.log(e[0]);
             setVotingPeriod(e[0])
             setValue('votingPeriod', e[0])
           }}
+          {...register("votingPeriod", { required: true })}
           min={86400 * 1000}
           max={86400 * 7 * 1000}
           step={86400 * 1000}
         />
         {errors.votingPeriod && <div className="text-error">this field is required</div>}
       </div>
-      <Button className="cursor-pointer" size="lg" type="submit">summon</Button>
+      <Button className="cursor-pointer mt-8" size="lg" type="submit">create</Button>
     </form>
   );
 }

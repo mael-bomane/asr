@@ -15,19 +15,18 @@ export async function generateMetadata({
   params: { address: string };
 }) {
 
-
   return getSEOTags({
-    title: `/monolith/${params.address}`,
-    description: `/monolith/${params.address}`,
-    canonicalUrlRelative: `/monolith/${params.address}`,
+    title: `/proposal/${params.address}`,
+    description: `/proposal/${params.address}`,
+    canonicalUrlRelative: `/proposal/${params.address}`,
     extraTags: {
       openGraph: {
-        title: `/monolith/${params.address}`,
-        description: `/monolith/${params.address}`,
-        url: `/monolith/${params.address}`,
+        title: `/proposal/${params.address}`,
+        description: `/proposal/${params.address}`,
+        url: `/proposal/${params.address}`,
         images: [
           {
-            url: `/monolith/${params.address}.png`,
+            url: `/proposal/${params.address}.png`,
             width: 1200,
             height: 660,
           },

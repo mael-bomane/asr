@@ -233,85 +233,37 @@ describe("lock", () => {
     }
   });
 
-  // it("initialize analytics", async () => {
-  //   if (rpc == "https://api.devnet.solana.com") {
-  //     await program.methods.initialize()
-  //       .accountsStrict({
-  //         signer: wallet.publicKey,
-  //         auth,
-  //         analytics,
-  //         systemProgram: SYSTEM_PROGRAM_ID
-  //       })
-  //       .signers([wallet.payer])
-  //       .rpc()
-  //       .then(confirmTx);
-  //   } else {
-  //     await program.methods.initialize()
-  //       .accountsStrict({
-  //         signer: user1.publicKey,
-  //         auth,
-  //         analytics,
-  //         systemProgram: SYSTEM_PROGRAM_ID
-  //       })
-  //       .signers([user1])
-  //       .rpc()
-  //       .then(confirmTx);
-  //   }
-  // });
+  it("initialize analytics", async () => {
+    if (rpc == "https://api.devnet.solana.com") {
+      await program.methods.initialize()
+        .accountsStrict({
+          signer: wallet.publicKey,
+          auth,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID
+        })
+        .signers([wallet.payer])
+        .rpc()
+        .then(confirmTx);
+    } else {
+      await program.methods.initialize()
+        .accountsStrict({
+          signer: user1.publicKey,
+          auth,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID
+        })
+        .signers([user1])
+        .rpc()
+        .then(confirmTx);
+    }
+  });
 
-  // it("create an active staking rewards locker, min poll threshold 50% , min. tokens to start poll 100", async () => {
-  //   //   // await program.methods.daoCreate({ twentyFourHours: {} }, 51, new BN(100), "Monolith DAO")
-  //   if (rpc == "https://api.devnet.solana.com") {
-  //     console.log("running on devnet");
-  //     await program.methods.lockerNew(0, week, new BN(0), 51, min, "SOON")
-  //       .accountsStrict({
-  //         signer: wallet.publicKey,
-  //         auth,
-  //         locker,
-  //         signerAta: signerAta.address,
-  //         vault,
-  //         mint,
-  //         analytics,
-  //         systemProgram: SYSTEM_PROGRAM_ID,
-  //         tokenProgram: TOKEN_PROGRAM_ID,
-  //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-  //       })
-  //       .signers([wallet.payer])
-  //       .rpc()
-  //       .then(confirmTx)
-  //       .then(async () => {
-  //         const debug = await program.account.locker.fetch(locker);
-  //         console.log(debug)
-  //       });
-  //   } else {
-  //     console.log("running on localnet");
-  //     await program.methods.lockerNew(0, day, new BN(0), 51, min, "SOON")
-  //       .accountsStrict({
-  //         signer: user1.publicKey,
-  //         auth,
-  //         locker,
-  //         signerAta: user1Ata.address,
-  //         vault,
-  //         mint,
-  //         analytics,
-  //         systemProgram: SYSTEM_PROGRAM_ID,
-  //         tokenProgram: TOKEN_PROGRAM_ID,
-  //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-  //       })
-  //       .signers([user1])
-  //       .rpc()
-  //       .then(confirmTx)
-  //       .then(async () => {
-  //         const debug = await program.account.locker.fetch(locker);
-  //         console.log(debug)
-  //       });
-  //   }
-  // });
-
-  it("create voting escrow locker, lock time 1 year, min poll threshold 51% , min. tokens to start poll 100", async () => {
+  it("create an active staking rewards locker, min poll threshold 50% , min. tokens to start poll 100", async () => {
+    //   // await program.methods.daoCreate({ twentyFourHours: {} }, 51, new BN(100), "Monolith DAO")
     if (rpc == "https://api.devnet.solana.com") {
       console.log("running on devnet");
-      await program.methods.lockNew(0, day, new BN(0), 51, 25, min, "Monolith")
+      await program.methods.lockNew(0, week, new BN(0), 51, 25, min, "SOON")
         .accountsStrict({
           signer: wallet.publicKey,
           auth,
@@ -333,11 +285,7 @@ describe("lock", () => {
         });
     } else {
       console.log("running on localnet");
-      // voting escrow
-      // await program.methods.lockerNew(1, day, new BN(86400 * 7 * 52), 51, min, "SOON")
-      // active staking rewards
-      // await program.methods.lockNew(0, day, new BN(0), 51, 25, min, "SOON")
-      await program.methods.lockNew(0, new BN(5), new BN(0), 51, 25, min, "SOON")
+      await program.methods.lockNew(0, day, new BN(0), 51, 25, min, "SOON")
         .accountsStrict({
           signer: user1.publicKey,
           auth,
@@ -359,6 +307,58 @@ describe("lock", () => {
         });
     }
   });
+
+  // it("create voting escrow locker, lock time 1 year, min poll threshold 51% , min. tokens to start poll 100", async () => {
+  //   if (rpc == "https://api.devnet.solana.com") {
+  //     console.log("running on devnet");
+  //     await program.methods.lockNew(0, day, new BN(0), 51, 25, min, "Monolith")
+  //       .accountsStrict({
+  //         signer: wallet.publicKey,
+  //         auth,
+  //         lock,
+  //         signerAta: signerAta.address,
+  //         vault,
+  //         mint,
+  //         analytics,
+  //         systemProgram: SYSTEM_PROGRAM_ID,
+  //         tokenProgram: TOKEN_PROGRAM_ID,
+  //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  //       })
+  //       .signers([wallet.payer])
+  //       .rpc()
+  //       .then(confirmTx)
+  //       .then(async () => {
+  //         const debug = await program.account.lock.fetch(lock);
+  //         console.log(debug)
+  //       });
+  //   } else {
+  //     console.log("running on localnet");
+  //     // voting escrow
+  //     // await program.methods.lockerNew(1, day, new BN(86400 * 7 * 52), 51, min, "SOON")
+  //     // active staking rewards
+  //     // await program.methods.lockNew(0, day, new BN(0), 51, 25, min, "SOON")
+  //     await program.methods.lockNew(0, new BN(5), new BN(0), 51, 25, min, "SOON")
+  //       .accountsStrict({
+  //         signer: user1.publicKey,
+  //         auth,
+  //         lock,
+  //         signerAta: user1Ata.address,
+  //         vault,
+  //         mint,
+  //         analytics,
+  //         systemProgram: SYSTEM_PROGRAM_ID,
+  //         tokenProgram: TOKEN_PROGRAM_ID,
+  //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  //       })
+  //       .signers([user1])
+  //       .rpc()
+  //       .then(confirmTx)
+  //       .then(async () => {
+  //         const debug = await program.account.lock.fetch(lock);
+  //         console.log(debug)
+  //       });
+  //   }
+  // });
 
   // it("user1 deposit asr tokens", async () => {
   //   await program.methods.asrDeposit(min)
