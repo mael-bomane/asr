@@ -56,7 +56,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
         const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
         console.log("signer ata : ", signerAta.toString());
 
-        const instruction = await registerIx(publicKey, new PublicKey(address), mint);
+        const instruction = await registerIx(publicKey, new PublicKey(address));
 
         let latestBlockhash = await connection.getLatestBlockhash()
 
@@ -196,9 +196,9 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
             className="w-full bg-[#121212] p-8 flex flex-col mt-4 rounded-xl"
           >
             <div className="w-full flex">
-              <div className="flex justify-around items-center text-xs w-[25%]">
+              <div className="flex justify-around items-center text-xs w-[33%]">
                 <div
-                  className={cn("cursor-pointer", {
+                  className={cn("cursor-pointer  text-lg", {
                     "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold": isStake
                   })}
                   onClick={() => {
@@ -212,7 +212,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                   stake
                 </div>
                 <div
-                  className={cn("cursor-pointer", {
+                  className={cn("cursor-pointer text-lg", {
                     "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold": isUnStake
                   })}
                   onClick={() => {

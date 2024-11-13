@@ -13,6 +13,7 @@ import { MONOLITH_ID, program, PROGRAM_ID } from "@/constants";
 import { VotingPower } from "./VotingPower";
 import { PublicKey } from "@solana/web3.js";
 import { ellipsis } from "@/lib/utils";
+import { Card, CardDescription, CardTitle } from "./ui/card";
 
 const Hero = () => {
 
@@ -61,7 +62,7 @@ const Hero = () => {
             "confirmed",
             TOKEN_PROGRAM_ID,
           );
-          console.log(metadata)
+          console.log("metadata : ", metadata)
           res.seasons.map((season: any, index: number) => {
             console.log(`season ${index}`, season)
           });
@@ -163,7 +164,27 @@ const Hero = () => {
               >
                 {ellipsis(lock.creator.toString())}
               </Link>
-              </h2></>
+              </h2>
+              <div className="md:w-full max-w-4xl flex justify-center items-center gap-2 md:gap-4">
+                <Card
+                  className={`flex-1 p-1 md:p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
+                >
+                  <CardTitle className="text-xs px-2 text-center text-success font-semibold">Total Staked MONO</CardTitle>
+                  <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
+                    //@ts-ignore
+                    lock && tokenInfo && lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals)
+                  } MONO</CardDescription>
+                </Card>
+                <Card
+                  className={`flex-1 p-1 md:p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
+                >
+                  <CardTitle className="text-xs px-2 text-center text-success font-semibold">Unique Addresses</CardTitle>
+                  <CardDescription className="text-xs px-2 text-center text-white font-semibold">
+                    {users && users.length > 0 ? users.length : 0}
+                  </CardDescription>
+                </Card>
+              </div>
+            </>
           ) : (<></>)}
           <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
           <Proposals proposals={proposals} lock={lock} />

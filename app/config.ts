@@ -2,7 +2,7 @@ import themes from "daisyui/src/theming/themes";
 import { ConfigProps } from "./types/config";
 
 const config = {
-  appName: "monolith",
+  appName: "Monolith",
   appDescription: "active staking reward & voting escrow",
   github: "",
   discord: "",

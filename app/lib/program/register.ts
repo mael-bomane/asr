@@ -10,7 +10,6 @@ import { program } from "@/constants/program";
 export const registerIx = async (
   owner: PublicKey,
   lock: PublicKey,
-  mint: PublicKey,
 ) => {
 
   const analytics = PublicKey.findProgramAddressSync(
