@@ -36,7 +36,7 @@ export const proposalNewIx = async (
 
 
   // @ts-ignore
-  return await program.methods.pollNew(amount)
+  return await program.methods.pollNew(title, choices)
     .accountsStrict({
       owner,
       poll,
