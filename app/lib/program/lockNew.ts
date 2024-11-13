@@ -1,12 +1,10 @@
-import { Address, BN } from "@coral-xyz/anchor";
+import { BN } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 import { program } from "@/constants/program";
 
-
-
-export const LockNew = async (
+export const lockNewIx = async (
   signer: PublicKey,
   mint: PublicKey,
   signerAta: PublicKey,
@@ -58,9 +56,7 @@ export const LockNew = async (
   //  quorum: u8,
   //  min: u64,
   //  name: String,
-  // await program.methods.lockNew(0, day, new BN(0), 51, 25, min, "SOON")
   // @ts-ignore
-  //return await program.methods.lockNew(0, new BN(86400), new BN(0), 51, 25, min, "SOON")
   return await program.methods.lockNew(config, votingPeriod, lockDuration, threshold, quorum, min, name)
     .accountsStrict({
       signer,

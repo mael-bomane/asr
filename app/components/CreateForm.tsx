@@ -1,10 +1,9 @@
 "use client"
 
-import Image from "next/image";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
-import { getAssociatedTokenAddress, getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "react-hot-toast";
 import { BN } from "bn.js";
@@ -13,11 +12,10 @@ import { Slider } from "./ui/slider";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 
 import type { FC } from "react";
 import { useRouter } from "next/navigation";
-import { LockNew } from "@/lib/program/new";
+import { lockNewIx } from "@/lib/program/lockNew";
 
 export const CreateForm: FC = () => {
   const { publicKey, sendTransaction } = useWallet();
@@ -68,7 +66,7 @@ export const CreateForm: FC = () => {
         // min: BN,
         // name: string
 
-        const instruction = await LockNew(
+        const instruction = await lockNewIx(
           publicKey,
           mint,
           signerAta,
