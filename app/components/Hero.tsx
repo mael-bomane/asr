@@ -153,7 +153,7 @@ const Hero = () => {
         <Link href="/monolith/create" className="btn btn- btn-wide btn-primary">
           Create Locker
         </Link>
-        <RewardsList lock={lock} setIsOpen={setIsOpen} />
+        {lock && <RewardsList lock={lock} setIsOpen={setIsOpen} />}
       </div>
       <div className="lg:w-full flex flex-col justify-center items-center space-y-4">
         {lock ? (
