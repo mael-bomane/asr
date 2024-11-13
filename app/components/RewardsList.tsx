@@ -2,6 +2,8 @@ import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import type { FC } from "react"
 import type { Lock } from "@/types";
 import { useWallet } from "@solana/wallet-adapter-react";
+import Link from "next/link";
+import { ellipsis } from "@/lib/utils";
 
 type Props = {
   lock: Lock
@@ -26,11 +28,13 @@ export const RewardsList: FC<Props> = ({ lock, setIsOpen }) => {
         <div className="w-full flex justify-between">
           <div className="w-full flex flex-col text-center">
             {lock.seasons[lock.seasons.length - 1].asr.map((token: any, index: number) => (
-              <div className="font-extrabold text-success" key={index}>
-                {token.amount.toNumber()} {token.mint.toString()}
+              <div className="w-full" key={index}>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold">
+                  {new Intl.NumberFormat().format(token.amount.toNumber() / (1 * 10 ** 6))}</span>{' '}
+                <Link href={`https://explorer.solana.com/address/${token.mint.toString()}`} className="underline">
+                  {ellipsis(token.mint.toString())}</Link>
               </div>
             ))}
-            <div className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold">1M MONO</div>
           </div>
         </div>
         <div className="w-full text-center text-sm font-semibold text-base-content mt-1">Next Claim: March (For the period of Nov - Fev)</div>

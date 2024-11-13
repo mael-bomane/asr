@@ -153,6 +153,7 @@ const Hero = () => {
         <Link href="/monolith/create" className="btn btn- btn-wide btn-primary">
           Create Locker
         </Link>
+        <RewardsList lock={lock} setIsOpen={setIsOpen} />
       </div>
       <div className="lg:w-full flex flex-col justify-center items-center space-y-4">
         {lock ? (
@@ -177,7 +178,7 @@ const Hero = () => {
                 <CardTitle className="text-sm px-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold">Total Voting Power</CardTitle>
                 <CardDescription className="text-sm px-2 text-center text-white font-semibold">{
                   //@ts-ignore
-                  lock && tokenInfo && lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals)
+                  lock && tokenInfo && new Intl.NumberFormat().format(lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals))
                 }</CardDescription>
               </Card>
               <Card
@@ -189,7 +190,6 @@ const Hero = () => {
                 </CardDescription>
               </Card>
             </div>
-            <RewardsList lock={lock} setIsOpen={setIsOpen} />
           </>
         ) : (<></>)}
         <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
