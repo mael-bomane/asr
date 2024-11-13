@@ -1,9 +1,11 @@
+import * as React from "react"
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import type { FC } from "react"
-import type { Lock } from "@/types";
 import { useWallet } from "@solana/wallet-adapter-react";
 import Link from "next/link";
 import { ellipsis } from "@/lib/utils";
+
+import type { FC } from "react"
+import type { Lock } from "@/types";
 
 type Props = {
   lock: Lock
