@@ -17,7 +17,7 @@ import type { FC } from "react";
 import { useRouter } from "next/navigation";
 import { lockNewIx } from "@/lib/program/lockNew";
 
-export const CreateForm: FC = () => {
+export const CreateLockForm: FC = () => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const router = useRouter();

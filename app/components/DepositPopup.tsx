@@ -1,3 +1,4 @@
+import * as React from "react"
 import { useState } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { toast } from "react-hot-toast";
@@ -25,7 +26,6 @@ export const DepositPopup: FC<Props> = ({ isOpen, setIsOpen }) => {
   const { connection } = useConnection();
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
 
   type Inputs = {
     mint: string

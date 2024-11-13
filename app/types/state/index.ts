@@ -1,7 +1,7 @@
-import type { PublicKey } from "@solana/web3.js"
 
-import { IDL } from '@/constants'
-import { IdlAccounts } from "@coral-xyz/anchor";
+import { BN, IdlAccounts } from "@coral-xyz/anchor";
+import type { PublicKey } from "@solana/web3.js";
+import type { IDL } from '@/constants';
 
 export type Lock = IdlAccounts<IDL>["Lock"];
 export type User = IdlAccounts<IDL>["User"];
@@ -11,5 +11,11 @@ export type Analytics = IdlAccounts<IDL>["Analytics"];
 export type TokenInfo = {
   mint: PublicKey,
   decimals: number
-}
+};
+
+export type ProposalChoice = {
+  id: number
+  votingPower: BN
+  title: string
+};
 
