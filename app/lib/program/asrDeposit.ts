@@ -6,13 +6,11 @@ import { program } from "@/constants/program";
 
 export const asrDepositIx = async (
   creator: PublicKey,
-  lock: PublicKey,
   mint: PublicKey,
   signerAta: PublicKey,
   amount: BN,
 ) => {
   console.log("creator", creator.toString());
-  console.log("lock", lock.toString());
   console.log("mint", mint.toString());
   console.log("signerAta", signerAta.toString());
   console.log("amount", amount.toNumber());
@@ -24,6 +22,12 @@ export const asrDepositIx = async (
 
   const auth = PublicKey.findProgramAddressSync(
     [Buffer.from("auth"), analytics.toBuffer()],
+    program.programId
+  )[0];
+
+  const lock = PublicKey.findProgramAddressSync(
+    // seeds = [b"lock", creator.key().as_ref(), mint.key().as_ref()]
+    [Buffer.from("lock"), creator.toBytes(), mint.toBytes()],
     program.programId
   )[0];
 

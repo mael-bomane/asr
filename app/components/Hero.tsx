@@ -13,7 +13,9 @@ import { MONOLITH_ID, program, PROGRAM_ID } from "@/constants";
 import { VotingPower } from "./VotingPower";
 import { PublicKey } from "@solana/web3.js";
 import { ellipsis } from "@/lib/utils";
-import { Card, CardDescription, CardTitle } from "./ui/card";
+import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
+import { RewardsList } from "./RewardsList";
+import { DepositPopup } from "./DepositPopup";
 
 const Hero = () => {
 
@@ -30,6 +32,8 @@ const Hero = () => {
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
 
   const [users, setUsers] = useState<User[] | null>(null);
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchMonolith = async () => {
@@ -140,56 +144,58 @@ const Hero = () => {
 
 
   return (
-    <section className="w-full mx-auto flex flex-col items-center justify-center px-8 py-8 text-base-content">
-      <section className="max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 py-8 text-base-content">
-        <div className="max-w-7xl w-full flex flex-col gap-10 lg:gap-14 items-center justify-center text-center">
-          <h1 className="flex flex-col justify-center items-center font-extrabold text-2xl lg:text-4xl md:-mb-4">
-            Active Staking Rewards,<br />
-            Incentivized Vote.
-          </h1>
-          <Link href="/monolith/create" className="btn btn- btn-wide btn-primary">
-            Create Locker
-          </Link>
-        </div>
-        <div className="lg:w-full flex flex-col justify-center items-center space-y-4">
-          {lock ? (
-            <>
-              <h1 className="text-3xl md:text-3xl font-extrabold flex">
-                {lock.name}
-              </h1>
-              <h2>created by <Link
-                href={`https://explorer.solana.com/address/${lock.creator.toString()}?cluster=devnet`}
-                className="underline"
-                target="_blank"
+    <section className="max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 py-8 text-base-content">
+      <div className="max-w-7xl w-full flex flex-col gap-10 lg:gap-14 items-center justify-center text-center">
+        <h1 className="flex flex-col justify-center items-center font-extrabold text-2xl lg:text-4xl md:-mb-4">
+          Active Staking Rewards,<br />
+          Incentivized Vote.
+        </h1>
+        <Link href="/monolith/create" className="btn btn- btn-wide btn-primary">
+          Create Locker
+        </Link>
+      </div>
+      <div className="lg:w-full flex flex-col justify-center items-center space-y-4">
+        {lock ? (
+          <>
+            <h1 className="text-3xl md:text-3xl font-extrabold flex">
+              {lock.name}
+            </h1>
+            <h2>created by <Link
+              href={`https://explorer.solana.com/address/${lock.creator.toString()}?cluster=devnet`}
+              className="underline"
+              target="_blank"
+            >
+              {ellipsis(lock.creator.toString())}
+            </Link>
+            </h2>
+
+
+            <div className="md:w-full max-w-4xl flex justify-center items-center gap-2 md:gap-4">
+              <Card
+                className={`flex-1 p-1 md:p-2 bg-base-100 text-base-content rounded-xl flex flex-col items-center justify-between mb-2`}
               >
-                {ellipsis(lock.creator.toString())}
-              </Link>
-              </h2>
-              <div className="md:w-full max-w-4xl flex justify-center items-center gap-2 md:gap-4">
-                <Card
-                  className={`flex-1 p-1 md:p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
-                >
-                  <CardTitle className="text-xs px-2 text-center text-success font-semibold">Total Staked MONO</CardTitle>
-                  <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
-                    //@ts-ignore
-                    lock && tokenInfo && lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals)
-                  } MONO</CardDescription>
-                </Card>
-                <Card
-                  className={`flex-1 p-1 md:p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
-                >
-                  <CardTitle className="text-xs px-2 text-center text-success font-semibold">Unique Addresses</CardTitle>
-                  <CardDescription className="text-xs px-2 text-center text-white font-semibold">
-                    {users && users.length > 0 ? users.length : 0}
-                  </CardDescription>
-                </Card>
-              </div>
-            </>
-          ) : (<></>)}
-          <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
-          <Proposals proposals={proposals} lock={lock} />
-        </div>
-      </section>
+                <CardTitle className="text-sm px-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold">Total Voting Power</CardTitle>
+                <CardDescription className="text-sm px-2 text-center text-white font-semibold">{
+                  //@ts-ignore
+                  lock && tokenInfo && lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals)
+                }</CardDescription>
+              </Card>
+              <Card
+                className={`flex-1 p-1 md:p-2 bg-base-100 text-base-content rounded-xl flex flex-col items-center justify-between mb-2`}
+              >
+                <CardTitle className="text-sm px-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-600 font-extrabold">Unique Addresses</CardTitle>
+                <CardDescription className="text-sm px-2 text-center text-white font-semibold">
+                  {users && users.length > 0 ? users.length : 0}
+                </CardDescription>
+              </Card>
+            </div>
+            <RewardsList lock={lock} setIsOpen={setIsOpen} />
+          </>
+        ) : (<></>)}
+        <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
+        <Proposals proposals={proposals} lock={lock} />
+      </div>
+      {isOpen && lock && <DepositPopup isOpen={isOpen} setIsOpen={setIsOpen} />}
     </section>
   );
 }

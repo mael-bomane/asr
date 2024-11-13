@@ -17,6 +17,8 @@ import Link from "next/link";
 import { ellipsis } from "@/lib/utils";
 
 import { TokenInfo } from "@/types";
+import { RewardsList } from "./RewardsList";
+import { DepositPopup } from "./DepositPopup";
 
 type Props = {
   address: string
@@ -39,6 +41,8 @@ export const Monolith: FC<Props> = ({ address }) => {
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
 
   const [proposals, setProposals] = useState<Poll[]>([]);
+
+  const [isOpen, setIsOpen] = useState<boolean>(false);
 
 
   useEffect(() => {
@@ -238,49 +242,15 @@ export const Monolith: FC<Props> = ({ address }) => {
 
             </div>
             <div className="w-full md:max-w-4xl flex flex-col md:flex-row items-center justify-center md:justify-around md:space-x-8">
-              <Card
-                className={`w-full p-8 bg-base-100 text-base-content rounded-xl flex flex-col items-center justify-center space-y-4`}
-              >
-                <CardTitle className="w-full px-2 text-center border-b pb-4">
-                  <div className="text-xl font-extrabold text-success tracking-wide">Active Staking Rewards</div>
-                  <div className="badge badge-outline badge-success p-4 mt-4">
-                    {/*@ts-ignore*/}
-                    For {new Date(lock.createdAt * 1000).toDateString().split(' ')[1]} - {new Date(lock.seasons[lock.seasons.length - 1].seasonEnd * 1000).toDateString().split(' ')[1]} {new Date(lock.seasons[lock.seasons.length - 1].seasonEnd * 1000).getFullYear()}
-                  </div>
-                </CardTitle>
-                <CardContent className="w-full">
-                  <div className="w-full flex flex-col">
-                    <div className="w-full flex justify-between">
-                      <div className="w-full flex flex-col text-left">
-                        {lock.seasons[lock.seasons.length - 1].asr.map((token: any, index: number) => (
-                          <div className="font-extrabold text-success" key={index}>
-                            {token.amount.toNumber()} {token.mint.toString()}
-                          </div>
-                        ))}
-                        <div className="font-extrabold text-success">50M MONO</div>
-                        <div className="text-xs">from MONO platform fees</div>
-                      </div>
-                      <div className="w-full flex flex-col">
-                        <div className="font-extrabold text-success">75% Platform Fees</div>
-                      </div>
-                    </div>
-                    <ul className="w-full text-xs my-4 list-disc">
-                      <li className="">Active Staking Rewards (ASR) are allocated once voted.</li>
-                      <li className="">ASR allocation = Your voting power / Total voting power.</li>
-                      <li className="">It doesn’t matter what you voted for, you’ll still get the rewards regardless of the results.</li>
-                    </ul>
-                  </div>
-                </CardContent>
-                <div className="text-sm font-semibold text-success mt-4">Next Claim: March (For the period of Nov - Fev)</div>
-                <CardDescription className="px-2 text-center">
-                </CardDescription>
-              </Card>
+              <RewardsList lock={lock} setIsOpen={setIsOpen} />
               <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} tokenInfo={tokenInfo} />
             </div>
             <Proposals proposals={proposals} lock={lock} />
 
           </>
         ) : <>not found</>
-      }    </section>
+      }
+      {isOpen && <DepositPopup isOpen={isOpen} setIsOpen={setIsOpen} />}
+    </section>
   )
 }

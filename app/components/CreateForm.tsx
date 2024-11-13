@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
-import { getAssociatedTokenAddressSync } from "@solana/spl-token";
+import { getAssociatedTokenAddressSync, getMint, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "react-hot-toast";
 import { BN } from "bn.js";
@@ -55,6 +55,13 @@ export const CreateForm: FC = () => {
         console.log("mint : ", mint.toString());
         const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
         console.log("signer ata : ", signerAta.toString());
+        const mintInfo = await getMint(
+          connection,
+          mint,
+          "confirmed",
+          TOKEN_PROGRAM_ID,
+        );
+        console.log("mint info : ", mintInfo);
         // signer: PublicKey,
         // mint: PublicKey,
         // signerAta: PublicKey,
@@ -75,7 +82,7 @@ export const CreateForm: FC = () => {
           new BN(inputs.lockDuration ? inputs.lockDuration : new BN(0)),
           inputs.threshold,
           inputs.quorum ?? 25,
-          new BN(inputs.min * 1 * 10 ** 9),
+          new BN(inputs.min * 1 * 10 ** mintInfo.decimals),
           inputs.name
         );
 
@@ -92,12 +99,7 @@ export const CreateForm: FC = () => {
 
         signature = await sendTransaction(transation, connection);
 
-        try {
-          await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
-        } catch (error) {
-          console.log(error)
-          toast.error(`error :\n ${error}`);
-        }
+        await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
 
         console.log(signature);
 
