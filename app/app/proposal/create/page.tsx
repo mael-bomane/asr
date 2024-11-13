@@ -1,13 +1,14 @@
-import Header from "@/components/Header";
 import { Suspense } from "react";
-import { CreateForm } from "@/components/CreateForm";
+import { CreateLockForm } from "@/components/CreateLockForm";
 
 export const dynamic = "force-dynamic";
 
 export default async function Summon() {
   return (
     <main className="w-full md:max-w-7xl mx-auto bg-base-100 text-base-content  flex flex-col items-center justify-center grow rounded-xl">
-      <CreateForm />
+      <Suspense>
+        <CreateLockForm />
+      </Suspense>
     </main >
   );
 }
