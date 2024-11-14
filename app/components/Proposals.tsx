@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FaChevronUp, FaChevronDown, FaPlusCircle } from "react-icons/fa";
-import { Card } from "./ui/card"
+import { FaPlusCircle } from "react-icons/fa";
 import { Progress } from "./ui/progress"
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
@@ -14,17 +13,18 @@ import { FaMagnifyingGlass } from "react-icons/fa6";
 
 type Props = {
   lock: Lock | null
+  address: string | null
   proposals: Poll[]
 }
 
-export const Proposals: FC<Props> = ({ lock, proposals }) => {
+export const Proposals: FC<Props> = ({ lock, address, proposals }) => {
   const router = useRouter();
   return (
     <div className="w-full bg-[#000] text-base-content space-y-4 rounded-xl">
       <div className="px-6 w-full flex items-center justify-between">
         <h3 className="font-bold text-lg lg:text-xl flex justify-center items-center space-x-4">
           <span>Proposals</span>
-          <Link href={`/proposal/create`} className="button"><FaPlusCircle className="w-5 h-5" /></Link>
+          <Link href={{ pathname: '/proposal/create', query: { address } }} className="button"><FaPlusCircle className="w-5 h-5" /></Link>
         </h3>
         <div className="flex justify-center items-center space-x-2">
           <FaMagnifyingGlass className="w-5 h-5" />

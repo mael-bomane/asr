@@ -1,15 +1,12 @@
 "use client"
 
-import Image from "next/image";
 import Link from "next/link";
 import { Proposals } from "./Proposals";
-import config from "@/config";
-import logo from "@/app/icon.png";
 import { useEffect, useState } from "react";
 import { Poll, TokenInfo, User, Lock } from "@/types";
 import { getMint, getTokenMetadata, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { MONOLITH_ID, program, PROGRAM_ID } from "@/constants";
+import { MONOLITH_ID, program } from "@/constants";
 import { VotingPower } from "./VotingPower";
 import { PublicKey } from "@solana/web3.js";
 import { ellipsis } from "@/lib/utils";
@@ -42,14 +39,22 @@ const Hero = () => {
     }
 
     fetchMonolith()
-      .then(async res => {
-        if (res) {
-          console.log(res);
-          setLock(res);
-          // Retrieve mint information
+      .then(async response => {
+        if (response) {
+          console.log(response);
+          setLock(response);
+          // @ts-ignore
+          // const monolithMap = response.map(({ account, publicKey }) => {
+          //   const result = account
+          //   account.pubkey = publicKey
+          //   return result
+          // })
+          // console.log('monoliths : ', monolithMap)
+          // setLock(monolithMap[0])
+
           const mintInfo = await getMint(
             connection,
-            res.mint,
+            response.mint,
             "confirmed",
             TOKEN_PROGRAM_ID,
           );
@@ -62,15 +67,15 @@ const Hero = () => {
           }
           const metadata = await getTokenMetadata(
             connection,
-            res.mint, // Mint Account address
+            response.mint, // Mint Account address
             "confirmed",
             TOKEN_PROGRAM_ID,
           );
           console.log("metadata : ", metadata)
-          res.seasons.map((season: any, index: number) => {
+          response.seasons.map((season: any, index: number) => {
             console.log(`season ${index}`, season)
           });
-          setSeason(res.seasons[res.seasons.length - 1])
+          setSeason(response.seasons[response.seasons.length - 1])
         }
       })
       .catch(err => console.log(err));
@@ -86,7 +91,7 @@ const Hero = () => {
       //@ts-ignore
       return await program.account.user.fetch(user);
     }
-    if (lock) {
+    if (lock && publicKey) {
       setCurrentUserLoading(true)
       fetchUser()
         .then(res => {
@@ -190,10 +195,10 @@ const Hero = () => {
                 </CardDescription>
               </Card>
             </div>
+            <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
+            <Proposals proposals={proposals} lock={lock} address={MONOLITH_ID} />
           </>
         ) : (<></>)}
-        <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
-        <Proposals proposals={proposals} lock={lock} />
       </div>
       {isOpen && lock && <DepositPopup isOpen={isOpen} setIsOpen={setIsOpen} />}
     </section>

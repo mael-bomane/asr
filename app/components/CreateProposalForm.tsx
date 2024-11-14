@@ -1,33 +1,88 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
-import { getAssociatedTokenAddressSync, getMint, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "react-hot-toast";
 import { BN } from "bn.js";
 
-import { Slider } from "./ui/slider";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 
-import type { FC } from "react";
-import { useRouter } from "next/navigation";
 import { proposalNewIx } from "@/lib/program/proposalNew";
-import { ProposalChoice } from "@/types";
+import { program } from "@/constants/program";
+
+import type { FC } from "react";
+import type { ProposalChoice, TokenInfo, Lock } from "@/types";
+import { getTokenMetadata, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { ellipsis } from "@/lib/utils";
+import Link from "next/link";
 
 export const CreateProposalForm: FC = () => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const router = useRouter();
+  const searchParams = useSearchParams()
+  const address = searchParams.get('address');
+
   const [loading, setLoading] = useState<boolean>(false);
-  const [threshold, setThreshold] = useState<number>(50);
+  const [lock, setLock] = useState<Lock | null>(null);
+  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [choices, setChoices] = useState<ProposalChoice[]>([
     { id: 0, title: 'approve', votingPower: new BN(0) },
     { id: 1, title: 'reject', votingPower: new BN(0) },
   ]);
+
+  useEffect(() => {
+    const fetchMonolith = async () => {
+      //@ts-ignore
+      return await program.account.lock.fetch(new PublicKey(address));
+    }
+
+    fetchMonolith()
+      .then(async response => {
+        if (response) {
+          console.log(response);
+          setLock(response);
+          // @ts-ignore
+          // const monolithMap = response.map(({ account, publicKey }) => {
+          //   const result = account
+          //   account.pubkey = publicKey
+          //   return result
+          // })
+          // console.log('monoliths : ', monolithMap)
+          // setLock(monolithMap[0])
+
+          const mintInfo = await getMint(
+            connection,
+            response.mint,
+            "confirmed",
+            TOKEN_PROGRAM_ID,
+          );
+          console.log(mintInfo);
+          if (mintInfo) {
+            setTokenInfo({
+              mint: mintInfo.address,
+              decimals: mintInfo.decimals
+            })
+          }
+          const metadata = await getTokenMetadata(
+            connection,
+            response.mint, // Mint Account address
+            "confirmed",
+            TOKEN_PROGRAM_ID,
+          );
+          console.log("metadata : ", metadata)
+          response.seasons.map((season: any, index: number) => {
+            console.log(`season ${index}`, season)
+          });
+        }
+      })
+      .catch(err => console.log(err));
+  }, []);
 
   type Inputs = {
     title: string
@@ -81,6 +136,14 @@ export const CreateProposalForm: FC = () => {
 
         toast.success(`success, redirecting you shortly :\ntx : ${signature}`);
 
+        const poll = PublicKey.findProgramAddressSync(
+          // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
+          [Buffer.from("poll"), new PublicKey(address).toBytes(), new BN(lock.polls.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
+          program.programId
+        )[0];
+
+        router.push(`/proposal/${poll.toString()}`)
+
       } catch (error) {
         console.log(error);
 
@@ -100,6 +163,7 @@ export const CreateProposalForm: FC = () => {
       <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">
         Create Proposal
       </h1>
+      <div>for <Link href={`/lock/${address}`} className="underline text-white">{`${ellipsis(address)}`}</Link></div>
       <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
         <Label htmlFor="name" className="self-start md:text-xl font-extrabold">title : {errors.title && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
         <Input placeholder="ex : fire gary !" id="name" type="text"
@@ -129,8 +193,8 @@ export const CreateProposalForm: FC = () => {
                 choices[index].title = e.target.value;
                 setChoices(choices)
               }}
-              placeholder="title"
-              className="text-black w-full"
+              placeholder="choice title"
+              className="w-full"
             />
           </div>
         ))}

@@ -24,12 +24,12 @@ type Props = {
   address: string
 };
 
-
-export const Monolith: FC<Props> = ({ address }) => {
+export const Proposal: FC<Props> = ({ address }) => {
 
   const { connection } = useConnection();
   const { publicKey } = useWallet();
 
+  const [proposal, setProposal] = useState<Poll | null>(null);
   const [lock, setLock] = useState<Lock | null>(null);
   const [season, setSeason] = useState(null);
 
@@ -46,41 +46,23 @@ export const Monolith: FC<Props> = ({ address }) => {
 
 
   useEffect(() => {
-    const fetchMonolith = async () => {
+    const fetchProposal = async () => {
       //@ts-ignore
-      return await program.account.lock.fetch(new PublicKey(address));
+      return await program.account.poll.fetch(new PublicKey(address));
     }
 
-    fetchMonolith()
-      .then(async res => {
-        if (res) {
-          console.log(res);
-          setLock(res);
-          // Retrieve mint information
-          const mintInfo = await getMint(
-            connection,
-            res.mint,
-            "confirmed",
-            TOKEN_PROGRAM_ID,
-          );
-          console.log(mintInfo);
-          if (mintInfo) {
-            setTokenInfo({
-              mint: mintInfo.address,
-              decimals: mintInfo.decimals
-            })
-          }
-          const metadata = await getTokenMetadata(
-            connection,
-            res.mint, // Mint Account address
-            "confirmed",
-            TOKEN_PROGRAM_ID,
-          );
-          console.log(metadata)
-          res.seasons.map((season: any, index: number) => {
-            console.log(`season ${index}`, season)
-          });
-          setSeason(res.seasons[res.seasons.length - 1])
+    fetchProposal()
+      .then(async response => {
+        if (response) {
+          console.log(response);
+          // @ts-ignore
+          const proposalMap = response.map(({ account, publicKey }) => {
+            const result = account
+            account.pubkey = publicKey
+            return result
+          })
+          console.log('proposal : ', proposal)
+          setProposal(proposalMap);
         }
       })
       .catch(err => console.log(err));
@@ -96,7 +78,7 @@ export const Monolith: FC<Props> = ({ address }) => {
       //@ts-ignore
       return await program.account.user.fetch(user);
     }
-    if (lock) {
+    if (proposal) {
       setCurrentUserLoading(true)
       fetchUser()
         .then(res => {
@@ -112,45 +94,7 @@ export const Monolith: FC<Props> = ({ address }) => {
         });
     }
 
-  }, [lock, publicKey]);
-
-  useEffect(() => {
-    const fetchProposals = async () => {
-      //@ts-ignore
-      return await program.account.poll.all();
-    }
-    if (lock) {
-      fetchProposals()
-        .then(res => {
-          if (res) {
-            console.log("proposals : ", res);
-            console.log(res);
-            setProposals(res);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-
-  }, [lock, publicKey]);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      //@ts-ignore
-      return await program.account.user.all();
-    }
-    if (lock) {
-      fetchUsers()
-        .then(res => {
-          if (res) {
-            console.log("total users : ", res);
-            setUsers(res);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-
-  }, [lock]);
-
+  }, [proposal, publicKey]);
 
   return (
     <section className="my-6 md:my-10 w-full flex flex-col justify-center items-center md:p-4 bg-[#000] text-base-content space-y-4">

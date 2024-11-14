@@ -51,7 +51,6 @@ export const MonolithProvider = ({ children }: { children: ReactNode }) => {
         connection
       }));
     }
-
   }, [publicKey])
 
   useEffect(() => {
@@ -67,6 +66,14 @@ export const MonolithProvider = ({ children }: { children: ReactNode }) => {
       fetchAnalytics()
         .then((response) => {
           setAnalytics(response)
+          //@ts-ignore
+          // const analyticsMap = response.map(({ account, publicKey }) => {
+          //   const result = account
+          //   account.pubkey = publicKey
+          //   return result
+          // })
+          // console.log('analytics : ', analyticsMap)
+          // setAnalytics(analyticsMap)
         })
         .catch((error) => {
           console.log(error)
@@ -82,14 +89,15 @@ export const MonolithProvider = ({ children }: { children: ReactNode }) => {
       }
       fetchMonoliths()
         .then((response) => {
+          setMonoliths(response);
           // @ts-ignore
-          const monolithsMap = response.map(({ account, publicKey }) => {
-            const result = account
-            account.pubkey = publicKey
-            return result
-          })
-          console.log('monoliths : ', monolithsMap)
-          setMonoliths(monolithsMap)
+          // const monolithsMap = response.map(({ account, publicKey }) => {
+          //   const result = account
+          //   account.pubkey = publicKey
+          //   return result
+          // })
+          // console.log('monoliths : ', monolithsMap)
+          // setMonoliths(monolithsMap)
         })
         .catch((error) => console.log(error))
     }

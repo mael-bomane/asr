@@ -1,12 +1,5 @@
-import { Proposals } from "@/components/Proposals";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { getSEOTags } from "@/lib/seo";
-import { createClient } from "@/lib/supabase/client";
-import Image from "next/image";
-import Link from "next/link";
-import { IoDiamond, IoWallet } from "react-icons/io5";
-import { Input } from "@/components/ui/input";
-import { Monolith } from "@/components/Monolith";
+import { Proposal } from "@/components/Proposal";
 
 
 export async function generateMetadata({
@@ -15,6 +8,7 @@ export async function generateMetadata({
   params: { address: string };
 }) {
 
+  //@ts-ignore
   return getSEOTags({
     title: `/proposal/${params.address}`,
     description: `/proposal/${params.address}`,
@@ -46,7 +40,7 @@ export default async function MonolithPage({
 
   return (
     <main className="w-full md:max-w-7xl mx-auto flex flex-col items-center justify-center grow border rounded-xl">
-      <Monolith address={params.address} />
+      <Proposal address={params.address} />
     </main >
   );
 }
