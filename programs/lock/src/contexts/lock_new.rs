@@ -1,4 +1,5 @@
 use anchor_spl::associated_token::AssociatedToken;
+use anchor_spl::metadata::MetadataAccount;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 
 use crate::{constants::*, errors::ErrorCode, state::Analytics};
@@ -32,6 +33,8 @@ pub struct LockNew<'info> {
     )]
     pub signer_ata: Box<Account<'info, TokenAccount>>,
     pub mint: Box<Account<'info, Mint>>,
+    #[account(constraint = metadata.mint.key() == mint.key())]
+    pub metadata: Box<Account<'info, MetadataAccount>>,
     #[account(
         init,
         payer = signer,
@@ -97,6 +100,7 @@ impl<'info> LockNew<'info> {
 
         lock.creator = self.signer.key();
         lock.mint = self.mint.key();
+        lock.symbol = self.metadata.symbol.clone();
         lock.decimals = self.mint.decimals;
         lock.config = config;
         lock.seasons.push(Season {

@@ -159,6 +159,7 @@ describe("lock", () => {
           100 * anchor.web3.LAMPORTS_PER_SOL
         )
         .then(confirmTx);
+
       await anchor
         .getProvider()
         .connection.requestAirdrop(

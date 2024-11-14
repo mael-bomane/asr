@@ -22,6 +22,7 @@ pub struct Lock {
     pub updated_at: i64,
     pub lock_bump: u8,
     pub vault_bump: u8,
+    pub symbol: String,
     pub name: String,
     pub seasons: Vec<Season>,
 }
@@ -35,7 +36,7 @@ impl Lock {
         + TIMESTAMP_LENGTH * 5
         + BUMP_LENGTH * 2 // bumps
         + VECTOR_LENGTH_PREFIX 
-        + STRING_LENGTH_PREFIX
+        + STRING_LENGTH_PREFIX * 2
         + MAX_LOCKER_NAME_LENGTH;
 
     pub fn total_asr(&self) -> usize {

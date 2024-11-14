@@ -5,7 +5,7 @@ import type { IDL } from '@/constants';
 
 export type Lock = IdlAccounts<IDL>["Lock"] & { account: PublicKey };
 export type User = IdlAccounts<IDL>["User"] & { account: PublicKey };
-export type Poll = IdlAccounts<IDL>["Poll"] & { account: PublicKey };
+export type Poll = { account: IdlAccounts<IDL>["Poll"], publicKey: PublicKey };
 export type Analytics = IdlAccounts<IDL>["Analytics"] & { account: PublicKey };
 
 export type TokenInfo = {

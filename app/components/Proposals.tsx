@@ -10,6 +10,7 @@ import { Poll, Lock } from "@/types";
 
 import type { FC } from "react"
 import { FaMagnifyingGlass } from "react-icons/fa6";
+import { tConvert } from "@/lib/utils";
 
 type Props = {
   lock: Lock | null
@@ -44,15 +45,15 @@ export const Proposals: FC<Props> = ({ lock, address, proposals }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {proposals.length > 0 && proposals.map((proposal, i) => (
+          {proposals.length > 0 && proposals.map(({ account }, i) => (
             <TableRow key={i}
               onClick={() => {
-                router.push(`/proposal/${proposal.id}`)
+                router.push(`/proposal/${account.id}`)
               }}
               className="cursor-pointer"
             >
               <TableCell className="font-medium">
-                <div>{proposal.title}</div>
+                <div>{account.title}</div>
                 {/*<div>{proposal.text}</div>*/}
               </TableCell>
               <TableCell className="text-center">-</TableCell>
@@ -62,17 +63,18 @@ export const Proposals: FC<Props> = ({ lock, address, proposals }) => {
                 </div>
               </TableCell>
               <TableCell>
-                <Progress value={proposal.choices.length} />
+                {/*<Progress value={proposal.choices.length} />*/}
               </TableCell>
               <TableCell className="text-left">
                 {/* @ts-ignore */}
-                <div>{proposal.createdAt}</div>
+                <div>{new Date(account.createdAt.toNumber() * 1000).toDateString()}</div>
                 <div>17:31 PM</div>
               </TableCell>
               <TableCell className="text-left">
                 {/* @ts-ignore */}
-                <div>{proposal.createdAt}</div>
-                <div>17:31 PM</div>
+                <div>{new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).toDateString()}</div>
+                {/* @ts-ignore */}
+                <div>{new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).getHours()}:{(new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).toISOString().split('T')[1])}</div>
               </TableCell>
             </TableRow>
           ))}

@@ -125,7 +125,14 @@ export const Monolith: FC<Props> = ({ address }) => {
           if (res) {
             console.log("proposals : ", res);
             console.log(res);
-            setProposals(res);
+            // @ts-ignore
+            const proposalsMap = res.map(({ account, publicKey }) => {
+              const result = account
+              account.pubkey = publicKey
+              return result
+            })
+            console.log('monoliths : ', proposalsMap)
+            setProposals(proposalsMap);
           }
         })
         .catch(err => console.log(err));

@@ -61,7 +61,9 @@ impl<'info> PollNew<'info> {
 
         poll.summoner = self.owner.key();
         poll.id = lock.polls + 1;
-        poll.created_at = Clock::get()?.unix_timestamp;
+        let now = Clock::get()?.unix_timestamp;
+        poll.created_at = now;
+        poll.ends_at = now + lock.voting_period;
         poll.executed = false;
         poll.status = Status::Voting;
         poll.title = title;

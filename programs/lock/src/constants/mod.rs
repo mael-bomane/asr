@@ -7,6 +7,7 @@ pub const BUMP_LENGTH: usize = 1;
 pub const BOOL_LENGTH: usize = 1;
 pub const MAX_LOCKER_NAME_LENGTH: usize = 50 * 4;
 pub const MAX_TITLE_LENGTH: usize = 50 * 4;
+pub const MAX_SYMBOL_LENGTH: usize = 10 * 4;
 // pub const MAX_CONTENT_LENGTH: usize = 280 * 4; // 280 chars max.
 pub const ONE_DAY_IN_SECONDS: i64 = 5;
 // pub const ONE_DAY_IN_SECONDS: i64 = 86400;

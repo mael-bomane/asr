@@ -29,7 +29,10 @@ export const CreateProposalForm: FC = () => {
   const address = searchParams.get('address');
 
   const [loading, setLoading] = useState<boolean>(false);
+
   const [lock, setLock] = useState<Lock | null>(null);
+  const [lockPubkey, setLockPubkey] = useState<PublicKey | null>(null);
+
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [choices, setChoices] = useState<ProposalChoice[]>([
     { id: 0, title: 'approve', votingPower: new BN(0) },
@@ -37,52 +40,60 @@ export const CreateProposalForm: FC = () => {
   ]);
 
   useEffect(() => {
+    if (address) {
+      setLockPubkey(new PublicKey(address));
+    }
+  }, [address])
+
+  useEffect(() => {
     const fetchMonolith = async () => {
       //@ts-ignore
-      return await program.account.lock.fetch(new PublicKey(address));
+      return await program.account.lock.fetch(lockPubkey);
+    }
+    if (lockPubkey) {
+      fetchMonolith()
+        .then(async response => {
+          if (response) {
+            console.log(response);
+            setLock(response);
+            // @ts-ignore
+            // const monolithMap = response.map(({ account, publicKey }) => {
+            //   const result = account
+            //   account.pubkey = publicKey
+            //   return result
+            // })
+            // console.log('monoliths : ', monolithMap)
+            // setLock(monolithMap[0])
+
+            const mintInfo = await getMint(
+              connection,
+              response.mint,
+              "confirmed",
+              TOKEN_PROGRAM_ID,
+            );
+            console.log(mintInfo);
+            if (mintInfo) {
+              setTokenInfo({
+                mint: mintInfo.address,
+                decimals: mintInfo.decimals
+              })
+            }
+            const metadata = await getTokenMetadata(
+              connection,
+              response.mint, // Mint Account address
+              "confirmed",
+              TOKEN_PROGRAM_ID,
+            );
+            console.log("metadata : ", metadata)
+            response.seasons.map((season: any, index: number) => {
+              console.log(`season ${index}`, season)
+            });
+          }
+        })
+        .catch(err => console.log(err));
     }
 
-    fetchMonolith()
-      .then(async response => {
-        if (response) {
-          console.log(response);
-          setLock(response);
-          // @ts-ignore
-          // const monolithMap = response.map(({ account, publicKey }) => {
-          //   const result = account
-          //   account.pubkey = publicKey
-          //   return result
-          // })
-          // console.log('monoliths : ', monolithMap)
-          // setLock(monolithMap[0])
-
-          const mintInfo = await getMint(
-            connection,
-            response.mint,
-            "confirmed",
-            TOKEN_PROGRAM_ID,
-          );
-          console.log(mintInfo);
-          if (mintInfo) {
-            setTokenInfo({
-              mint: mintInfo.address,
-              decimals: mintInfo.decimals
-            })
-          }
-          const metadata = await getTokenMetadata(
-            connection,
-            response.mint, // Mint Account address
-            "confirmed",
-            TOKEN_PROGRAM_ID,
-          );
-          console.log("metadata : ", metadata)
-          response.seasons.map((season: any, index: number) => {
-            console.log(`season ${index}`, season)
-          });
-        }
-      })
-      .catch(err => console.log(err));
-  }, []);
+  }, [lockPubkey]);
 
   type Inputs = {
     title: string
@@ -111,10 +122,10 @@ export const CreateProposalForm: FC = () => {
 
         const instruction = await proposalNewIx(
           publicKey,
-          publicKey,
+          lockPubkey,
           inputs.title,
           choices,
-          new BN(0),
+          new BN(lock.polls.toNumber() + 1),
         );
 
 
@@ -138,14 +149,14 @@ export const CreateProposalForm: FC = () => {
 
         const poll = PublicKey.findProgramAddressSync(
           // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
-          [Buffer.from("poll"), new PublicKey(address).toBytes(), new BN(lock.polls.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
+          [Buffer.from("poll"), new PublicKey(address).toBytes(), new BN(lock.polls.toNumber() ?? 0 + 1).toArrayLike(Buffer, 'le', 8)],
           program.programId
         )[0];
 
         router.push(`/proposal/${poll.toString()}`)
 
       } catch (error) {
-        console.log(error);
+        console.log(error.message);
 
         setLoading(false);
         toast.error(`error :\n ${error}`);

@@ -9,6 +9,7 @@ pub struct Poll {
     pub summoner: Pubkey,
     pub season: u8,
     pub created_at: i64,
+    pub ends_at: i64,
     pub executed: bool,
     pub bump: u8,
     pub status: Status,
@@ -22,7 +23,7 @@ impl Poll {
         + 8
         + PUBLIC_KEY_LENGTH
         + 1
-        + TIMESTAMP_LENGTH
+        + TIMESTAMP_LENGTH * 2
         + BOOL_LENGTH
         + BUMP_LENGTH
         + 1
