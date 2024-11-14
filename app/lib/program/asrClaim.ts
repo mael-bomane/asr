@@ -4,16 +4,18 @@ import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token
 
 import { program } from "@/constants/program";
 
-
-
-export const stakeIx = async (
-  amount: number,
-  decimals: number,
+export const asrClaimIx = async (
   owner: PublicKey,
   lock: PublicKey,
   mint: PublicKey,
   signerAta: PublicKey,
+  amount: BN,
 ) => {
+  console.log("owner", owner.toString());
+  console.log("lock", lock.toString());
+  console.log("mint", mint.toString());
+  console.log("signerAta", signerAta.toString());
+  console.log("amount", amount.toNumber());
 
   const analytics = PublicKey.findProgramAddressSync(
     [Buffer.from("analytics")],
@@ -26,8 +28,8 @@ export const stakeIx = async (
   )[0];
 
   const vault = PublicKey.findProgramAddressSync(
-    // seeds = [b"vault", lock.key().as_ref(), owner.key().as_ref()],
-    [Buffer.from("vault"), lock.toBytes(), owner.toBytes()],
+    // seeds = [b"vault", lock.key().as_ref(), mint.key().as_ref()]
+    [Buffer.from("vault"), lock.toBytes(), mint.toBytes()],
     program.programId
   )[0];
 
@@ -37,8 +39,8 @@ export const stakeIx = async (
     program.programId
   )[0];
 
-  //@ts-ignore
-  return await program.methods.stakeNew(new BN(amount * 1 * 10 ** decimals))
+  // @ts-ignore
+  return await program.methods.asrClaim()
     .accountsStrict({
       owner,
       user,

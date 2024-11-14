@@ -1,14 +1,9 @@
-import { BN } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 import { program } from "@/constants/program";
 
-
-
-export const stakeIx = async (
-  amount: number,
-  decimals: number,
+export const unstakeIx = async (
   owner: PublicKey,
   lock: PublicKey,
   mint: PublicKey,
@@ -25,28 +20,28 @@ export const stakeIx = async (
     program.programId
   )[0];
 
-  const vault = PublicKey.findProgramAddressSync(
-    // seeds = [b"vault", lock.key().as_ref(), owner.key().as_ref()],
-    [Buffer.from("vault"), lock.toBytes(), owner.toBytes()],
-    program.programId
-  )[0];
-
   const user = PublicKey.findProgramAddressSync(
     // seeds = [b"user", lock.key().as_ref(), owner.key().as_ref()],
     [Buffer.from("user"), lock.toBytes(), owner.toBytes()],
     program.programId
   )[0];
 
+  const vault = PublicKey.findProgramAddressSync(
+    // seeds = [b"vault", creator.key().as_ref(), mint.key().as_ref()]
+    [Buffer.from("vault"), lock.toBytes(), owner.toBytes()],
+    program.programId
+  )[0];
+
   //@ts-ignore
-  return await program.methods.stakeNew(new BN(amount * 1 * 10 ** decimals))
+  return await program.methods.stakeClaim()
     .accountsStrict({
       owner,
-      user,
       auth,
       lock,
+      user,
       signerAta,
-      vault,
       mint,
+      vault,
       analytics,
       systemProgram: SystemProgram.programId,
       tokenProgram: TOKEN_PROGRAM_ID,

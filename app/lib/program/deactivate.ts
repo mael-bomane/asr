@@ -2,7 +2,7 @@ import { PublicKey, SystemProgram } from "@solana/web3.js";
 
 import { program } from "@/constants/program";
 
-export const registerIx = async (
+export const stakeDeactivateIx = async (
   owner: PublicKey,
   lock: PublicKey,
 ) => {
@@ -12,25 +12,19 @@ export const registerIx = async (
     program.programId
   )[0];
 
-  const auth = PublicKey.findProgramAddressSync(
-    [Buffer.from("auth"), analytics.toBuffer()],
-    program.programId
-  )[0];
-
   const user = PublicKey.findProgramAddressSync(
     // seeds = [b"user", lock.key().as_ref(), owner.key().as_ref()],
     [Buffer.from("user"), lock.toBytes(), owner.toBytes()],
     program.programId
   )[0];
 
-  return await program.methods.register()
+  //@ts-ignore
+  return await program.methods.stakeDeactivate()
     .accountsStrict({
       owner,
       user,
-      auth,
       lock,
       analytics,
-      //@ts-ignore
       systemProgram: SystemProgram.programId,
     }).instruction()
 }
