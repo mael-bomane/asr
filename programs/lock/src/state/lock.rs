@@ -6,6 +6,7 @@ use crate::constants::*;
 pub struct Lock {
     pub creator: Pubkey,
     pub mint: Pubkey,
+    pub decimals: u8,
     pub config: u8, // 0 = asr, 1 = ve
     pub voting_period: i64,
     pub lock_duration: i64, // only for ve
@@ -28,8 +29,8 @@ pub struct Lock {
 impl Lock {
     pub const LEN: usize = DISCRIMINATOR_LENGTH
         + PUBLIC_KEY_LENGTH * 2 // creator, mint 
-        + 1
-        + 1 // threshold 51 => 100
+        + 1 * 2 // config, decimals
+        + 1 * 2 // threshold 51 => 100, quorum 0 => 100
         + 8 * 4 // approved, rejected, min 
         + TIMESTAMP_LENGTH * 5
         + BUMP_LENGTH * 2 // bumps
@@ -57,9 +58,10 @@ impl Season {
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
 pub struct ASR {
     pub mint: Pubkey,
+    pub decimals: u8,
     pub amount: u64,
 }
 
 impl ASR {
-    pub const LEN: usize = PUBLIC_KEY_LENGTH + 8;
+    pub const LEN: usize = PUBLIC_KEY_LENGTH + 1 + 8;
 }

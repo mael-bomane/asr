@@ -97,6 +97,7 @@ impl<'info> LockNew<'info> {
 
         lock.creator = self.signer.key();
         lock.mint = self.mint.key();
+        lock.decimals = self.mint.decimals;
         lock.config = config;
         lock.seasons.push(Season {
             season: 0,

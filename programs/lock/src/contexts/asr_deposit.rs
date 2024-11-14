@@ -80,6 +80,7 @@ impl<'info> ASRDeposit<'info> {
                 season_end: now + THREE_MONTH_IN_SECONDS,
                 asr: vec![ASR {
                     mint: self.mint.key(),
+                    decimals: self.mint.decimals,
                     amount,
                 }],
             });
@@ -92,6 +93,7 @@ impl<'info> ASRDeposit<'info> {
             } else {
                 season.asr.push(ASR {
                     mint: self.mint.key(),
+                    decimals: self.mint.decimals,
                     amount,
                 });
             }
