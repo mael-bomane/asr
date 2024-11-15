@@ -55,12 +55,12 @@ impl<'info> PollNew<'info> {
         let poll = &mut self.poll;
 
         require!(
-            user.total_user_deposit_amount() >= lock.min,
+            user.total_user_deposit_amount() >= lock.amount,
             ErrorCode::NotEnoughDepositsToStartPoll
         );
 
         poll.summoner = self.owner.key();
-        poll.lock = self.lock.key();
+        poll.lock = lock.key();
         poll.id = lock.polls + 1;
         let now = Clock::get()?.unix_timestamp;
         poll.created_at = now;

@@ -1,14 +1,14 @@
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::metadata::MetadataAccount;
-use anchor_spl::token::{Mint, Token, TokenAccount};
+use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
 use crate::{constants::*, errors::ErrorCode, state::Analytics};
-use crate::{Lock, Season};
+use crate::{Deposit, Lock, Season, User};
 
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(config: u8, voting_period: i64, lock_duration: i64, threshold: u8, quorum: u8, min: u64, name: String)]
+#[instruction(config: u8, voting_period: i64, lock_duration: i64, threshold: u8, quorum: u8, amount: u64)]
 pub struct LockNew<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -26,6 +26,14 @@ pub struct LockNew<'info> {
         bump
     )]
     pub lock: Box<Account<'info, Lock>>,
+    // #[account(
+    //     init,
+    //     payer = signer,
+    //     space = User::LEN + Deposit::LEN,
+    //     seeds = [b"user", lock.key().as_ref(), signer.key().as_ref()],
+    //     bump
+    // )]
+    // pub user: Box<Account<'info, User>>,
     #[account(
         mut,
         associated_token::mint = mint,
@@ -64,14 +72,13 @@ impl<'info> LockNew<'info> {
         lock_duration: i64,
         threshold: u8,
         quorum: u8,
-        min: u64,
-        name: String,
+        amount: u64,
     ) -> Result<()> {
-        if name.len() > MAX_LOCKER_NAME_LENGTH {
-            return err!(ErrorCode::LockerNameTooLong);
-        } else if name.len() == 0 {
-            return err!(ErrorCode::LockerNameEmpty);
-        }
+        // if name.len() > MAX_LOCKER_NAME_LENGTH {
+        //     return err!(ErrorCode::LockerNameTooLong);
+        // } else if name.len() == 0 {
+        //     return err!(ErrorCode::LockerNameEmpty);
+        // }
 
         require!(
             voting_period >= ONE_DAY_IN_SECONDS && voting_period <= ONE_WEEK_IN_SECONDS,
@@ -115,18 +122,67 @@ impl<'info> LockNew<'info> {
         lock.lock_duration = lock_duration;
         lock.threshold = threshold;
         lock.quorum = quorum;
-        lock.min = min;
+        lock.amount = amount;
         lock.total_deposits = 0;
         lock.approved = 0;
         lock.rejected = 0;
         lock.created_at = Clock::get()?.unix_timestamp;
         lock.lock_bump = bumps.lock;
         lock.vault_bump = bumps.vault;
-        lock.name = name;
         lock.polls = 0;
 
         Ok(())
     }
+
+    // pub fn register(&mut self, bumps: &LockNewBumps) -> Result<()> {
+    //     let user = &mut self.user;
+    //     user.owner = self.signer.key();
+    //     user.lock = self.lock.key();
+    //     user.points = 0u64;
+    //     user.bump = bumps.user;
+    //     user.deposits = Vec::new();
+    //     user.claims = Vec::new();
+
+    //     Ok(())
+    // }
+
+    // pub fn deposit(&mut self, amount: u64) -> Result<()> {
+    //     // pub creator: Pubkey,
+    //     // pub mint: Pubkey,
+    //     // pub time: Time,
+    //     // pub approved: u64,
+    //     // pub rejected: u64,
+    //     // pub created_at: i64,
+    //     // pub bump: u8,
+    //     // pub name: String,
+    //     // pub polls: Vec<Poll>,
+    //     // pub users: Vec<User>,
+    //     let lock = &mut self.lock;
+    //     let user = &mut self.user;
+
+    //     let accounts = Transfer {
+    //         from: self.signer_ata.to_account_info(),
+    //         to: self.vault.to_account_info(),
+    //         authority: self.signer.to_account_info(),
+    //     };
+
+    //     let cpi = CpiContext::new(self.token_program.to_account_info(), accounts);
+
+    //     transfer(cpi, amount)?;
+
+    //     let deposit = Deposit {
+    //         amount,
+    //         deactivating: false,
+    //         deactivation_start: None,
+    //         created_at: Clock::get()?.unix_timestamp,
+    //         expires_at: Clock::get()?.unix_timestamp + lock.lock_duration,
+    //     };
+
+    //     user.deposits.push(deposit);
+    //     lock.total_deposits += amount;
+
+    //     Ok(())
+    // }
 
     pub fn update_analytics(&mut self) -> Result<()> {
         let analytics = &mut self.analytics;

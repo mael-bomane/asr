@@ -5,7 +5,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-lock = "asrMFZq2j6bA1RADnGM58txGVtSzMcDxxSVr57mQhLZ"
+lock = "1ckXSJ2TDNizSpBWftmgCtxCZ22crs2ELsrdgeeAfi8"
 
 [registry]
 url = "https://api.apr.dev"

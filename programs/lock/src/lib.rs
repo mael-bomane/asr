@@ -8,7 +8,7 @@ mod state;
 use contexts::*;
 use state::*;
 
-declare_id!("asrMFZq2j6bA1RADnGM58txGVtSzMcDxxSVr57mQhLZ");
+declare_id!("1ckXSJ2TDNizSpBWftmgCtxCZ22crs2ELsrdgeeAfi8");
 
 #[program]
 pub mod lock {
@@ -25,8 +25,8 @@ pub mod lock {
         lock_duration: i64,
         threshold: u8,
         quorum: u8,
-        min: u64,
-        name: String,
+        amount: u64,
+        // name: String,
     ) -> Result<()> {
         ctx.accounts.lock_new(
             &ctx.bumps,
@@ -35,10 +35,12 @@ pub mod lock {
             lock_duration,
             threshold,
             quorum,
-            min,
-            name,
-        )?;
-        ctx.accounts.update_analytics()
+            amount,
+            // name,
+        )
+        // ctx.accounts.register(&ctx.bumps)?;
+        // ctx.accounts.deposit(amount)?;
+        // ctx.accounts.update_analytics()
     }
 
     pub fn register(ctx: Context<Register>) -> Result<()> {

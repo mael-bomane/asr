@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use anchor_spl::metadata::mpl_token_metadata::MAX_SYMBOL_LENGTH;
 
 use crate::constants::*;
 
@@ -12,7 +13,7 @@ pub struct Lock {
     pub lock_duration: i64, // only for ve
     pub threshold: u8,      // 51% to 100%
     pub quorum: u8,         // 0% to 100%
-    pub min: u64,
+    pub amount: u64,
     pub total_deposits: u64,
     pub polls: u64,
     pub votes: u64,
@@ -30,14 +31,13 @@ pub struct Lock {
 impl Lock {
     pub const LEN: usize = DISCRIMINATOR_LENGTH
         + PUBLIC_KEY_LENGTH * 2 // creator, mint 
-        + 1 * 2 // config, decimals
-        + 1 * 2 // threshold 51 => 100, quorum 0 => 100
-        + 8 * 4 // approved, rejected, min 
-        + TIMESTAMP_LENGTH * 5
+        + 1 * 4 // config, decimals, threshold 51 => 100, quorum 0 => 100
+        + 8 * 6 // amount, approved, rejected, min 
+        + TIMESTAMP_LENGTH * 4
         + BUMP_LENGTH * 2 // bumps
         + VECTOR_LENGTH_PREFIX 
         + STRING_LENGTH_PREFIX * 2
-        + MAX_LOCKER_NAME_LENGTH;
+        + MAX_LOCKER_NAME_LENGTH + MAX_SYMBOL_LENGTH;
 
     pub fn total_asr(&self) -> usize {
         self.seasons.iter().map(|season| season.asr.len()).sum()

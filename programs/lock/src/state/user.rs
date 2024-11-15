@@ -22,7 +22,7 @@ impl User {
         + 8
         + TIMESTAMP_LENGTH
         + BUMP_LENGTH
-        + VECTOR_LENGTH_PREFIX * 2;
+        + VECTOR_LENGTH_PREFIX * 3;
 
     pub fn total_user_deposit_amount(&self) -> u64 {
         self.deposits

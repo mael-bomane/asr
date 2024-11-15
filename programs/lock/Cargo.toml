@@ -4,9 +4,9 @@ version = "0.1.0"
 description = "Created with Anchor"
 edition = "2021"
 
-[[test.genesis]]
-address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"  
-program = "tests/metaplex_token_metadata_program.so"
+#[[test.genesis]]
+#address = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"  
+#program = "tests/metaplex_token_metadata_program.so"
 
 [lib]
 crate-type = ["cdylib", "lib"]
