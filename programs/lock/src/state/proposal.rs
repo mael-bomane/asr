@@ -4,7 +4,7 @@ use {
 };
 
 #[account]
-pub struct Poll {
+pub struct Proposal {
     pub id: u64,
     pub lock: Pubkey,
     pub summoner: Pubkey,
@@ -19,7 +19,7 @@ pub struct Poll {
     pub choices: Vec<Choice>,
 }
 
-impl Poll {
+impl Proposal {
     pub const LEN: usize = DISCRIMINATOR_LENGTH
         + 8
         + PUBLIC_KEY_LENGTH * 2

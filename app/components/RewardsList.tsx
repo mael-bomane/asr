@@ -17,7 +17,7 @@ export const RewardsList: FC<Props> = ({ lock, setIsOpen }) => {
 
   return (
     <Card
-      className={`w-full p-2 bg-base-100 text-base-content rounded-xl flex flex-col items-center justify-center space-y-2`}
+      className={`max-w-[500px] w-full p-4 bg-base-100 text-base-content rounded-xl flex flex-col items-center justify-center space-y-2`}
     >
       <CardTitle className="w-full px-2 text-center pb-1 space-y-4">
         <div className="text-xl tracking-wide bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold">Active Staking Rewards</div>

@@ -13,6 +13,8 @@ import { ellipsis } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 import { RewardsList } from "./RewardsList";
 import { DepositPopup } from "./DepositPopup";
+import { MacbookScroll } from "./ui/macbook-scroll";
+import { Skeleton } from "@radix-ui/themes";
 
 const Hero = () => {
 
@@ -150,16 +152,6 @@ const Hero = () => {
 
   return (
     <section className="max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 py-8 text-base-content">
-      <div className="max-w-7xl w-full flex flex-col gap-10 lg:gap-14 items-center justify-center text-center">
-        <h1 className="flex flex-col justify-center items-center font-extrabold text-2xl lg:text-4xl md:-mb-4">
-          Active Staking Rewards,<br />
-          Incentivized Vote.
-        </h1>
-        <Link href="/monolith/create" className="btn btn- btn-wide btn-primary">
-          Create Locker
-        </Link>
-        {lock && <RewardsList lock={lock} setIsOpen={setIsOpen} />}
-      </div>
       <div className="lg:w-full flex flex-col justify-center items-center space-y-4">
         {lock ? (
           <>
@@ -195,10 +187,13 @@ const Hero = () => {
                 </CardDescription>
               </Card>
             </div>
-            <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
+            <div className="w-full flex justify-center items-center space-x-4">
+              <RewardsList lock={lock} setIsOpen={setIsOpen} />
+              <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
+            </div>
             <Proposals proposals={proposals} lock={lock} address={MONOLITH_ID} users={users} currentUser={currentUser} />
           </>
-        ) : (<></>)}
+        ) : <Skeleton />}
       </div>
       {isOpen && lock && <DepositPopup isOpen={isOpen} setIsOpen={setIsOpen} />}
     </section>

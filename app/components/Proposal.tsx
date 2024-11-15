@@ -123,7 +123,7 @@ export const Proposal: FC<Props> = ({ address }) => {
   }, [proposal, publicKey]);
 
   return (
-    <section className="my-6 md:my-10 w-full max-w-7xl flex justify-center items-center md:p-4 text-base-content space-x-4">
+    <section className="my-6 md:my-10 w-full max-w-7xl flex justify-center items-start md:p-4 text-base-content space-x-4">
       {
         proposal ? (
           <div className="w-[66%] flex flex-col items-center justify-center bg-base-100 rounded-xl p-8">
@@ -217,7 +217,7 @@ export const Proposal: FC<Props> = ({ address }) => {
         ) : <>not found</>
       }
       <div className="w-[33%] md:max-w-xl flex flex-col items-center justify-center space-y-4">
-        {proposal && lock ? (
+        {proposal ? (
           <>
             <div className="w-full flex flex-col justify-center items-center bg-base-100 rounded-xl space-y-4 p-8">
               <div>Results</div>
@@ -264,11 +264,11 @@ export const Proposal: FC<Props> = ({ address }) => {
               <div className="w-full flex justify-start items-center space-x-1">
                 <FaCalendar />
                 <span className="flex space-x-1">
-                  <span>Start:</span>
+                  <span>End:</span>
                   {/* @ts-ignore */}
-                  <span>{new Date((proposal.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).toDateString()}</span>
+                  <span>{new Date((proposal.createdAt.toNumber()) * 1000).toDateString()}</span>
                   {/* @ts-ignore */}
-                  <span>{new Date((proposal.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).getHours()}:{(new Date((proposal.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).getMinutes())}</span>
+                  <span>{new Date((proposal.createdAt.toNumber()) * 1000).getHours()}:{(new Date((proposal.createdAt.toNumber()) * 1000).getMinutes())}</span>
                 </span>
               </div>
               {proposal.choices.map(choice => {

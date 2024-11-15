@@ -26,7 +26,8 @@ pub mod lock {
         threshold: u8,
         quorum: u8,
         amount: u64,
-        // name: String,
+        name: String,
+        symbol: String,
     ) -> Result<()> {
         ctx.accounts.lock_new(
             &ctx.bumps,
@@ -36,7 +37,8 @@ pub mod lock {
             threshold,
             quorum,
             amount,
-            // name,
+            name,
+            symbol,
         )
         // ctx.accounts.register(&ctx.bumps)?;
         // ctx.accounts.deposit(amount)?;
@@ -59,13 +61,17 @@ pub mod lock {
         ctx.accounts.stake_claim()
     }
 
-    pub fn poll_new(ctx: Context<PollNew>, title: String, choices: Vec<Choice>) -> Result<()> {
-        ctx.accounts.poll_new(&ctx.bumps, title, choices)?;
+    pub fn proposal_new(
+        ctx: Context<ProposalNew>,
+        title: String,
+        choices: Vec<Choice>,
+    ) -> Result<()> {
+        ctx.accounts.proposal_new(&ctx.bumps, title, choices)?;
         ctx.accounts.update_analytics()
     }
 
-    pub fn poll_execute(ctx: Context<PollExecute>) -> Result<()> {
-        ctx.accounts.poll_execute()
+    pub fn proposal_execute(ctx: Context<ProposalExecute>) -> Result<()> {
+        ctx.accounts.proposal_execute()
     }
 
     pub fn vote_new(ctx: Context<VoteNew>, index: u64, id: u8) -> Result<()> {

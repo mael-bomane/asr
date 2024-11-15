@@ -1,10 +1,12 @@
-use crate::{constants::*, errors::ErrorCode, state::Analytics, Choice, Lock, Poll, Status, User};
+use crate::{
+    constants::*, errors::ErrorCode, state::Analytics, Choice, Lock, Proposal, Status, User,
+};
 
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 #[instruction(title: String, choices: Vec<Choice>)]
-pub struct PollNew<'info> {
+pub struct ProposalNew<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
     #[account(
@@ -23,11 +25,11 @@ pub struct PollNew<'info> {
     #[account(
         init,
         payer = owner,
-        space = Poll::LEN + choices.len() * Choice::LEN,
-        seeds = [b"poll", lock.key().as_ref(), (lock.polls + 1).to_le_bytes().as_ref()],
+        space = Proposal::LEN + choices.len() * Choice::LEN,
+        seeds = [b"proposal", lock.key().as_ref(), (lock.polls + 1).to_le_bytes().as_ref()],
         bump
     )]
-    pub poll: Box<Account<'info, Poll>>,
+    pub proposal: Box<Account<'info, Proposal>>,
     #[account(
         mut,
         seeds = [b"analytics"],
@@ -37,10 +39,10 @@ pub struct PollNew<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> PollNew<'info> {
-    pub fn poll_new(
+impl<'info> ProposalNew<'info> {
+    pub fn proposal_new(
         &mut self,
-        bumps: &PollNewBumps,
+        bumps: &ProposalNewBumps,
         title: String,
         choices: Vec<Choice>,
     ) -> Result<()> {
@@ -52,25 +54,25 @@ impl<'info> PollNew<'info> {
 
         let user = &mut self.user;
         let lock = &mut self.lock;
-        let poll = &mut self.poll;
+        let proposal = &mut self.proposal;
 
         require!(
             user.total_user_deposit_amount() >= lock.amount,
             ErrorCode::NotEnoughDepositsToStartPoll
         );
 
-        poll.summoner = self.owner.key();
-        poll.lock = lock.key();
-        poll.id = lock.polls + 1;
+        proposal.summoner = self.owner.key();
+        proposal.lock = lock.key();
+        proposal.id = lock.polls + 1;
         let now = Clock::get()?.unix_timestamp;
-        poll.created_at = now;
-        poll.ends_at = now + lock.voting_period;
-        poll.executed = false;
-        poll.status = Status::Voting;
-        poll.title = title;
-        poll.result = None;
-        poll.choices = choices;
-        poll.bump = bumps.poll;
+        proposal.created_at = now;
+        proposal.ends_at = now + lock.voting_period;
+        proposal.executed = false;
+        proposal.status = Status::Voting;
+        proposal.title = title;
+        proposal.result = None;
+        proposal.choices = choices;
+        proposal.bump = bumps.proposal;
 
         Ok(())
     }

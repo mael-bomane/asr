@@ -37,7 +37,8 @@ impl Lock {
         + BUMP_LENGTH * 2 // bumps
         + VECTOR_LENGTH_PREFIX 
         + STRING_LENGTH_PREFIX * 2
-        + MAX_LOCKER_NAME_LENGTH + MAX_SYMBOL_LENGTH;
+        + MAX_LOCKER_NAME_LENGTH 
+        + MAX_SYMBOL_LENGTH;
 
     pub fn total_asr(&self) -> usize {
         self.seasons.iter().map(|season| season.asr.len()).sum()

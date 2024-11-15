@@ -8,7 +8,7 @@ use crate::{Deposit, Lock, Season, User};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(config: u8, voting_period: i64, lock_duration: i64, threshold: u8, quorum: u8, amount: u64)]
+#[instruction(config: u8, voting_period: i64, lock_duration: i64, threshold: u8, quorum: u8, amount: u64, name: String, symbol: String)]
 pub struct LockNew<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -73,12 +73,20 @@ impl<'info> LockNew<'info> {
         threshold: u8,
         quorum: u8,
         amount: u64,
+        name: String,
+        symbol: String,
     ) -> Result<()> {
-        // if name.len() > MAX_LOCKER_NAME_LENGTH {
-        //     return err!(ErrorCode::LockerNameTooLong);
-        // } else if name.len() == 0 {
-        //     return err!(ErrorCode::LockerNameEmpty);
-        // }
+        if name.len() > MAX_LOCKER_NAME_LENGTH {
+            return err!(ErrorCode::LockerNameTooLong);
+        } else if name.len() == 0 {
+            return err!(ErrorCode::LockerNameEmpty);
+        }
+
+        if symbol.len() > MAX_SYMBOL_LENGTH {
+            return err!(ErrorCode::SymbolTooLong);
+        } else if name.len() == 0 {
+            return err!(ErrorCode::SymbolEmpty);
+        }
 
         require!(
             voting_period >= ONE_DAY_IN_SECONDS && voting_period <= ONE_WEEK_IN_SECONDS,
@@ -89,7 +97,7 @@ impl<'info> LockNew<'info> {
             require!(lock_duration == 0, ErrorCode::InvalidLockDuration);
         } else if config == 1 {
             require!(
-                lock_duration >= ONE_MONTH_IN_SECONDS && voting_period <= ONE_WEEK_IN_SECONDS,
+                lock_duration >= ONE_MONTH_IN_SECONDS && voting_period <= ONE_YEAR_IN_SECONDS,
                 ErrorCode::LockDurationOutOfBounds
             );
         } else {
@@ -108,6 +116,8 @@ impl<'info> LockNew<'info> {
         lock.creator = self.signer.key();
         lock.mint = self.mint.key();
         //lock.symbol = self.metadata.symbol.clone();
+        lock.name = name;
+        lock.symbol = symbol;
         lock.decimals = self.mint.decimals;
         lock.config = config;
         let season_start = Clock::get()?.unix_timestamp;

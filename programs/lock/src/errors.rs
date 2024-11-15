@@ -6,6 +6,10 @@ pub enum ErrorCode {
     LockerNameEmpty,
     #[msg("Locker Name Too Long, 50 Characters Max.")]
     LockerNameTooLong,
+    #[msg("Symbol Empty")]
+    SymbolEmpty,
+    #[msg("Symbol Too Long, 10 Characters Max.")]
+    SymbolTooLong,
     #[msg("Poll Title Empty.")]
     PollTitleEmpty,
     #[msg("Poll Title Too Long, 50 Characters Max.")]

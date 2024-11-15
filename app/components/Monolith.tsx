@@ -175,27 +175,26 @@ export const Monolith: FC<Props> = ({ address }) => {
               {ellipsis(lock.creator.toString())}
             </Link>
             </h2>
-            <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
+            <div className="md:w-full max-w-4xl flex justify-center items-center gap-2 md:gap-4">
               <Card
-                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
+                className={`flex-1 p-1 md:p-2 bg-base-100 text-base-content rounded-xl flex flex-col items-center justify-between mb-2`}
               >
-                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Total Staked MONO</CardTitle>
-                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
+                <CardTitle className="text-sm px-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold">Total Voting Power</CardTitle>
+                <CardDescription className="text-sm px-2 text-center text-white font-semibold">{
                   //@ts-ignore
-                  lock && tokenInfo && lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals)
-                } MONO</CardDescription>
+                  lock && tokenInfo && new Intl.NumberFormat().format(lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals))
+                }</CardDescription>
               </Card>
               <Card
-                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
+                className={`flex-1 p-1 md:p-2 bg-base-100 text-base-content rounded-xl flex flex-col items-center justify-between mb-2`}
               >
-                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Unique Addresses</CardTitle>
-                <CardDescription className="text-xs px-2 text-center text-white font-semibold">
+                <CardTitle className="text-sm px-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-600 font-extrabold">Unique Addresses</CardTitle>
+                <CardDescription className="text-sm px-2 text-center text-white font-semibold">
                   {users && users.length > 0 ? users.length : 0}
                 </CardDescription>
               </Card>
             </div>
-
-            <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
+            {/*<div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
               <Card
                 className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
               >
@@ -220,8 +219,9 @@ export const Monolith: FC<Props> = ({ address }) => {
                   }
                 </CardDescription>
               </Card>
-            </div>
-            <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
+            </div>*/}
+
+            {/*}<div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
               <Card
                 className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
               >
@@ -247,7 +247,7 @@ export const Monolith: FC<Props> = ({ address }) => {
                 }</CardDescription>
               </Card>
 
-            </div>
+            </div>*/}
             <div className="w-full md:max-w-4xl flex flex-col md:flex-row items-center justify-center md:justify-around md:space-x-8">
               <RewardsList lock={lock} setIsOpen={setIsOpen} />
               <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} tokenInfo={tokenInfo} />

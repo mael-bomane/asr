@@ -1,7 +1,7 @@
 use {
     crate::{
         errors::ErrorCode,
-        state::{Analytics, Choice, Deposit, Lock, Poll, User, Vote, Claim},
+        state::{Analytics, Choice, Deposit, Lock, Proposal, User, Vote, Claim},
     },
     anchor_lang::prelude::*
 };
@@ -31,11 +31,11 @@ pub struct VoteNew<'info> {
     pub lock: Box<Account<'info, Lock>>,
     #[account(
         mut,
-        seeds = [b"poll", lock.key().as_ref(), poll.id.to_le_bytes().as_ref()],
-        bump = poll.bump,
-        constraint = poll.id == index,
+        seeds = [b"proposal", lock.key().as_ref(), proposal.id.to_le_bytes().as_ref()],
+        bump = proposal.bump,
+        constraint = proposal.id == index,
     )]
-    pub poll: Box<Account<'info, Poll>>,
+    pub proposal: Box<Account<'info, Proposal>>,
     #[account(
         mut,
         seeds = [b"analytics"],
@@ -52,11 +52,11 @@ impl<'info> VoteNew<'info> {
 
         require!(user.total_user_deposit_amount() > 0, ErrorCode::UserHaveNoVotingPowerInThisLock);
 
-        let poll = &mut self.poll;
+        let proposal = &mut self.proposal;
         
-        require!(Clock::get()?.unix_timestamp < (poll.created_at + lock.voting_period), ErrorCode::VotingPeriodExpired);
+        require!(Clock::get()?.unix_timestamp < (proposal.created_at + lock.voting_period), ErrorCode::VotingPeriodExpired);
         
-        let choice = poll.choices[usize::from(id as usize)].clone();
+        let choice = proposal.choices[usize::from(id as usize)].clone();
         let title = choice.title.clone();
         let voting_power = user.voting_power(&lock);
         let mut choice_voting_power = choice.voting_power;
@@ -74,7 +74,7 @@ impl<'info> VoteNew<'info> {
 
         user.votes.push(vote);
 
-        let index = poll 
+        let index = proposal 
             .choices
             .clone()
             .into_iter()
@@ -82,7 +82,7 @@ impl<'info> VoteNew<'info> {
             .unwrap();
 
         let _ = std::mem::replace(
-            &mut poll.choices[index],
+            &mut proposal.choices[index],
             Choice {
                 id,
                 voting_power: choice_voting_power,
