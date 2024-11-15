@@ -19,6 +19,9 @@ import { ellipsis } from "@/lib/utils";
 import { TokenInfo } from "@/types";
 import { RewardsList } from "./RewardsList";
 import { DepositPopup } from "./DepositPopup";
+import { Skeleton } from "@radix-ui/themes";
+import { IoWallet } from "react-icons/io5";
+import { FaCalendar, FaWallet, FaWaveSquare } from "react-icons/fa";
 
 type Props = {
   address: string
@@ -56,13 +59,36 @@ export const Proposal: FC<Props> = ({ address }) => {
         if (response) {
           console.log(response);
           // @ts-ignore
-          const proposalMap = response.map(({ account, publicKey }) => {
-            const result = account
-            account.pubkey = publicKey
-            return result
-          })
-          console.log('proposal : ', proposal)
-          setProposal(proposalMap);
+          // const proposalMap = response.map(({ account, publicKey }) => {
+          //   const result = account
+          //   account.pubkey = publicKey
+          //   return result
+          // })
+          console.log('proposal : ', response)
+          setProposal(response);
+        }
+      })
+      .catch(err => console.log(err));
+  }, []);
+
+  useEffect(() => {
+    const fetchLock = async () => {
+      //@ts-ignore
+      return await program.account.lock.fetch(new PublicKey());
+    }
+
+    fetchLock()
+      .then(async response => {
+        if (response) {
+          console.log(response);
+          // @ts-ignore
+          // const proposalMap = response.map(({ account, publicKey }) => {
+          //   const result = account
+          //   account.pubkey = publicKey
+          //   return result
+          // })
+          console.log('proposal : ', response)
+          setProposal(response);
         }
       })
       .catch(err => console.log(err));
@@ -78,7 +104,7 @@ export const Proposal: FC<Props> = ({ address }) => {
       //@ts-ignore
       return await program.account.user.fetch(user);
     }
-    if (proposal) {
+    if (publicKey) {
       setCurrentUserLoading(true)
       fetchUser()
         .then(res => {
@@ -97,19 +123,19 @@ export const Proposal: FC<Props> = ({ address }) => {
   }, [proposal, publicKey]);
 
   return (
-    <section className="my-6 md:my-10 w-full flex flex-col justify-center items-center md:p-4 bg-[#000] text-base-content space-y-4">
+    <section className="my-6 md:my-10 w-full max-w-7xl flex justify-center items-center md:p-4 text-base-content space-x-4">
       {
-        lock ? (
-          <>
+        proposal ? (
+          <div className="w-[66%] flex flex-col items-center justify-center bg-base-100 rounded-xl p-8">
             <h1 className="text-3xl md:text-3xl font-extrabold flex">
-              {lock.name}
+              {proposal.title}
             </h1>
             <h2>created by <Link
-              href={`https://explorer.solana.com/address/${lock.creator.toString()}?cluster=devnet`}
+              href={`https://explorer.solana.com/address/${proposal.summoner.toString()}?cluster=devnet`}
               className="underline"
               target="_blank"
             >
-              {ellipsis(lock.creator.toString())}
+              {ellipsis(proposal.summoner.toString())}
             </Link>
             </h2>
             <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
@@ -119,7 +145,7 @@ export const Proposal: FC<Props> = ({ address }) => {
                 <CardTitle className="text-xs px-2 text-center text-success font-semibold">Total Staked MONO</CardTitle>
                 <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
                   //@ts-ignore
-                  lock && tokenInfo && lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals)
+                  // lock && tokenInfo && lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals)
                 } MONO</CardDescription>
               </Card>
               <Card
@@ -143,7 +169,7 @@ export const Proposal: FC<Props> = ({ address }) => {
                     className="underline"
                     target="_blank"
                   >
-                    {ellipsis(lock.mint.toString())}
+                    {/*ellipsis(lock.mint.toString())*/}
                   </Link>
                 }</CardDescription>
               </Card>
@@ -152,9 +178,9 @@ export const Proposal: FC<Props> = ({ address }) => {
               >
                 <CardTitle className="text-xs px-2 text-center text-success font-semibold">Min Voting Power To Create Proposals</CardTitle>
                 <CardDescription className="text-xs px-2 text-center text-white font-semibold">
-                  {
+                  {/*
                     lock && tokenInfo && `${lock.min.toNumber() / (1 * 10 ** tokenInfo.decimals)}`
-                  }
+                  */}
                 </CardDescription>
               </Card>
             </div>
@@ -185,15 +211,82 @@ export const Proposal: FC<Props> = ({ address }) => {
               </Card>
 
             </div>
-            <div className="w-full md:max-w-4xl flex flex-col md:flex-row items-center justify-center md:justify-around md:space-x-8">
-              <RewardsList lock={lock} setIsOpen={setIsOpen} />
-              <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} tokenInfo={tokenInfo} />
-            </div>
-            <Proposals proposals={proposals} lock={lock} address={address} />
 
-          </>
+
+          </div>
         ) : <>not found</>
       }
+      <div className="w-[33%] md:max-w-xl flex flex-col items-center justify-center space-y-4">
+        {proposal && lock ? (
+          <>
+            <div className="w-full flex flex-col justify-center items-center bg-base-100 rounded-xl space-y-4 p-8">
+              <div>Results</div>
+              {proposal.choices.map(choice => {
+                return (
+                  <div className="w-full flex justify-between">
+                    <span>{choice.title}</span>
+                    {/*@ts-ignore*/}
+                    <span>{choice.votingPower.toNumber()}</span>
+                  </div>
+                )
+              }) || <Skeleton />}
+            </div>
+            <div className="w-full flex flex-col justify-center items-start bg-base-100 rounded-xl space-y-4 p-8">
+              <div className="w-full flex justify-start items-center space-x-1">
+                <FaWaveSquare />
+                <span className="flex space-x-1">
+                  <span>Status:</span> <div className="badge badge-info p-3">Voting</div>
+                </span>
+              </div>
+              <div className="w-full flex justify-start items-center space-x-1">
+                <FaWallet />
+                <span className="flex space-x-1">
+                  <span>Created by:</span>
+                  <Link
+                    href={`https://explorer.solana.com/address/${proposal.summoner.toString()}?cluster=devnet`}
+                    className="underline"
+                    target="_blank"
+                  >
+                    {ellipsis(proposal.summoner.toString())}
+                  </Link>
+                </span>
+              </div>
+              <div className="w-full flex justify-start items-center space-x-1">
+                <FaCalendar />
+                <span className="flex space-x-1">
+                  <span>Start:</span>
+                  {/* @ts-ignore */}
+                  <span>{new Date(proposal.createdAt.toNumber() * 1000).toDateString()}</span>
+                  {/* @ts-ignore */}
+                  <span>{new Date(proposal.createdAt.toNumber() * 1000).getHours()}:{(new Date(proposal.createdAt.toNumber() * 1000).getMinutes())}</span>
+                </span>
+              </div>
+              <div className="w-full flex justify-start items-center space-x-1">
+                <FaCalendar />
+                <span className="flex space-x-1">
+                  <span>Start:</span>
+                  {/* @ts-ignore */}
+                  <span>{new Date((proposal.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).toDateString()}</span>
+                  {/* @ts-ignore */}
+                  <span>{new Date((proposal.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).getHours()}:{(new Date((proposal.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).getMinutes())}</span>
+                </span>
+              </div>
+              {proposal.choices.map(choice => {
+                return (
+                  <div className="w-full flex justify-between">
+                    <span>{choice.title}</span>
+                    {/*@ts-ignore*/}
+                    <span>{choice.votingPower.toNumber()}</span>
+                  </div>
+                )
+              }) || <Skeleton />}
+            </div>
+          </>
+        ) : (
+          <Skeleton />
+        )}
+
+      </div>
       {isOpen && <DepositPopup isOpen={isOpen} setIsOpen={setIsOpen} />}
     </section>
   )

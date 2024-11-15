@@ -28,7 +28,7 @@ const Hero = () => {
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
 
-  const [users, setUsers] = useState<User[] | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -43,14 +43,7 @@ const Hero = () => {
         if (response) {
           console.log(response);
           setLock(response);
-          // @ts-ignore
-          // const monolithMap = response.map(({ account, publicKey }) => {
-          //   const result = account
-          //   account.pubkey = publicKey
-          //   return result
-          // })
-          // console.log('monoliths : ', monolithMap)
-          // setLock(monolithMap[0])
+
 
           const mintInfo = await getMint(
             connection,
@@ -119,7 +112,14 @@ const Hero = () => {
         .then(res => {
           if (res) {
             console.log("proposals : ", res);
-            console.log(res);
+            // @ts-ignore
+            //  const proposalsMap = res.map(({ account, publicKey }) => {
+            //    const result = account
+            //    account.pubkey = publicKey
+            //    return result
+            //  })
+            //  console.log('proposals : ', proposalsMap)
+            //  setProposals(proposalsMap)
             setProposals(res);
           }
         })
@@ -196,7 +196,7 @@ const Hero = () => {
               </Card>
             </div>
             <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
-            <Proposals proposals={proposals} lock={lock} address={MONOLITH_ID} />
+            <Proposals proposals={proposals} lock={lock} address={MONOLITH_ID} users={users} currentUser={currentUser} />
           </>
         ) : (<></>)}
       </div>

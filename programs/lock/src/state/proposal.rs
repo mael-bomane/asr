@@ -6,6 +6,7 @@ use {
 #[account]
 pub struct Poll {
     pub id: u64,
+    pub lock: Pubkey,
     pub summoner: Pubkey,
     pub season: u8,
     pub created_at: i64,
@@ -21,7 +22,7 @@ pub struct Poll {
 impl Poll {
     pub const LEN: usize = DISCRIMINATOR_LENGTH
         + 8
-        + PUBLIC_KEY_LENGTH
+        + PUBLIC_KEY_LENGTH * 2
         + 1
         + TIMESTAMP_LENGTH * 2
         + BOOL_LENGTH

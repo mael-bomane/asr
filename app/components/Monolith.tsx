@@ -126,13 +126,13 @@ export const Monolith: FC<Props> = ({ address }) => {
             console.log("proposals : ", res);
             console.log(res);
             // @ts-ignore
-            const proposalsMap = res.map(({ account, publicKey }) => {
-              const result = account
-              account.pubkey = publicKey
-              return result
-            })
-            console.log('monoliths : ', proposalsMap)
-            setProposals(proposalsMap);
+            // const proposalsMap = res.map(({ account, publicKey }) => {
+            //   const result = account
+            //   account.pubkey = publicKey
+            //   return result
+            // })
+            // console.log('monoliths : ', proposalsMap)
+            setProposals(res);
           }
         })
         .catch(err => console.log(err));
@@ -252,7 +252,7 @@ export const Monolith: FC<Props> = ({ address }) => {
               <RewardsList lock={lock} setIsOpen={setIsOpen} />
               <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} tokenInfo={tokenInfo} />
             </div>
-            <Proposals proposals={proposals} lock={lock} address={address} />
+            <Proposals proposals={proposals} lock={lock} address={address} users={users} currentUser={currentUser} />
 
           </>
         ) : <>not found</>

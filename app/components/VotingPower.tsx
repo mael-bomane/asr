@@ -181,7 +181,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
         <div className="mt-4 flex w-full items-center space-x-4">
           <IoDiamond className="w-6 h-6" /> <span className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500"> {currentUser && tokenInfo ? (
             <>
-              {currentUser.deposits.reduce((acc: any, obj: any) => {
+              {currentUser && currentUser.deposits.reduce((acc: any, obj: any) => {
                 return acc + obj.amount.toNumber();
               }, 0) / (1 * 10 ** tokenInfo.decimals)}
             </>
@@ -193,12 +193,12 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
         <p className="px-2 text-base-content text-xs text-center mt-4">Lock MONO tokens to receive your voting power. <Link href="/docs" className="underline">Learn more</Link></p>
         {publicKey && currentUser ? (
           <div
-            className="w-full bg-[#121212] p-8 flex flex-col mt-4 rounded-xl"
+            className="w-full bg-[#121212] p-4 flex flex-col mt-4 rounded-xl"
           >
             <div className="w-full flex">
-              <div className="flex justify-around items-center text-xs w-[33%]">
+              <div className="flex justify-around items-center text-xs space-x-2">
                 <div
-                  className={cn("cursor-pointer  text-lg", {
+                  className={cn("cursor-pointer text-lg", {
                     "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold": isStake
                   })}
                   onClick={() => {
@@ -227,7 +227,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                 </div>
               </div>
               <div className="text-xs flex flex-1 grow w-full justify-end space-x-2">
-                <div className="flex items-center justify-center"><IoWallet className="w-4 h-4" /> <span>{`${isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (`${currentUser.deposits.reduce((acc: any, obj: any) => {
+                <div className="w-full flex items-center justify-center"><IoWallet className="w-4 h-4" /> <span>{`${isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (`${currentUser.deposits.reduce((acc: any, obj: any) => {
                   return acc + obj.amount.toNumber();
                 }, 0) / (1 * 10 ** tokenInfo.decimals)} Staked`)}`} MONO</span></div>
                 <button

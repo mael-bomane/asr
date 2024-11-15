@@ -33,8 +33,8 @@ pub struct LockNew<'info> {
     )]
     pub signer_ata: Box<Account<'info, TokenAccount>>,
     pub mint: Box<Account<'info, Mint>>,
-    #[account(constraint = metadata.mint.key() == mint.key())]
-    pub metadata: Box<Account<'info, MetadataAccount>>,
+    //#[account(constraint = metadata.mint.key() == mint.key())]
+    //pub metadata: Box<Account<'info, MetadataAccount>>,
     #[account(
         init,
         payer = signer,
@@ -100,12 +100,14 @@ impl<'info> LockNew<'info> {
 
         lock.creator = self.signer.key();
         lock.mint = self.mint.key();
-        lock.symbol = self.metadata.symbol.clone();
+        //lock.symbol = self.metadata.symbol.clone();
         lock.decimals = self.mint.decimals;
         lock.config = config;
+        let season_start = Clock::get()?.unix_timestamp;
         lock.seasons.push(Season {
             season: 0,
             points: 0,
+            season_start,
             season_end: Clock::get()?.unix_timestamp + THREE_MONTH_IN_SECONDS,
             asr: Vec::new(),
         });

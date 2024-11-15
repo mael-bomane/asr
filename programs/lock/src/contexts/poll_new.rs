@@ -60,6 +60,7 @@ impl<'info> PollNew<'info> {
         );
 
         poll.summoner = self.owner.key();
+        poll.lock = self.lock.key();
         poll.id = lock.polls + 1;
         let now = Clock::get()?.unix_timestamp;
         poll.created_at = now;

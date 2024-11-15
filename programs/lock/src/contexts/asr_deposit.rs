@@ -77,6 +77,7 @@ impl<'info> ASRDeposit<'info> {
             lock.seasons.push(Season {
                 season: season.season + 1,
                 points: 0,
+                season_start: now,
                 season_end: now + THREE_MONTH_IN_SECONDS,
                 asr: vec![ASR {
                     mint: self.mint.key(),

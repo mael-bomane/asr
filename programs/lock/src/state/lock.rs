@@ -49,6 +49,7 @@ pub struct Season {
     pub season: u8,
     pub points: u64,
     pub asr: Vec<ASR>,
+    pub season_start: i64, // 0 = asr, 1 = ve
     pub season_end: i64, // 0 = asr, 1 = ve
 }
 

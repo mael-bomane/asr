@@ -7,6 +7,7 @@ use crate::state::Lock;
 #[account]
 pub struct User {
     pub owner: Pubkey,
+    pub lock: Pubkey,
     pub points: u64,
     pub created_at: i64,
     pub bump: u8,

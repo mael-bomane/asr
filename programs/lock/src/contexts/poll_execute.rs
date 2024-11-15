@@ -74,6 +74,7 @@ impl<'info> PollExecute<'info> {
                 season: season.season + 1,
                 points: 0,
                 asr: Vec::new(),
+                season_start: now,
                 season_end: now + THREE_MONTH_IN_SECONDS
             })
         }

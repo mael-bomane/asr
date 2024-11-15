@@ -39,7 +39,7 @@ export default async function MonolithPage({
 }) {
 
   return (
-    <main className="w-full md:max-w-7xl mx-auto flex flex-col items-center justify-center grow border rounded-xl">
+    <main className="w-full md:max-w-7xl mx-auto flex flex-col items-center justify-center grow">
       <Proposal address={params.address} />
     </main >
   );

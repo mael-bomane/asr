@@ -6,7 +6,7 @@ import { FaPlusCircle } from "react-icons/fa";
 import { Progress } from "./ui/progress"
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { Poll, Lock } from "@/types";
+import { Poll, Lock, User } from "@/types";
 
 import type { FC } from "react"
 import { FaMagnifyingGlass } from "react-icons/fa6";
@@ -16,16 +16,22 @@ type Props = {
   lock: Lock | null
   address: string | null
   proposals: Poll[]
+  users: User[]
+  currentUser: User
 }
 
-export const Proposals: FC<Props> = ({ lock, address, proposals }) => {
+export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentUser }) => {
   const router = useRouter();
   return (
     <div className="w-full bg-[#000] text-base-content space-y-4 rounded-xl">
       <div className="px-6 w-full flex items-center justify-between">
         <h3 className="font-bold text-lg lg:text-xl flex justify-center items-center space-x-4">
           <span>Proposals</span>
-          <Link href={{ pathname: '/proposal/create', query: { address } }} className="button"><FaPlusCircle className="w-5 h-5" /></Link>
+          {currentUser && (currentUser.deposits.reduce((acc: any, obj: any) => {
+            return acc + obj.amount.toNumber();
+          }, 0) / (1 * 10 ** 6)) >= (lock.min.toNumber() / (1 * 10 ** 6)) &&
+            <Link href={{ pathname: '/proposal/create', query: { address } }} className="button"><FaPlusCircle className="w-5 h-5" /></Link>
+          }
         </h3>
         <div className="flex justify-center items-center space-x-2">
           <FaMagnifyingGlass className="w-5 h-5" />
@@ -45,10 +51,11 @@ export const Proposals: FC<Props> = ({ lock, address, proposals }) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {proposals.length > 0 && proposals.map(({ account }, i) => (
+          {/*@ts-ignore*/}
+          {proposals.length > 0 && proposals.map(({ account, publicKey }, i) => (
             <TableRow key={i}
               onClick={() => {
-                router.push(`/proposal/${account.id}`)
+                router.push(`/proposal/${publicKey}`)
               }}
               className="cursor-pointer"
             >
@@ -68,13 +75,14 @@ export const Proposals: FC<Props> = ({ lock, address, proposals }) => {
               <TableCell className="text-left">
                 {/* @ts-ignore */}
                 <div>{new Date(account.createdAt.toNumber() * 1000).toDateString()}</div>
-                <div>17:31 PM</div>
+                {/* @ts-ignore */}
+                <div>{new Date(account.createdAt.toNumber() * 1000).getHours()}:{(new Date(account.createdAt.toNumber() * 1000).getMinutes())}</div>
               </TableCell>
               <TableCell className="text-left">
                 {/* @ts-ignore */}
                 <div>{new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).toDateString()}</div>
                 {/* @ts-ignore */}
-                <div>{new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).getHours()}:{(new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).toISOString().split('T')[1])}</div>
+                <div>{new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).getHours()}:{(new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).getMinutes())}</div>
               </TableCell>
             </TableRow>
           ))}

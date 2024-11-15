@@ -39,9 +39,11 @@ impl<'info> Register<'info> {
     pub fn register(&mut self, bumps: &RegisterBumps) -> Result<()> {
         let user = &mut self.user;
         user.owner = self.owner.key();
+        user.lock = self.lock.key();
         user.points = 0u64;
         user.bump = bumps.user;
         user.deposits = Vec::new();
+        user.claims = Vec::new();
 
         Ok(())
     }
