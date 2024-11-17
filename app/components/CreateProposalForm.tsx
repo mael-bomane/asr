@@ -15,12 +15,12 @@ import { Button } from "./ui/button";
 import { proposalNewIx } from "@/lib/program/proposalNew";
 import { program } from "@/constants/program";
 
-import type { FC } from "react";
-import type { ProposalChoice, TokenInfo, Lock } from "@/types";
-import { getMint, getTokenMetadata, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ellipsis } from "@/lib/utils";
 import Link from "next/link";
 import { FaTrash } from "react-icons/fa";
+
+import type { FC } from "react";
+import type { ProposalChoice, TokenInfo, Lock } from "@/types";
 
 export const CreateProposalForm: FC = () => {
   const { publicKey, sendTransaction } = useWallet();

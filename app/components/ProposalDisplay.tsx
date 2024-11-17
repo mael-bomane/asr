@@ -15,6 +15,10 @@ import { ellipsis } from "@/lib/utils";
 import { DepositPopup } from "./DepositPopup";
 import Skeleton from "react-loading-skeleton";
 import { FaCalendar, FaWallet, FaWaveSquare } from "react-icons/fa";
+import { IoDiamond } from "react-icons/io5";
+import { useForm } from "react-hook-form";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Label } from "./ui/label";
 
 type Props = {
   address: string
@@ -24,11 +28,20 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   const { connection } = useConnection();
   const { publicKey } = useWallet();
+  type Inputs = {
+    title: string
+  }
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<Inputs>();
 
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [lock, setLock] = useState<Lock | null>(null);
-  const [lockPubkey, setLockPubkey] = useState<PublicKey | null>(null);
-  const [season, setSeason] = useState(null);
 
   const [users, setUsers] = useState<User[] | null>(null);
 
@@ -88,104 +101,83 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
     }
   }, [proposal]);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      const user = PublicKey.findProgramAddressSync(
+        // seeds = [b"user", lock.key().as_ref(), signer.key().as_ref()]
+        [Buffer.from("user"), proposal.lock.toBytes(), publicKey.toBytes()],
+        program.programId
+      )[0];
+      //@ts-ignore
+      return await program.account.user.fetch(user);
+    }
+    if (lock) {
+      setCurrentUserLoading(true)
+      fetchUser()
+        .then(res => {
+          if (res) {
+            console.log("current user : ", res);
+            setCurrentUser(res);
+            setCurrentUserLoading(false);
+          }
+        })
+        .catch(err => {
+          console.log(err);
+          setCurrentUserLoading(false);
+        });
+    }
+
+  }, [lock, publicKey]);
+
   return (
     <section className="my-6 md:my-10 w-full max-w-7xl flex justify-center items-start md:p-4 text-base-content space-x-4">
       {
         proposal && lock ? (
-          <div className="w-full md:w-[66%] flex flex-col items-center justify-center bg-base-100 rounded-xl p-8">
-            <h1 className="text-3xl md:text-3xl font-extrabold flex">
-              {proposal.title}
-            </h1>
-            <h2>created by <Link
-              href={`https://explorer.solana.com/address/${proposal.summoner.toString() ?? ''}?cluster=devnet`}
-              className="underline"
-              target="_blank"
-            >
-              {ellipsis(proposal.summoner.toString() ?? '')}
-            </Link>
-            </h2>
-            <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
-              <Card
-                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
-              >
-                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Total Staked MONO</CardTitle>
-                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
-                  //@ts-ignore
-                  // lock && tokenInfo && lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals)
-                } MONO</CardDescription>
-              </Card>
-              <Card
-                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
-              >
-                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Unique Addresses</CardTitle>
-                <CardDescription className="text-xs px-2 text-center text-white font-semibold">
-                  {users && users.length > 0 ? users.length : 0}
-                </CardDescription>
-              </Card>
-            </div>
-
-            <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
-              <Card
-                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
-              >
-                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Mint</CardTitle>
-                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
-                  lock && <Link
-                    href={`https://explorer.solana.com/address/${lock.creator.toString()}?cluster=devnet`}
-                    className="underline"
-                    target="_blank"
-                  >
-                    {/*ellipsis(lock.mint.toString())*/}
-                  </Link>
-                }</CardDescription>
-              </Card>
-              <Card
-                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
-              >
-                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Min Voting Power To Create Proposals</CardTitle>
-                <CardDescription className="text-xs px-2 text-center text-white font-semibold">
-                  {/*
-                    lock && tokenInfo && `${lock.min.toNumber() / (1 * 10 ** tokenInfo.decimals)}`
-                  */}
-                </CardDescription>
-              </Card>
-            </div>
-            <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
-              <Card
-                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
-              >
-                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Quorum</CardTitle>
-                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
-                  lock && lock.quorum
-                } %</CardDescription>
-              </Card>
-              <Card
-                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
-              >
-                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Approval Threshold</CardTitle>
-                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
-                  lock && lock.threshold
-                } %</CardDescription>
-              </Card>
-              <Card
-                className={`flex-1 p-2 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-between mb-2`}
-              >
-                <CardTitle className="text-xs px-2 text-center text-success font-semibold">Locker Type</CardTitle>
-                <CardDescription className="text-xs px-2 text-center text-white font-semibold">{
-                  lock && `${lock.config == 0 ? 'Active Staking Rewards' : lock.config == 1 ? 'Voting Escrow' : ''}`
-                }</CardDescription>
-              </Card>
+          <div className="w-full md:w-[66%] flex flex-col items-center justify-center space-y-4 ">
+            <div className="w-full flex flex-col items-center justify-center bg-primary text-white rounded-xl p-8">
+              <div
+                className="font-extrabold self-start">
+                <Link href={`/lock/${proposal.lock.toString()}`} className="" target="_blank">
+                  {lock.name}
+                </Link> &gt; Proposal
+              </div>
+              <h1 className="text-3xl md:text-3xl font-extrabold flex">
+                {proposal.title}
+              </h1>
 
             </div>
+            <form className="w-full bg-primary text-white rounded-box p-8">
+              <div className="w-full flex justify-between">
+                <span className="text-xl font-extrabold">Cast your vote</span>
+                <span className="flex justify-center items-center text-base-content space-x-2"><IoDiamond /><span>Voting Power : {' '}
+                  {currentUser ? currentUser.deposits.reduce((acc: any, obj: any) => {
+                    return acc + obj.amount.toNumber();
+                  }, 0) / (1 * 10 ** lock.decimals) : 0}</span></span>
 
-
+              </div>
+              <div>
+                <RadioGroup className="mt-4">
+                  {
+                    proposal.choices.map(choice => {
+                      return (
+                        <div className="flex items-center space-x-2" key={choice.id}>
+                          <RadioGroupItem value={choice.id.toString()} id={choice.id.toString()} />
+                          <Label htmlFor={choice.id.toString()} className="text-lg">{choice.title}</Label>
+                        </div>
+                      )
+                    })
+                  }
+                </RadioGroup>
+              </div>
+              <button type="submit" className="btn w-full mt-4">Vote</button>
+            </form>
           </div>
         ) : <>not found</>
       }
       <div className="w-[33%] md:max-w-xl flex flex-col items-center justify-center space-y-4">
         {proposal ? (
           <>
-            <div className="w-full flex flex-col justify-center items-center bg-base-100 rounded-xl space-y-4 p-8">
+            <div className="w-full flex flex-col justify-center items-center bg-primary text-white rounded-xl space-y-4 p-8">
               <div>Results</div>
               {proposal.choices.map(choice => {
                 return (
@@ -197,7 +189,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 )
               }) || <Skeleton />}
             </div>
-            <div className="w-full flex flex-col justify-center items-start bg-base-100 rounded-xl space-y-4 p-8">
+            <div className="w-full flex flex-col justify-center items-start bg-primary text-white rounded-xl space-y-4 p-8">
               <div className="w-full flex justify-start items-center space-x-1">
                 <FaWaveSquare />
                 <span className="flex space-x-1">
@@ -232,9 +224,9 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 <span className="flex space-x-1">
                   <span>End:</span>
                   {/* @ts-ignore */}
-                  <span>{new Date((proposal.createdAt.toNumber()) * 1000).toDateString()}</span>
+                  <span>{new Date((proposal.endsAt.toNumber()) * 1000).toDateString()}</span>
                   {/* @ts-ignore */}
-                  <span>{new Date((proposal.createdAt.toNumber()) * 1000).getHours()}:{(new Date((proposal.createdAt.toNumber()) * 1000).getMinutes())}</span>
+                  <span>{new Date((proposal.endsAt.toNumber()) * 1000).getHours()}:{(new Date((proposal.createdAt.toNumber()) * 1000).getMinutes())}</span>
                 </span>
               </div>
             </div>

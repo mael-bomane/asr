@@ -10,17 +10,17 @@ export async function generateMetadata({
 
   //@ts-ignore
   return getSEOTags({
-    title: `/proposal/${params.address}`,
-    description: `/proposal/${params.address}`,
+    title: `Proposal`,
+    description: `Proposal`,
     canonicalUrlRelative: `/proposal/${params.address}`,
     extraTags: {
       openGraph: {
-        title: `/proposal/${params.address}`,
-        description: `/proposal/${params.address}`,
+        title: `Proposal`,
+        description: `Proposal`,
         url: `/proposal/${params.address}`,
         images: [
           {
-            url: `/proposal/${params.address}.png`,
+            url: "",
             width: 1200,
             height: 660,
           },
