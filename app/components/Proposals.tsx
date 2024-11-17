@@ -6,16 +6,16 @@ import { FaPlusCircle } from "react-icons/fa";
 import { Progress } from "./ui/progress"
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { Poll, Lock, User } from "@/types";
+import { FaMagnifyingGlass } from "react-icons/fa6";
+import { Input } from "./ui/input";
 
 import type { FC } from "react"
-import { FaMagnifyingGlass } from "react-icons/fa6";
-import { tConvert } from "@/lib/utils";
+import type { Proposal, Lock, User } from "@/types";
 
 type Props = {
   lock: Lock | null
   address: string | null
-  proposals: Poll[]
+  proposals: Proposal[]
   users: User[]
   currentUser: User
 }
@@ -23,19 +23,19 @@ type Props = {
 export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentUser }) => {
   const router = useRouter();
   return (
-    <div className="w-full bg-[#000] text-base-content space-y-4 rounded-xl">
+    <div className="w-full bg-[#000] text-white space-y-4 p-4 rounded-box">
       <div className="px-6 w-full flex items-center justify-between">
         <h3 className="font-bold text-lg lg:text-xl flex justify-center items-center space-x-4">
-          <span>Proposals</span>
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold">Proposals</span>
           {currentUser && (currentUser.deposits.reduce((acc: any, obj: any) => {
             return acc + obj.amount.toNumber();
-          }, 0) / (1 * 10 ** 6)) >= (lock.min.toNumber() / (1 * 10 ** 6)) &&
+          }, 0) / (1 * 10 ** 6)) >= (lock.amount.toNumber() / (1 * 10 ** 6)) &&
             <Link href={{ pathname: '/proposal/create', query: { address } }} className="button"><FaPlusCircle className="w-5 h-5" /></Link>
           }
         </h3>
         <div className="flex justify-center items-center space-x-2">
           <FaMagnifyingGlass className="w-5 h-5" />
-          <input placeholder="Search Proposal ..." className="text-right pr-4" />
+          <Input placeholder="Search Proposal ..." className="text-right pr-4" />
         </div>
       </div>
       <Table className="overflow-x-scroll">
@@ -70,7 +70,7 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
                 </div>
               </TableCell>
               <TableCell>
-                {/*<Progress value={proposal.choices.length} />*/}
+                <Progress value={50} />
               </TableCell>
               <TableCell className="text-left">
                 {/* @ts-ignore */}
@@ -80,14 +80,12 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
               </TableCell>
               <TableCell className="text-left">
                 {/* @ts-ignore */}
-                <div>{new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).toDateString()}</div>
+                <div>{new Date(account.createdAt.toNumber() * 1000).toDateString()}</div>
                 {/* @ts-ignore */}
-                <div>{new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).getHours()}:{(new Date((account.createdAt.toNumber() + lock.votingPeriod.toNumber()) * 1000).getMinutes())}</div>
+                <div>{new Date(account.endsAt.toNumber() * 1000).getHours()}:{(new Date(account.endsAt.toNumber() * 1000).getMinutes())}</div>
               </TableCell>
             </TableRow>
           ))}
-
-
         </TableBody>
       </Table>
       <div className="px-6 max-w-[600px] flex flex-col gap-4 overflow-y-scroll pb-8">

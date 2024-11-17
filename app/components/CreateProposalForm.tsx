@@ -17,9 +17,10 @@ import { program } from "@/constants/program";
 
 import type { FC } from "react";
 import type { ProposalChoice, TokenInfo, Lock } from "@/types";
-import { getTokenMetadata, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { getMint, getTokenMetadata, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { ellipsis } from "@/lib/utils";
 import Link from "next/link";
+import { FaTrash } from "react-icons/fa";
 
 export const CreateProposalForm: FC = () => {
   const { publicKey, sendTransaction } = useWallet();
@@ -35,8 +36,8 @@ export const CreateProposalForm: FC = () => {
 
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [choices, setChoices] = useState<ProposalChoice[]>([
-    { id: 0, title: 'approve', votingPower: new BN(0) },
-    { id: 1, title: 'reject', votingPower: new BN(0) },
+    { id: 0, title: 'Approve', votingPower: new BN(0) },
+    { id: 1, title: 'Reject', votingPower: new BN(0) },
   ]);
 
   useEffect(() => {
@@ -175,40 +176,46 @@ export const CreateProposalForm: FC = () => {
         Create Proposal
       </h1>
       <div>for <Link href={`/lock/${address}`} className="underline text-white">{`${ellipsis(address)}`}</Link></div>
-      <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
-        <Label htmlFor="name" className="self-start md:text-xl font-extrabold">title : {errors.title && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
-        <Input placeholder="ex : fire gary !" id="name" type="text"
-          {...register("title", { required: true })}
-        />
-        <div
-          className="btn btn-xs btn-primary md:max-w-36 md:margin-x-auto my-4 text-base-100 self-start"
-          onClick={() => {
-            setChoices([...choices, {
-              id: choices.length + 1,
-              title: '',
-              votingPower: new BN(0),
-            }])
-          }}
-        >
-          Add Choice
+      <div className="w-full flex flex-col items-center justify-center space-y-4 grow">
+        <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
+          <Label htmlFor="name" className="self-start md:text-xl font-extrabold">title : {errors.title && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
+          <Input placeholder="ex : fire gary !" id="name" type="text"
+            {...register("title", { required: true })}
+          />
         </div>
-      </div>
-      <div className="w-full flex flex-col mt-4 space-y-2">
-        {choices.length > 0 && choices.map((choice, index) => (
-          <div className="w-full flex justify-center space-x-2" key={index}>
-            <input
-              type="text"
-              defaultValue={choice.title ?? ''}
-              onChange={(e) => {
-                e.preventDefault();
-                choices[index].title = e.target.value;
-                setChoices(choices)
-              }}
-              placeholder="choice title"
-              className="w-full"
-            />
+        <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
+          <Label htmlFor="choices" className="self-start md:text-xl font-extrabold">choices : {errors.title && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
+          <div
+            className="btn btn-xs btn-primary md:max-w-36 md:margin-x-auto text-base-100 self-start"
+            onClick={() => {
+              setChoices([...choices, {
+                id: choices.length + 1,
+                title: '',
+                votingPower: new BN(0),
+              }])
+            }}
+          >
+            Add Choice
           </div>
-        ))}
+        </div>
+        <div className="w-full flex flex-col mt-4 space-y-2">
+          {choices.length > 0 && choices.map((choice, index) => (
+            <div className="w-full flex justify-center space-x-2" key={index}>
+              <Input
+                type="text"
+                defaultValue={choice.title ?? ''}
+                onChange={(e) => {
+                  e.preventDefault();
+                  choices[index].title = e.target.value;
+                  setChoices(choices)
+                }}
+                placeholder="choice title"
+                className="w-full p-2"
+              />
+              <div className="w-[25%] h-9 flex justify-center items-center cursor-pointer group bg-neutral rounded-lg hover:bg-base-100 border"><FaTrash className="group-hover:text-error" /></div>
+            </div>
+          ))}
+        </div>
       </div>
 
       <Button className="cursor-pointer mt-8" size="lg" type="submit">create</Button>

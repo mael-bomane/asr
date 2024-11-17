@@ -9,7 +9,7 @@ module.exports = {
   theme: {
     extend: {
       scale: {
-        '-100': '-1',
+        '-100': '-1'
       },
       backgroundImage: {
         gradient: 'linear-gradient(60deg, #f79533, #f37055, #ef4e7b, #a166ab, #5073b8, #1098ad, #07b39b, #6fba82)'
@@ -19,7 +19,9 @@ module.exports = {
         appearFromRight: 'appearFromRight 300ms ease-in-out',
         wiggle: 'wiggle 1.5s ease-in-out infinite',
         popup: 'popup 0.25s ease-in-out',
-        shimmer: 'shimmer 3s ease-out infinite alternate'
+        shimmer: 'shimmer 3s ease-out infinite alternate',
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out'
       },
       keyframes: {
         opacity: {
@@ -81,6 +83,22 @@ module.exports = {
           '100%': {
             backgroundPosition: '0% 50%'
           }
+        },
+        'accordion-down': {
+          from: {
+            height: '0'
+          },
+          to: {
+            height: 'var(--radix-accordion-content-height)'
+          }
+        },
+        'accordion-up': {
+          from: {
+            height: 'var(--radix-accordion-content-height)'
+          },
+          to: {
+            height: '0'
+          }
         }
       },
       borderRadius: {
@@ -100,7 +118,7 @@ module.exports = {
           foreground: 'hsl(var(--popover-foreground))'
         },
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
+          DEFAULT: '#000000',
           foreground: 'hsl(var(--primary-foreground))'
         },
         secondary: {
@@ -138,6 +156,6 @@ module.exports = {
     // You can add another theme among the list of 30+
     // Add "data-theme='theme_name" to any HTML tag to enable the 'theme_name' theme.
     // https://daisyui.com/
-    themes: ["light", "dark"],
+    themes: ["dark"],
   },
 };

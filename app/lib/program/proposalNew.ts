@@ -28,18 +28,18 @@ export const proposalNewIx = async (
     program.programId
   )[0];
 
-  const poll = PublicKey.findProgramAddressSync(
-    // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
-    [Buffer.from("poll"), lock.toBytes(), id.toArrayLike(Buffer, 'le', 8)],
+  const proposal = PublicKey.findProgramAddressSync(
+    // seeds = [b"proposal", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
+    [Buffer.from("proposal"), lock.toBytes(), id.toArrayLike(Buffer, 'le', 8)],
     program.programId
   )[0];
 
 
   // @ts-ignore
-  return await program.methods.pollNew(title, choices)
+  return await program.methods.proposalNew(title, choices)
     .accountsStrict({
       owner,
-      poll,
+      proposal,
       lock,
       user,
       analytics,

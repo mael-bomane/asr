@@ -1,5 +1,5 @@
 {
-  "address": "asrMFZq2j6bA1RADnGM58txGVtSzMcDxxSVr57mQhLZ",
+  "address": "1ckXSJ2TDNizSpBWftmgCtxCZ22crs2ELsrdgeeAfi8",
   "metadata": {
     "name": "lock",
     "version": "0.1.0",
@@ -788,26 +788,30 @@
           "type": "u8"
         },
         {
-          "name": "min",
+          "name": "amount",
           "type": "u64"
         },
         {
           "name": "name",
           "type": "string"
+        },
+        {
+          "name": "symbol",
+          "type": "string"
         }
       ]
     },
     {
-      "name": "poll_execute",
+      "name": "proposal_execute",
       "discriminator": [
-        81,
-        161,
-        65,
-        252,
-        148,
-        75,
-        160,
-        148
+        11,
+        199,
+        235,
+        200,
+        187,
+        186,
+        18,
+        4
       ],
       "accounts": [
         {
@@ -843,7 +847,7 @@
           }
         },
         {
-          "name": "poll",
+          "name": "proposal",
           "writable": true,
           "pda": {
             "seeds": [
@@ -851,8 +855,12 @@
                 "kind": "const",
                 "value": [
                   112,
+                  114,
                   111,
-                  108,
+                  112,
+                  111,
+                  115,
+                  97,
                   108
                 ]
               },
@@ -862,8 +870,8 @@
               },
               {
                 "kind": "account",
-                "path": "poll.id",
-                "account": "Poll"
+                "path": "proposal.id",
+                "account": "Proposal"
               }
             ]
           }
@@ -898,16 +906,16 @@
       "args": []
     },
     {
-      "name": "poll_new",
+      "name": "proposal_new",
       "discriminator": [
-        225,
-        240,
-        120,
-        16,
-        204,
-        183,
-        190,
-        140
+        94,
+        164,
+        227,
+        29,
+        12,
+        125,
+        35,
+        221
       ],
       "accounts": [
         {
@@ -971,7 +979,7 @@
           }
         },
         {
-          "name": "poll",
+          "name": "proposal",
           "writable": true
         },
         {
@@ -1810,7 +1818,7 @@
           }
         },
         {
-          "name": "poll",
+          "name": "proposal",
           "writable": true,
           "pda": {
             "seeds": [
@@ -1818,8 +1826,12 @@
                 "kind": "const",
                 "value": [
                   112,
+                  114,
                   111,
-                  108,
+                  112,
+                  111,
+                  115,
+                  97,
                   108
                 ]
               },
@@ -1829,8 +1841,8 @@
               },
               {
                 "kind": "account",
-                "path": "poll.id",
-                "account": "Poll"
+                "path": "proposal.id",
+                "account": "Proposal"
               }
             ]
           }
@@ -1902,16 +1914,16 @@
       ]
     },
     {
-      "name": "Poll",
+      "name": "Proposal",
       "discriminator": [
-        110,
-        234,
-        167,
-        188,
-        231,
+        26,
+        94,
+        189,
+        187,
+        116,
         136,
-        153,
-        111
+        53,
+        33
       ]
     },
     {
@@ -1941,106 +1953,116 @@
     },
     {
       "code": 6002,
+      "name": "SymbolEmpty",
+      "msg": "Symbol Empty"
+    },
+    {
+      "code": 6003,
+      "name": "SymbolTooLong",
+      "msg": "Symbol Too Long, 10 Characters Max."
+    },
+    {
+      "code": 6004,
       "name": "PollTitleEmpty",
       "msg": "Poll Title Empty."
     },
     {
-      "code": 6003,
+      "code": 6005,
       "name": "PollTitleTooLong",
       "msg": "Poll Title Too Long, 50 Characters Max."
     },
     {
-      "code": 6004,
+      "code": 6006,
       "name": "PollContentEmpty",
       "msg": "Poll Content Empty."
     },
     {
-      "code": 6005,
+      "code": 6007,
       "name": "PollContentTooLong",
       "msg": "Poll Content Too Long, 280 Characters Max."
     },
     {
-      "code": 6006,
+      "code": 6008,
       "name": "VotingPeriodOutOfBounds",
       "msg": "Voting Period Out Of Bounds : Min 1 Day, Max 1 Week"
     },
     {
-      "code": 6007,
+      "code": 6009,
       "name": "LockDurationOutOfBounds",
       "msg": "Lock Duration Out Of Bounds : Min 1 Month, Max 5 Years"
     },
     {
-      "code": 6008,
+      "code": 6010,
       "name": "InvalidLockDuration",
       "msg": "Invalid Lock Duration"
     },
     {
-      "code": 6009,
+      "code": 6011,
       "name": "ThresholdOutOfBounds",
       "msg": "Threshold Out Of Bounds : Min 50%, Max 100%"
     },
     {
-      "code": 6010,
+      "code": 6012,
       "name": "QuorumOutOfBounds",
       "msg": "Quorum Out Of Bounds : Min 0%, Max 100%"
     },
     {
-      "code": 6011,
+      "code": 6013,
       "name": "WrongLockerMint",
       "msg": "Wrong Locker Mint"
     },
     {
-      "code": 6012,
+      "code": 6014,
       "name": "NotEnoughDepositsToStartPoll",
       "msg": "Not Enough Deposits To Start Poll."
     },
     {
-      "code": 6013,
+      "code": 6015,
       "name": "NoDepositsForThisUserInThisLocker",
       "msg": "No Deposits For This User In This Locker"
     },
     {
-      "code": 6014,
+      "code": 6016,
       "name": "UserHaveNoVotingPowerInThisLock",
       "msg": "No Voting Power For This User Found In This Lock"
     },
     {
-      "code": 6015,
+      "code": 6017,
       "name": "VotingPeriodExpired",
       "msg": "Voting Period Expired."
     },
     {
-      "code": 6016,
+      "code": 6018,
       "name": "UserAlreadyVotedThisPoll",
       "msg": "User Already Voted This Poll."
     },
     {
-      "code": 6017,
+      "code": 6019,
       "name": "WaitForVotingPeriodToEnd",
       "msg": "Wait For Voting Period To End."
     },
     {
-      "code": 6018,
+      "code": 6020,
       "name": "PollAlreadyExecuted",
       "msg": "Poll Already Executed."
     },
     {
-      "code": 6019,
+      "code": 6021,
       "name": "NoDepositsReadyToClaimForThisUserInThisLocker",
       "msg": "No Deposits Ready To Claim For This User In This Locker"
     },
     {
-      "code": 6020,
+      "code": 6022,
       "name": "ConfigUnrecognized",
       "msg": "Config Unrecognized"
     },
     {
-      "code": 6021,
+      "code": 6023,
       "name": "InstructionUnavailableForThisLock",
       "msg": "Instruction Unavailable For This Lock"
     },
     {
-      "code": 6022,
+      "code": 6024,
       "name": "UserAlreadyClaimedThis",
       "msg": "User Already Claimed This"
     }
@@ -2054,6 +2076,10 @@
           {
             "name": "mint",
             "type": "pubkey"
+          },
+          {
+            "name": "decimals",
+            "type": "u8"
           },
           {
             "name": "amount",
@@ -2198,6 +2224,10 @@
             "type": "pubkey"
           },
           {
+            "name": "decimals",
+            "type": "u8"
+          },
+          {
             "name": "config",
             "type": "u8"
           },
@@ -2218,7 +2248,7 @@
             "type": "u8"
           },
           {
-            "name": "min",
+            "name": "amount",
             "type": "u64"
           },
           {
@@ -2258,6 +2288,10 @@
             "type": "u8"
           },
           {
+            "name": "symbol",
+            "type": "string"
+          },
+          {
             "name": "name",
             "type": "string"
           },
@@ -2275,13 +2309,17 @@
       }
     },
     {
-      "name": "Poll",
+      "name": "Proposal",
       "type": {
         "kind": "struct",
         "fields": [
           {
             "name": "id",
             "type": "u64"
+          },
+          {
+            "name": "lock",
+            "type": "pubkey"
           },
           {
             "name": "summoner",
@@ -2293,6 +2331,10 @@
           },
           {
             "name": "created_at",
+            "type": "i64"
+          },
+          {
+            "name": "ends_at",
             "type": "i64"
           },
           {
@@ -2362,6 +2404,10 @@
             }
           },
           {
+            "name": "season_start",
+            "type": "i64"
+          },
+          {
             "name": "season_end",
             "type": "i64"
           }
@@ -2392,6 +2438,10 @@
         "fields": [
           {
             "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "lock",
             "type": "pubkey"
           },
           {

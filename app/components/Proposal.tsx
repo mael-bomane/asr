@@ -5,7 +5,7 @@ import { Program } from "@coral-xyz/anchor";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { IDL, program } from "@/constants";
-import { Lock, Poll, User } from "@/types/state";
+import { Lock, Proposal, User } from "@/types/state";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -27,12 +27,12 @@ type Props = {
   address: string
 };
 
-export const Proposal: FC<Props> = ({ address }) => {
+export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   const { connection } = useConnection();
   const { publicKey } = useWallet();
 
-  const [proposal, setProposal] = useState<Poll | null>(null);
+  const [proposal, setProposal] = useState<Proposal | null>(null);
   const [lock, setLock] = useState<Lock | null>(null);
   const [season, setSeason] = useState(null);
 
@@ -43,7 +43,7 @@ export const Proposal: FC<Props> = ({ address }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
 
-  const [proposals, setProposals] = useState<Poll[]>([]);
+  const [proposals, setProposals] = useState<Proposal[]>([]);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 

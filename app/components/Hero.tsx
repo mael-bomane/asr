@@ -1,203 +1,56 @@
 "use client"
 
-import Link from "next/link";
-import { Proposals } from "./Proposals";
-import { useEffect, useState } from "react";
-import { Poll, TokenInfo, User, Lock } from "@/types";
-import { getMint, getTokenMetadata, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { MONOLITH_ID, program } from "@/constants";
-import { VotingPower } from "./VotingPower";
-import { PublicKey } from "@solana/web3.js";
-import { ellipsis } from "@/lib/utils";
-import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
-import { RewardsList } from "./RewardsList";
-import { DepositPopup } from "./DepositPopup";
-import { MacbookScroll } from "./ui/macbook-scroll";
-import { Skeleton } from "@radix-ui/themes";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import type { FC } from "react";
+import WordRotate from "./ui/word-rotate";
 
-const Hero = () => {
-
-  const { connection } = useConnection();
-  const { publicKey } = useWallet();
-
-  const [proposals, setProposals] = useState<Poll[]>([])
-
-  const [lock, setLock] = useState<Lock | null>(null);
-  const [season, setSeason] = useState(null);
-
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
-  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
-
-  const [users, setUsers] = useState<User[]>([]);
-
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    const fetchMonolith = async () => {
-      //@ts-ignore
-      return await program.account.lock.fetch(new PublicKey(MONOLITH_ID));
-    }
-
-    fetchMonolith()
-      .then(async response => {
-        if (response) {
-          console.log(response);
-          setLock(response);
-
-
-          const mintInfo = await getMint(
-            connection,
-            response.mint,
-            "confirmed",
-            TOKEN_PROGRAM_ID,
-          );
-          console.log(mintInfo);
-          if (mintInfo) {
-            setTokenInfo({
-              mint: mintInfo.address,
-              decimals: mintInfo.decimals
-            })
-          }
-          const metadata = await getTokenMetadata(
-            connection,
-            response.mint, // Mint Account address
-            "confirmed",
-            TOKEN_PROGRAM_ID,
-          );
-          console.log("metadata : ", metadata)
-          response.seasons.map((season: any, index: number) => {
-            console.log(`season ${index}`, season)
-          });
-          setSeason(response.seasons[response.seasons.length - 1])
-        }
-      })
-      .catch(err => console.log(err));
-  }, []);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const user = PublicKey.findProgramAddressSync(
-        // seeds = [b"user", lock.key().as_ref(), signer.key().as_ref()]
-        [Buffer.from("user"), new PublicKey(MONOLITH_ID).toBytes(), publicKey.toBytes()],
-        program.programId
-      )[0];
-      //@ts-ignore
-      return await program.account.user.fetch(user);
-    }
-    if (lock && publicKey) {
-      setCurrentUserLoading(true)
-      fetchUser()
-        .then(res => {
-          if (res) {
-            console.log("current user : ", res);
-            setCurrentUser(res);
-            setCurrentUserLoading(false);
-          }
-        })
-        .catch(err => {
-          console.log(err);
-          setCurrentUserLoading(false);
-        });
-    }
-
-  }, [lock, publicKey]);
-
-  useEffect(() => {
-    const fetchProposals = async () => {
-      //@ts-ignore
-      return await program.account.poll.all();
-    }
-    if (lock) {
-      fetchProposals()
-        .then(res => {
-          if (res) {
-            console.log("proposals : ", res);
-            // @ts-ignore
-            //  const proposalsMap = res.map(({ account, publicKey }) => {
-            //    const result = account
-            //    account.pubkey = publicKey
-            //    return result
-            //  })
-            //  console.log('proposals : ', proposalsMap)
-            //  setProposals(proposalsMap)
-            setProposals(res);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-
-  }, [lock, publicKey]);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      //@ts-ignore
-      return await program.account.user.all();
-    }
-    if (lock) {
-      fetchUsers()
-        .then(res => {
-          if (res) {
-            console.log("total users : ", res);
-            setUsers(res);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-
-  }, [lock]);
-
-
-
+export const Hero: FC = () => {
+  const router = useRouter();
   return (
-    <section className="max-w-7xl w-full mx-auto flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 px-8 py-8 text-base-content">
-      <div className="lg:w-full flex flex-col justify-center items-center space-y-4">
-        {lock ? (
-          <>
-            <h1 className="text-3xl md:text-3xl font-extrabold flex">
-              {lock.name}
-            </h1>
-            <h2>created by <Link
-              href={`https://explorer.solana.com/address/${lock.creator.toString()}?cluster=devnet`}
-              className="underline"
-              target="_blank"
-            >
-              {ellipsis(lock.creator.toString())}
-            </Link>
-            </h2>
-
-
-            <div className="md:w-full max-w-4xl flex justify-center items-center gap-2 md:gap-4">
-              <Card
-                className={`flex-1 p-1 md:p-2 bg-base-100 text-base-content rounded-xl flex flex-col items-center justify-between mb-2`}
-              >
-                <CardTitle className="text-sm px-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold">Total Voting Power</CardTitle>
-                <CardDescription className="text-sm px-2 text-center text-white font-semibold">{
-                  //@ts-ignore
-                  lock && tokenInfo && new Intl.NumberFormat().format(lock.totalDeposits.toNumber() / (1 * 10 ** tokenInfo.decimals))
-                }</CardDescription>
-              </Card>
-              <Card
-                className={`flex-1 p-1 md:p-2 bg-base-100 text-base-content rounded-xl flex flex-col items-center justify-between mb-2`}
-              >
-                <CardTitle className="text-sm px-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-500 to-blue-600 font-extrabold">Unique Addresses</CardTitle>
-                <CardDescription className="text-sm px-2 text-center text-white font-semibold">
-                  {users && users.length > 0 ? users.length : 0}
-                </CardDescription>
-              </Card>
+    <>
+      {/* Hero */}
+      <div className="w-full relative overflow-hidden py-32">
+        {/* Gradients */}
+        <div
+          aria-hidden="true"
+          className="flex absolute -top-96 start-1/2 transform -translate-x-1/2"
+        >
+          <div className="bg-gradient-to-r from-background/50 to-background blur-3xl w-[25rem] h-[44rem] rotate-[-60deg] transform -translate-x-[10rem]" />
+          <div className="bg-gradient-to-tl blur-3xl w-[90rem] h-[50rem] rounded-full origin-top-left -rotate-12 -translate-x-[15rem] from-primary-foreground via-primary-foreground to-background" />
+        </div>
+        {/* End Gradients */}
+        <div className="w-full flex flex-col justify-center items-center relative z-10">
+          <div className="container py-10 lg:py-16">
+            <div className="max-w-2xl text-center mx-auto">
+              <p className="badge bg-[#14F195] text-[#000] p-4">Devnet Release</p>
+              {/* Title */}
+              <div className="mt-5 max-w-2xl">
+                <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+                  Active Staking Rewards
+                </h1>
+              </div>
+              {/* End Title */}
+              <div className="mt-5 max-w-3xl">
+                <p className="text-xl text-muted-foreground flex flex-row justify-center items-center space-x-2">
+                  <span>Incentivized</span> <WordRotate words={['Voting', 'Feedback', 'Engagement']} className="inline-block" />  <span>Platform</span>
+                </p>
+              </div>
+              {/* Buttons */}
+              <div className="mt-8 gap-3 flex justify-center">
+                <Button size={"lg"}>Contribute</Button>
+                <Button size={"lg"} variant={"outline"} onClick={() => {
+                  router.push('/lock/create')
+                }}>
+                  Create Lock
+                </Button>
+              </div>
+              {/* End Buttons */}
             </div>
-            <div className="w-full flex justify-center items-center space-x-4">
-              <RewardsList lock={lock} setIsOpen={setIsOpen} />
-              <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={MONOLITH_ID} tokenInfo={tokenInfo} />
-            </div>
-            <Proposals proposals={proposals} lock={lock} address={MONOLITH_ID} users={users} currentUser={currentUser} />
-          </>
-        ) : <Skeleton />}
+          </div>
+        </div>
       </div>
-      {isOpen && lock && <DepositPopup isOpen={isOpen} setIsOpen={setIsOpen} />}
-    </section>
+      {/* End Hero */}
+    </>
   );
-}
-
-export default Hero;
+};

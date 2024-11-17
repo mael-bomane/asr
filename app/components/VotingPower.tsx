@@ -30,10 +30,9 @@ type Props = {
   currentUserLoading: boolean
   lock: Lock | null
   address: string
-  tokenInfo: TokenInfo
 }
 
-export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, address, tokenInfo }) => {
+export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, address }) => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [loading, setLoading] = useState<boolean>(false);
@@ -174,26 +173,29 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
     <form
       onSubmit={handleSubmit(onSubmit)}
 
-      className={`max-w-[500px] mx-auto w-full p-8 bg-base-100 text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
+      className={`max-w-[500px] mx-auto w-full p-2 md:p-8 bg-primary text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
     >
       <CardTitle className="px-2 pb-4 self-start w-full">
         <div className="text-lg font-extrabold">Voting Power</div>
         <div className="mt-4 flex w-full items-center space-x-4">
-          <IoDiamond className="w-6 h-6" /> <span className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500"> {currentUser && tokenInfo ? (
+          <IoDiamond className="w-6 h-6" /> <span className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500"> {currentUser ? (
             <>
               {currentUser && currentUser.deposits.reduce((acc: any, obj: any) => {
                 return acc + obj.amount.toNumber();
-              }, 0) / (1 * 10 ** tokenInfo.decimals)}
+              }, 0) / (1 * 10 ** lock.decimals)}
             </>
           ) : (
             <>0</>
           )
           }</span>
         </div>
-        <p className="px-2 text-base-content text-xs text-center mt-4">Lock MONO tokens to receive your voting power. <Link href="/docs" className="underline">Learn more</Link></p>
+        <p className="px-2 text-base-content text-xs text-center mt-4">Lock
+          <Link href={`https://explorer.solana.com/address/${lock.mint.toString()}?cluster=devnet`}
+            className="underline font-extrabold">{' '}{lock.symbol}{' '}</Link>
+          tokens to receive your voting power. <Link href="/docs" className="underline">Learn more</Link></p>
         {publicKey && currentUser ? (
           <div
-            className="w-full bg-[#121212] p-4 flex flex-col mt-4 rounded-xl"
+            className="w-full bg-base-100 p-4 flex flex-col mt-4 rounded-xl"
           >
             <div className="w-full flex">
               <div className="flex justify-around items-center text-xs space-x-2">
@@ -227,16 +229,16 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                 </div>
               </div>
               <div className="text-xs flex flex-1 grow w-full justify-end space-x-2">
-                <div className="w-full flex items-center justify-center"><IoWallet className="w-4 h-4" /> <span>{`${isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (`${currentUser.deposits.reduce((acc: any, obj: any) => {
+                <div className="w-full flex items-center justify-center"><IoWallet className="w-4 h-4" /> <span className="uppercase">{`${isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (`${currentUser.deposits.reduce((acc: any, obj: any) => {
                   return acc + obj.amount.toNumber();
-                }, 0) / (1 * 10 ** tokenInfo.decimals)} Staked`)}`} MONO</span></div>
+                }, 0) / (1 * 10 ** lock.decimals)} Staked`)}`} {lock.symbol}</span></div>
                 <button
                   className="btn btn-xs"
                   onClick={(e) => {
                     e.preventDefault();
                     setValue('amount', isStake ? (userTokenAmount ? (userTokenAmount.uiAmount / 2) : 0) : ((currentUser.deposits.reduce((acc: any, obj: any) => {
                       return acc + obj.amount.toNumber();
-                    }, 0) / 2) / (1 * 10 ** tokenInfo.decimals)))
+                    }, 0) / 2) / (1 * 10 ** lock.decimals)))
                   }}
                 >
                   HALF
@@ -247,8 +249,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                     e.preventDefault();
                     setValue('amount', isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (currentUser.deposits.reduce((acc: any, obj: any) => {
                       return acc + obj.amount.toNumber();
-                    }, 0) / (1 * 10 ** tokenInfo.decimals)))
-
+                    }, 0) / (1 * 10 ** lock.decimals)))
                   }}
                 >
                   MAX

@@ -3,7 +3,7 @@ import { ConfigProps } from "./types/config";
 
 const config = {
   appName: "Monolith",
-  appDescription: "active staking reward & voting escrow",
+  appDescription: "Active Staking Rewards",
   github: "",
   discord: "",
   xTwitter: "monolith_haus",
