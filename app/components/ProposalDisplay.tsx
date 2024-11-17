@@ -13,7 +13,7 @@ import Link from "next/link";
 import { ellipsis } from "@/lib/utils";
 
 import { DepositPopup } from "./DepositPopup";
-import { Skeleton } from "@radix-ui/themes";
+import Skeleton from "react-loading-skeleton";
 import { FaCalendar, FaWallet, FaWaveSquare } from "react-icons/fa";
 
 type Props = {
@@ -27,6 +27,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [lock, setLock] = useState<Lock | null>(null);
+  const [lockPubkey, setLockPubkey] = useState<PublicKey | null>(null);
   const [season, setSeason] = useState(null);
 
   const [users, setUsers] = useState<User[] | null>(null);
@@ -36,95 +37,71 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-
   useEffect(() => {
     const fetchProposal = async () => {
       //@ts-ignore
-      return await program.account.poll.fetch(new PublicKey(address));
+      return await program.account.proposal.fetch(new PublicKey(address));
+    }
+    if (address) {
+      fetchProposal()
+        .then(async response => {
+          if (response) {
+            console.log(response);
+            // @ts-ignore
+            // const proposalMap = response.map(({ account, publicKey }) => {
+            //   const result = account
+            //   account.pubkey = publicKey
+            //   return result
+            // })
+            console.log('proposal : ', response)
+            setProposal(response);
+          }
+        })
+        .catch(err => console.log(err));
+
     }
 
-    fetchProposal()
-      .then(async response => {
-        if (response) {
-          console.log(response);
-          // @ts-ignore
-          // const proposalMap = response.map(({ account, publicKey }) => {
-          //   const result = account
-          //   account.pubkey = publicKey
-          //   return result
-          // })
-          console.log('proposal : ', response)
-          setProposal(response);
-        }
-      })
-      .catch(err => console.log(err));
   }, []);
 
   useEffect(() => {
     const fetchLock = async () => {
       //@ts-ignore
-      return await program.account.lock.fetch(new PublicKey());
+      return await program.account.lock.fetch(proposal.lock);
     }
-
-    fetchLock()
-      .then(async response => {
-        if (response) {
-          console.log(response);
-          // @ts-ignore
-          // const proposalMap = response.map(({ account, publicKey }) => {
-          //   const result = account
-          //   account.pubkey = publicKey
-          //   return result
-          // })
-          console.log('proposal : ', response)
-          setProposal(response);
-        }
-      })
-      .catch(err => console.log(err));
-  }, []);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const user = PublicKey.findProgramAddressSync(
-        // seeds = [b"user", lock.key().as_ref(), signer.key().as_ref()]
-        [Buffer.from("user"), new PublicKey(address).toBytes(), publicKey.toBytes()],
-        program.programId
-      )[0];
-      //@ts-ignore
-      return await program.account.user.fetch(user);
-    }
-    if (publicKey) {
-      setCurrentUserLoading(true)
-      fetchUser()
-        .then(res => {
-          if (res) {
-            console.log("current user : ", res);
-            setCurrentUser(res);
-            setCurrentUserLoading(false);
+    if (proposal) {
+      fetchLock()
+        .then(async response => {
+          if (response) {
+            console.log(response);
+            // @ts-ignore
+            // const proposalMap = response.map(({ account, publicKey }) => {
+            //   const result = account
+            //   account.pubkey = publicKey
+            //   return result
+            // })
+            console.log('lock : ', response)
+            setLock(response);
           }
         })
-        .catch(err => {
-          console.log(err);
-          setCurrentUserLoading(false);
-        });
-    }
+        .catch(err => console.log(err));
 
-  }, [proposal, publicKey]);
+    }
+  }, [proposal]);
 
   return (
     <section className="my-6 md:my-10 w-full max-w-7xl flex justify-center items-start md:p-4 text-base-content space-x-4">
       {
-        proposal ? (
-          <div className="w-[66%] flex flex-col items-center justify-center bg-base-100 rounded-xl p-8">
+        proposal && lock ? (
+          <div className="w-full md:w-[66%] flex flex-col items-center justify-center bg-base-100 rounded-xl p-8">
             <h1 className="text-3xl md:text-3xl font-extrabold flex">
               {proposal.title}
             </h1>
             <h2>created by <Link
-              href={`https://explorer.solana.com/address/${proposal.summoner.toString()}?cluster=devnet`}
+              href={`https://explorer.solana.com/address/${proposal.summoner.toString() ?? ''}?cluster=devnet`}
               className="underline"
               target="_blank"
             >
-              {ellipsis(proposal.summoner.toString())}
+              {ellipsis(proposal.summoner.toString() ?? '')}
             </Link>
             </h2>
             <div className="w-full max-w-4xl grid grid-rows-1 md:flex justify-center items-center gap-4">
@@ -260,15 +237,6 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   <span>{new Date((proposal.createdAt.toNumber()) * 1000).getHours()}:{(new Date((proposal.createdAt.toNumber()) * 1000).getMinutes())}</span>
                 </span>
               </div>
-              {proposal.choices.map(choice => {
-                return (
-                  <div className="w-full flex justify-between" key={choice.id}>
-                    <span>{choice.title}</span>
-                    {/*@ts-ignore*/}
-                    <span>{choice.votingPower.toNumber()}</span>
-                  </div>
-                )
-              }) || <Skeleton />}
             </div>
           </>
         ) : (

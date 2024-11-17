@@ -1,5 +1,5 @@
 import { getSEOTags } from "@/lib/seo";
-import { ProposalDisplay } from "@/components/Proposal";
+import { ProposalDisplay } from "@/components/ProposalDisplay";
 
 
 export async function generateMetadata({

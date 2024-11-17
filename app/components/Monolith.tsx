@@ -95,7 +95,14 @@ export const Monolith: FC<Props> = ({ address }) => {
   useEffect(() => {
     const fetchProposals = async () => {
       //@ts-ignore
-      return await program.account.poll.all();
+      return await program.account.proposal.all([
+        {
+          memcmp: {
+            offset: 8 + 8,
+            bytes: new PublicKey(address).toBase58(),
+          },
+        },
+      ]);
     }
     if (lock) {
       fetchProposals()
@@ -139,7 +146,7 @@ export const Monolith: FC<Props> = ({ address }) => {
 
 
   return (
-    <section className="my-6 md:my-10 w-full flex flex-col justify-center items-center md:p-4 space-2-4">
+    <section className="my-6 md:my-10 w-full flex flex-col justify-center items-center md:p-4 space-y-4">
       {lock ? (
         <>
           <h1 className="text-3xl md:text-3xl font-extrabold flex">
