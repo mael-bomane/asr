@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Card, CardDescription, CardTitle } from "./ui/card";
 import type { FC } from "react";
 import type { Lock, User } from "@/types";
+import Skeleton from "react-loading-skeleton";
 
 type Props = {
   lock: Lock
