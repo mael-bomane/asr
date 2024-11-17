@@ -1,26 +1,19 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { Program } from "@coral-xyz/anchor";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
-import { IDL, program } from "@/constants";
+import { program } from "@/constants";
 import { Lock, Proposal, User } from "@/types/state";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 
 import type { FC } from "react";
-import { Proposals } from "./Proposals";
-import { getMint, getTokenMetadata, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { VotingPower } from "./VotingPower";
 import Link from "next/link";
 import { ellipsis } from "@/lib/utils";
 
-import { TokenInfo } from "@/types";
-import { RewardsList } from "./RewardsList";
 import { DepositPopup } from "./DepositPopup";
 import { Skeleton } from "@radix-ui/themes";
-import { IoWallet } from "react-icons/io5";
 import { FaCalendar, FaWallet, FaWaveSquare } from "react-icons/fa";
 
 type Props = {
@@ -36,14 +29,10 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
   const [lock, setLock] = useState<Lock | null>(null);
   const [season, setSeason] = useState(null);
 
-  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
-
   const [users, setUsers] = useState<User[] | null>(null);
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
-
-  const [proposals, setProposals] = useState<Proposal[]>([]);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 

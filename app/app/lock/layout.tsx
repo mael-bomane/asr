@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 
 export default async function LayoutBlog({ children }: { children: any }) {
   return (
-    <div className="bg-[#000]">
+    <div className="">
       <Suspense>
         <Header />
       </Suspense>

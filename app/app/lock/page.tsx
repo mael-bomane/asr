@@ -3,15 +3,16 @@ import Image from "next/image";
 
 export async function generateMetadata() {
 
+  // @ts-ignore
   return getSEOTags({
-    title: "monolith",
-    description: "summon a monolith, become stakeholder",
-    canonicalUrlRelative: `/monolith`,
+    title: "Create ASR Lock",
+    description: "Create ASR Lock",
+    canonicalUrlRelative: `/lock/create`,
     extraTags: {
       openGraph: {
-        title: "monolith",
-        description: "summon a monolith, become stakeholder",
-        url: `/monolith`,
+        title: "Create Lock",
+        description: "Create ASR Lock",
+        url: `/lock/create`,
         images: [
           {
             url: "",
@@ -26,11 +27,7 @@ export async function generateMetadata() {
   });
 }
 
-export default async function Article({
-  params,
-}: {
-  params: { username: string };
-}) {
+export default async function LockPage() {
 
   return (
     <main className="my-6 md:my-10 w-full flex flex-col justify-center items-center">

@@ -57,38 +57,6 @@ export const CreateProposalForm: FC = () => {
           if (response) {
             console.log(response);
             setLock(response);
-            // @ts-ignore
-            // const monolithMap = response.map(({ account, publicKey }) => {
-            //   const result = account
-            //   account.pubkey = publicKey
-            //   return result
-            // })
-            // console.log('monoliths : ', monolithMap)
-            // setLock(monolithMap[0])
-
-            const mintInfo = await getMint(
-              connection,
-              response.mint,
-              "confirmed",
-              TOKEN_PROGRAM_ID,
-            );
-            console.log(mintInfo);
-            if (mintInfo) {
-              setTokenInfo({
-                mint: mintInfo.address,
-                decimals: mintInfo.decimals
-              })
-            }
-            const metadata = await getTokenMetadata(
-              connection,
-              response.mint, // Mint Account address
-              "confirmed",
-              TOKEN_PROGRAM_ID,
-            );
-            console.log("metadata : ", metadata)
-            response.seasons.map((season: any, index: number) => {
-              console.log(`season ${index}`, season)
-            });
           }
         })
         .catch(err => console.log(err));
@@ -148,13 +116,13 @@ export const CreateProposalForm: FC = () => {
 
         toast.success(`success, redirecting you shortly :\ntx : ${signature}`);
 
-        const poll = PublicKey.findProgramAddressSync(
-          // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
-          [Buffer.from("poll"), new PublicKey(address).toBytes(), new BN(lock.polls.toNumber() ?? 0 + 1).toArrayLike(Buffer, 'le', 8)],
+        const proposal = PublicKey.findProgramAddressSync(
+          // seeds = [b"proposal", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
+          [Buffer.from("proposal"), new PublicKey(address).toBytes(), new BN(lock.polls.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
           program.programId
         )[0];
 
-        router.push(`/proposal/${poll.toString()}`)
+        router.push(`/proposal/${proposal.toString()}`)
 
       } catch (error) {
         console.log(error.message);

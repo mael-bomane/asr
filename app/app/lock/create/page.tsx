@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default async function Summon() {
   return (
-    <main className="w-full md:max-w-7xl mx-auto bg-base-100 text-base-content flex flex-col items-center justify-center grow  rounded-xl">
+    <main className="w-full md:max-w-7xl mx-auto flex flex-col items-center justify-center grow">
       <Suspense>
         <CreateLockForm />
       </Suspense>

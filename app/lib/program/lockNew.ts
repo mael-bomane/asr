@@ -13,8 +13,9 @@ export const lockNewIx = async (
   lockDuration: BN,
   threshold: number,
   quorum: number,
-  min: BN,
-  name: string
+  amount: BN,
+  name: string,
+  symbol: string
 ) => {
   console.log("signer", signer.toString());
   console.log("mint", mint.toString());
@@ -24,8 +25,9 @@ export const lockNewIx = async (
   console.log("lockDuration", lockDuration.toNumber());
   console.log("threshold", threshold);
   console.log("quorum", quorum);
-  console.log("min", min.toNumber());
+  console.log("amount", amount.toNumber());
   console.log("name", name);
+  console.log("symbol", symbol);
 
   const analytics = PublicKey.findProgramAddressSync(
     [Buffer.from("analytics")],
@@ -57,7 +59,7 @@ export const lockNewIx = async (
   //  min: u64,
   //  name: String,
   // @ts-ignore
-  return await program.methods.lockNew(config, votingPeriod, lockDuration, threshold, quorum, min, name)
+  return await program.methods.lockNew(config, votingPeriod, lockDuration, threshold, quorum, amount, name, symbol)
     .accountsStrict({
       signer,
       auth,

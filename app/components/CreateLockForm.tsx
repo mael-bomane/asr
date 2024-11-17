@@ -16,6 +16,7 @@ import { Button } from "./ui/button";
 import type { FC } from "react";
 import { useRouter } from "next/navigation";
 import { lockNewIx } from "@/lib/program/lockNew";
+import { program } from "@/constants";
 
 export const CreateLockForm: FC = () => {
   const { publicKey, sendTransaction } = useWallet();
@@ -23,17 +24,19 @@ export const CreateLockForm: FC = () => {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [threshold, setThreshold] = useState<number>(50);
+  const [quorum, setQuorum] = useState<number>(25);
   const [votingPeriod, setVotingPeriod] = useState<number>(86400 * 1000);
 
   type Inputs = {
     signer: PublicKey
     mint: PublicKey
+    symbol: string
     config: number
     votingPeriod: number
     lockDuration: number
     threshold: number
     quorum: number
-    min: number
+    amount: number
     name: string
   }
 
@@ -82,8 +85,9 @@ export const CreateLockForm: FC = () => {
           new BN(inputs.lockDuration ? inputs.lockDuration : new BN(0)),
           inputs.threshold,
           inputs.quorum ?? 25,
-          new BN(inputs.min * 1 * 10 ** mintInfo.decimals),
-          inputs.name
+          new BN(inputs.amount * 1 * 10 ** mintInfo.decimals),
+          inputs.name,
+          inputs.symbol
         );
 
 
@@ -103,7 +107,15 @@ export const CreateLockForm: FC = () => {
 
         console.log(signature);
 
+        const lock = PublicKey.findProgramAddressSync(
+          // seeds = [b"lock", creator.key().as_ref(), mint.key().as_ref()]
+          [Buffer.from("lock"), publicKey.toBytes(), mint.toBytes()],
+          program.programId
+        )[0];
+
         toast.success(`success, redirecting you shortly :\ntx : ${signature}`);
+
+        router.push(`/lock/${lock.toString()}`);
 
       } catch (error) {
         console.log(error);
@@ -131,54 +143,39 @@ export const CreateLockForm: FC = () => {
   };
 
   return (
-    <form className="w-full md:max-w-7xl grow w-full mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-base-100 text-base-content rounded-xl"
+    <form className="w-full md:max-w-7xl grow w-full mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-primary text-white rounded-xl"
       onSubmit={handleSubmit(onSubmit)}
     >
       <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">
-        configure your monolith
+        Create ASR Lock
       </h1>
       <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
-
-        {/*<Label htmlFor="time" className="md:text-xl font-extrabold mt-4">monolith type : </Label>
-
-        <RadioGroup
-          className="flex w-full items-center justify-center"
-          id="config"
-          defaultValue="ActiveStakingRewards"
-          onValueChange={(e) => {
-            console.log(e);
-          }}>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value={'0'} id="ActiveStakingRewards" />
-            <Label htmlFor="config" className="self-start md:text-xl font-extrabold">active staking rewards</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value={'1'} id="FourtyEightHours" />
-            <Label htmlFor="config" className="self-start md:text-xl font-extrabold">voting escrow</Label>
-          </div>
-        </RadioGroup>*/}
-        <Label htmlFor="name" className="self-start md:text-xl font-extrabold">monolith name : {errors.name && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
-
+        <Label htmlFor="name" className="self-start md:text-xl font-extrabold">Lock Name : {errors.name && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
         <Input placeholder="ex : monolith.haus" id="name" type="text"
           {...register("name", { required: true })}
         />
-        <Label htmlFor="mint" className="self-start md:text-xl font-extrabold">mint to stake : {errors.mint && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
-
+        <Label htmlFor="mint" className="self-start md:text-xl font-extrabold">Lock Mint : {errors.mint && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
         <Input
           type="text"
           placeholder="chosen mint"
           id="mint"
           {...register("mint", { required: true })}
         />
-        <Label htmlFor="min" className="self-start md:text-xl font-extrabold">min. tokens to create poll {errors.min && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
+        <Label htmlFor="symbol" className="self-start md:text-xl font-extrabold">Mint Symbol : {errors.symbol && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
+        <Input
+          type="text"
+          placeholder="ex: MONO"
+          id="symbol"
+          {...register("symbol", { required: true })}
+        />
+        <Label htmlFor="min" className="self-start md:text-xl font-extrabold">Voting Power To Start Proposal : {errors.amount && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
         <Input
           type="number"
           placeholder="ex : 100"
           id="min"
-          {...register("min", { required: true })}
+          {...register("amount", { required: true })}
         />
-
-        <Label htmlFor="threshold" className="self-start md:text-xl font-extrabold">approval threshold : {threshold}%</Label>
+        <Label htmlFor="threshold" className="self-start md:text-xl font-extrabold">Approval Threshold : {threshold}% {errors.threshold && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
         <Slider id="threshold"
           defaultValue={[threshold]}
           onValueChange={(e) => {
@@ -191,8 +188,20 @@ export const CreateLockForm: FC = () => {
           max={100}
           step={1}
         />
-        {errors.threshold && <div className="text-error">this field is required</div>}
-        <Label htmlFor="votingPeriod" className="self-start md:text-xl font-extrabold">voting period : {getDuration(votingPeriod).value} {getDuration(votingPeriod).unit}</Label>
+        <Label htmlFor="quorum" className="self-start md:text-xl font-extrabold">Minimum Quorum : {quorum}% {errors.quorum && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
+        <Slider id="quorum"
+          defaultValue={[quorum]}
+          onValueChange={(e) => {
+            console.log(e[0]);
+            setQuorum(e[0])
+            setValue('quorum', e[0])
+          }}
+          {...register("quorum", { required: true })}
+          min={0}
+          max={100}
+          step={1}
+        />
+        <Label htmlFor="votingPeriod" className="self-start md:text-xl font-extrabold">Voting Period : {getDuration(votingPeriod).value} {getDuration(votingPeriod).unit} {errors.votingPeriod && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
         <Slider id="votingPeriod"
           defaultValue={[86400 * 1000]}
           onValueChange={(e) => {
@@ -205,9 +214,8 @@ export const CreateLockForm: FC = () => {
           max={86400 * 7 * 1000}
           step={86400 * 1000}
         />
-        {errors.votingPeriod && <div className="text-error">this field is required</div>}
       </div>
-      <Button className="cursor-pointer mt-8" size="lg" type="submit">create</Button>
+      <Button className="cursor-pointer mt-8 w-full font-extrabold text-lg hover:bg-base-100 border" size="lg" type="submit">Create</Button>
     </form>
   );
 }
