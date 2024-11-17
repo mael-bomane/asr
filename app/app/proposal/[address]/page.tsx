@@ -1,5 +1,5 @@
 import { getSEOTags } from "@/lib/seo";
-import { Proposal } from "@/components/Proposal";
+import { ProposalDisplay } from "@/components/Proposal";
 
 
 export async function generateMetadata({
@@ -32,7 +32,7 @@ export async function generateMetadata({
   });
 }
 
-export default async function MonolithPage({
+export default async function ProposalPage({
   params,
 }: {
   params: { address: string };
@@ -40,7 +40,7 @@ export default async function MonolithPage({
 
   return (
     <main className="w-full md:max-w-7xl mx-auto flex flex-col items-center justify-center grow">
-      <Proposal address={params.address} />
+      <ProposalDisplay address={params.address} />
     </main >
   );
 }
