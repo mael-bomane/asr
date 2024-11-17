@@ -273,7 +273,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
               </div>
               {proposal.choices.map(choice => {
                 return (
-                  <div className="w-full flex justify-between">
+                  <div className="w-full flex justify-between" key={choice.id}>
                     <span>{choice.title}</span>
                     {/*@ts-ignore*/}
                     <span>{choice.votingPower.toNumber()}</span>
