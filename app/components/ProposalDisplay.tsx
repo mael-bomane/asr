@@ -32,6 +32,7 @@ import { useForm } from "react-hook-form";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { proposalVoteIx } from "@/lib/program/proposalVote";
+import { Progress } from "./ui/progress";
 
 type Props = {
   address: string
@@ -171,7 +172,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
       {
         proposal && lock ? (
           <div className="w-full md:w-[66%] flex flex-col items-center justify-center space-y-4 ">
-            <div className="w-full flex flex-col items-center justify-center bg-primary text-white rounded-xl p-8">
+            <div className="w-full flex flex-col items-center justify-center bg-primary text-white rounded-box p-8">
               <div
                 className="font-extrabold self-start">
                 <Link href={`/lock/${proposal.lock.toString()}`} className="" target="_blank">
@@ -240,25 +241,53 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
       <div className="w-full md:w-[33%] md:max-w-xl flex flex-col items-center justify-center mt-4 md:mt-0 space-y-4">
         {proposal && lock ? (
           <>
-            <div className="w-full flex flex-col justify-center items-center bg-primary text-white rounded-xl space-y-4 p-8">
-              <div>Results</div>
-              {proposal.choices.map(choice => {
-                return (
-                  <div className="w-full flex justify-between" key={choice.id}>
-                    <span>{choice.title}</span>
-                    {/*@ts-ignore*/}
-                    <span>{choice.votingPower.toNumber() / (1 * 10 ** lock.decimals)}</span>
+            <div className="w-full flex flex-col justify-center items-center bg-primary text-white rounded-box space-y-4 p-8">
+              {proposal.executed ? (
+                <>
+                  <div>Results</div>
+                  {proposal.choices.map(choice => {
+                    return (
+                      <div className="w-full flex justify-between" key={choice.id}>
+                        <span>{choice.title}</span>
+                        {/*@ts-ignore*/}
+                        <span>{choice.votingPower.toNumber() / (1 * 10 ** lock.decimals)}</span>
+                      </div>
+                    )
+                  })}
+                </>) : (
+                <>
+                  <div>Progress</div>
+                  <Progress className="bg-base-100" />
+                  <div className="w-full flex items-center justify-between">
+                    <div className="w-full text-sm">
+                      <span className="text-base-content">Votes : </span>
+                      <span>{proposal.choices.reduce((acc: any, obj: any) => {
+                        return acc + obj.votingPower.toNumber();
+                      }, 0) / (1 * 10 ** lock.decimals)}
+                      </span>
+                    </div>
+                    <div className="w-full text-sm text-right">
+                      <span className="text-base-content">Min threshold : </span>
+                      {/*@ts-ignore*/}
+                      <span>{lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100}
+                      </span>
+                    </div>
                   </div>
-                )
-              }) || <Skeleton />}
+                  <p className="text-sm text-base-content">
+                    Final voting results will be shown once the voting is closed.
+                  </p>
+
+                </>
+              )}
             </div>
-            <div className="w-full flex flex-col justify-center items-start bg-primary text-white rounded-xl space-y-4 p-8">
+            <div className="w-full flex flex-col justify-center items-start bg-primary text-white rounded-box space-y-4 p-8">
               <div className="w-full flex justify-start items-center space-x-1">
                 <FaWaveSquare className="text-base-content" />
                 <span className="flex space-x-4">
                   <span className="text-base-content">Status:</span>
                   <div className="badge badge-info badge-outline p-3">
-                    Voting
+                    {/*@ts-ignore*/}
+                    {proposal.endsAt.toNumber() < new Date().getTime() && 'Voting'}
                   </div>
                 </span>
               </div>
@@ -296,7 +325,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 </span>
               </div>
             </div>
-            <div className="w-full flex flex-col justify-start items-start bg-primary text-white rounded-xl space-y-4 p-8">
+            <div className="w-full flex flex-col justify-start items-start bg-primary text-white rounded-box space-y-4 p-8">
               <ul className="timeline timeline-vertical timeline-compact self-start">
                 <li>
                   <div className="timeline-middle">
@@ -311,7 +340,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                         clipRule="evenodd" />
                     </svg>
                   </div>
-                  <div className="timeline-end">Created</div>
+                  <div className="timeline-end timeline-box text-sm">Created</div>
                   <hr className="bg-info" />
                 </li>
                 <li>
@@ -331,7 +360,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                         clipRule="evenodd" />
                     </svg>
                   </div>
-                  <div className="timeline-end">Succeeded/Failed</div>
+                  <div className="timeline-end timeline-box text-sm">Succeeded/Failed</div>
                   <hr className={cn('', {
                     // @ts-ignore
                     "bg-info": proposal.endsAt.toNumber() > new Date().getTime()
@@ -359,7 +388,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                         clipRule="evenodd" />
                     </svg>
                   </div>
-                  <div className="timeline-end">Executed</div>
+                  <div className="timeline-end timeline-box text-sm">Executed</div>
                 </li>
               </ul>
             </div>
