@@ -63,7 +63,7 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
                 <div>{account.title}</div>
               </TableCell>
               <TableCell className="text-center">
-                {currentUser && currentUser.votes.filter((vote) => vote.poll.toNumber() == account.id.toNumber()).length ?
+                {currentUser && currentUser.votes.filter((vote) => vote.poll.toNumber() == account.id.toNumber()).length > 0 ?
                   (
                     <div className="text-center w-full flex justify-center items-center text-success"><FaCheck /></div>
                   ) : (
@@ -76,7 +76,7 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
                 </div>
               </TableCell>
               <TableCell>
-                <Progress value={50} />
+                <Progress className="bg-base-100" />
               </TableCell>
               <TableCell className="text-left">
                 {/* @ts-ignore */}

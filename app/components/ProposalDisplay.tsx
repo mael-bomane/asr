@@ -33,6 +33,7 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { proposalVoteIx } from "@/lib/program/proposalVote";
 import { Progress } from "./ui/progress";
+import { FaCheck } from "react-icons/fa6";
 
 type Props = {
   address: string
@@ -226,11 +227,20 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                     </div>
                   )}
                   <button type="submit" className="btn w-full mt-4"
-                    disabled={!publicKey || !currentUser || currentUser.deposits.reduce((acc: any, obj: any) => {
+                    disabled={!publicKey || !currentUser || (currentUser.deposits.reduce((acc: any, obj: any) => {
                       return acc + obj.amount.toNumber();
-                    }, 0) / (1 * 10 ** lock.decimals) == 0}
+                    }, 0) / (1 * 10 ** lock.decimals) == 0) || currentUser.votes.filter((vote) => vote.poll.toNumber() == proposal.id.toNumber()).length > 0}
                   >
-                    Vote
+                    {currentUser && currentUser.votes.filter((vote) => vote.poll.toNumber() == proposal.id.toNumber()).length > 0 ?
+                      (
+                        <span className="text-white flex justify-center items-center space-x-2">
+                          <span>Voted</span> <FaCheck className="text-success" />
+                        </span>
+                      ) : (
+                        <>
+                          Vote
+                        </>
+                      )}
                   </button>
                 </Form>
               </form>
