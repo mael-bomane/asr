@@ -156,7 +156,7 @@ export const CreateProposalForm: FC = () => {
             className="btn btn-xs btn-primary md:max-w-36 md:margin-x-auto text-base-100 self-start"
             onClick={() => {
               setChoices([...choices, {
-                id: choices.length + 1,
+                id: choices.length,
                 title: '',
                 votingPower: new BN(0),
               }])

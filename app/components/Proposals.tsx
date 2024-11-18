@@ -17,7 +17,7 @@ type Props = {
   address: string | null
   proposals: Proposal[]
   users: User[]
-  currentUser: User
+  currentUser: User | null
 }
 
 export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentUser }) => {
