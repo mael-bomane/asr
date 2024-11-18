@@ -2,11 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
+import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
 import { program } from "@/constants";
 import { Lock, Proposal, User } from "@/types/state";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { toast } from "react-hot-toast";
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 
 import type { FC } from "react";
 import Link from "next/link";
@@ -19,6 +31,7 @@ import { IoDiamond } from "react-icons/io5";
 import { useForm } from "react-hook-form";
 import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
+import { proposalVoteIx } from "@/lib/program/proposalVote";
 
 type Props = {
   address: string
@@ -27,23 +40,21 @@ type Props = {
 export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   const { connection } = useConnection();
-  const { publicKey } = useWallet();
-  type Inputs = {
-    title: string
-  }
+  const { publicKey, sendTransaction } = useWallet();
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<Inputs>();
+  const formSchema = z.object({
+    choice: z.string().min(0).max(255),
+  })
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      choice: "",
+    },
+  })
 
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [lock, setLock] = useState<Lock | null>(null);
-
-  const [users, setUsers] = useState<User[] | null>(null);
 
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
@@ -59,21 +70,12 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
       fetchProposal()
         .then(async response => {
           if (response) {
-            console.log(response);
-            // @ts-ignore
-            // const proposalMap = response.map(({ account, publicKey }) => {
-            //   const result = account
-            //   account.pubkey = publicKey
-            //   return result
-            // })
             console.log('proposal : ', response)
             setProposal(response);
           }
         })
         .catch(err => console.log(err));
-
     }
-
   }, []);
 
   useEffect(() => {
@@ -86,12 +88,6 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
         .then(async response => {
           if (response) {
             console.log(response);
-            // @ts-ignore
-            // const proposalMap = response.map(({ account, publicKey }) => {
-            //   const result = account
-            //   account.pubkey = publicKey
-            //   return result
-            // })
             console.log('lock : ', response)
             setLock(response);
           }
@@ -129,6 +125,47 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   }, [lock, publicKey]);
 
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    let signature: TransactionSignature = '';
+    if (publicKey) {
+      const choice = parseInt(values.choice);
+      console.log(choice);
+      // owner: PublicKey,
+      // lock: PublicKey,
+      // proposal: PublicKey,
+      // index: BN,
+      // choice: number,
+      const instruction = await proposalVoteIx(
+        publicKey,
+        proposal.lock,
+        new PublicKey(address),
+        proposal.id,
+        choice,
+      );
+
+      let latestBlockhash = await connection.getLatestBlockhash()
+
+      const messageV0 = new TransactionMessage({
+        payerKey: publicKey,
+        recentBlockhash: latestBlockhash.blockhash,
+        instructions: [instruction],
+      }).compileToV0Message();
+
+      const transation = new VersionedTransaction(messageV0)
+
+      signature = await sendTransaction(transation, connection);
+
+      await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
+
+      console.log(signature);
+
+      toast.success(`success, redirecting you shortly :\ntx : ${signature}`);
+
+    }
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
+  }
+
   return (
     <section className="my-6 md:my-10 w-full max-w-7xl flex justify-center items-start md:p-4 text-base-content space-x-4">
       {
@@ -146,36 +183,47 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
               </h1>
 
             </div>
-            <form className="w-full bg-primary text-white rounded-box p-8">
-              <div className="w-full flex justify-between">
-                <span className="text-xl font-extrabold">Cast your vote</span>
-                <span className="flex justify-center items-center text-base-content space-x-2"><IoDiamond /><span>Voting Power : {' '}
-                  {currentUser ? currentUser.deposits.reduce((acc: any, obj: any) => {
-                    return acc + obj.amount.toNumber();
-                  }, 0) / (1 * 10 ** lock.decimals) : 0}</span></span>
-
-              </div>
-              <div>
-                <RadioGroup className="mt-4">
-                  {
-                    proposal.choices.map(choice => {
-                      return (
-                        <div className="flex items-center space-x-2" key={choice.id}>
-                          <RadioGroupItem value={choice.id.toString()} id={choice.id.toString()} />
-                          <Label htmlFor={choice.id.toString()} className="text-lg">{choice.title}</Label>
-                        </div>
-                      )
-                    })
-                  }
-                </RadioGroup>
-              </div>
-              <button type="submit" className="btn w-full mt-4">Vote</button>
+            <form onSubmit={form.handleSubmit(onSubmit)}
+              className="w-full bg-primary text-white rounded-box p-8">
+              <Form {...form}>
+                <div className="w-full flex justify-between">
+                  <span className="text-xl font-extrabold">Cast your vote</span>
+                  <span className="flex justify-center items-center text-base-content space-x-2"><IoDiamond /><span>Voting Power : {' '}
+                    {currentUser ? currentUser.deposits.reduce((acc: any, obj: any) => {
+                      return acc + obj.amount.toNumber();
+                    }, 0) / (1 * 10 ** lock.decimals) : 0}</span></span>
+                </div>
+                <div>
+                  <FormField
+                    control={form.control}
+                    name="choice"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <RadioGroup className="mt-4"
+                            onValueChange={field.onChange}
+                            defaultValue={field.value.toString()}>
+                            {proposal.choices.map(choice => (
+                              <div className="flex items-center space-x-2" key={choice.id}>
+                                <RadioGroupItem value={choice.id.toString()} id={choice.id.toString()} />
+                                <Label htmlFor={choice.id.toString()} className="text-lg">{choice.title}</Label>
+                              </div>
+                            ))}
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <button type="submit" className="btn w-full mt-4">Vote</button>
+              </Form>
             </form>
           </div>
         ) : <>not found</>
       }
       <div className="w-[33%] md:max-w-xl flex flex-col items-center justify-center space-y-4">
-        {proposal ? (
+        {proposal && lock ? (
           <>
             <div className="w-full flex flex-col justify-center items-center bg-primary text-white rounded-xl space-y-4 p-8">
               <div>Results</div>
@@ -184,22 +232,22 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   <div className="w-full flex justify-between" key={choice.id}>
                     <span>{choice.title}</span>
                     {/*@ts-ignore*/}
-                    <span>{choice.votingPower.toNumber()}</span>
+                    <span>{choice.votingPower.toNumber() / (1 * 10 ** lock.decimals)}</span>
                   </div>
                 )
               }) || <Skeleton />}
             </div>
             <div className="w-full flex flex-col justify-center items-start bg-primary text-white rounded-xl space-y-4 p-8">
               <div className="w-full flex justify-start items-center space-x-1">
-                <FaWaveSquare />
+                <FaWaveSquare className="text-base-content" />
                 <span className="flex space-x-1">
-                  <span>Status:</span> <div className="badge badge-info p-3">Voting</div>
+                  <span className="text-base-content">Status:</span> <div className="badge badge-info p-3">Voting</div>
                 </span>
               </div>
               <div className="w-full flex justify-start items-center space-x-1">
-                <FaWallet />
+                <FaWallet className="text-base-content" />
                 <span className="flex space-x-1">
-                  <span>Created by:</span>
+                  <span className="text-base-content">Created by:</span>
                   <Link
                     href={`https://explorer.solana.com/address/${proposal.summoner.toString()}?cluster=devnet`}
                     className="underline"
@@ -210,9 +258,9 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 </span>
               </div>
               <div className="w-full flex justify-start items-center space-x-1">
-                <FaCalendar />
+                <FaCalendar className="text-base-content" />
                 <span className="flex space-x-1">
-                  <span>Start:</span>
+                  <span className="text-base-content">Start:</span>
                   {/* @ts-ignore */}
                   <span>{new Date(proposal.createdAt.toNumber() * 1000).toDateString()}</span>
                   {/* @ts-ignore */}
@@ -220,9 +268,9 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 </span>
               </div>
               <div className="w-full flex justify-start items-center space-x-1">
-                <FaCalendar />
+                <FaCalendar className="text-base-content" />
                 <span className="flex space-x-1">
-                  <span>End:</span>
+                  <span className="text-base-content">End:</span>
                   {/* @ts-ignore */}
                   <span>{new Date((proposal.endsAt.toNumber()) * 1000).toDateString()}</span>
                   {/* @ts-ignore */}

@@ -1,13 +1,13 @@
 
 import { BN } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 import { program } from "@/constants/program";
 
-export const asrDepositIx = async (
+export const proposalVoteIx = async (
   owner: PublicKey,
   lock: PublicKey,
+  proposal: PublicKey,
   index: BN,
   choice: number,
 ) => {
@@ -23,22 +23,16 @@ export const asrDepositIx = async (
 
   const user = PublicKey.findProgramAddressSync(
     // seeds = [b"user", lock.key().as_ref(), owner.key().as_ref()]
-    [Buffer.from("lock"), lock.toBytes(), owner.toBytes()],
+    [Buffer.from("user"), lock.toBytes(), owner.toBytes()],
     program.programId
   )[0];
 
-  const poll = PublicKey.findProgramAddressSync(
-    //seeds = [b"poll", lock.key().as_ref(), poll.id.to_le_bytes().as_ref()],
-    [Buffer.from("poll"), lock.toBytes(), index.toArrayLike(Buffer, 'le', 8)],
-    program.programId
-  )[0];
-
-  // @ts-ignore
+  //@ts-ignore
   return await program.methods.voteNew(index, choice)
     .accountsStrict({
       owner,
       user,
-      poll,
+      proposal,
       lock,
       analytics,
       systemProgram: SystemProgram.programId,

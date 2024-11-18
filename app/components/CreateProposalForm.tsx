@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
@@ -16,11 +17,10 @@ import { proposalNewIx } from "@/lib/program/proposalNew";
 import { program } from "@/constants/program";
 
 import { ellipsis } from "@/lib/utils";
-import Link from "next/link";
 import { FaTrash } from "react-icons/fa";
 
 import type { FC } from "react";
-import type { ProposalChoice, TokenInfo, Lock } from "@/types";
+import type { ProposalChoice, Lock } from "@/types";
 
 export const CreateProposalForm: FC = () => {
   const { publicKey, sendTransaction } = useWallet();
@@ -34,7 +34,6 @@ export const CreateProposalForm: FC = () => {
   const [lock, setLock] = useState<Lock | null>(null);
   const [lockPubkey, setLockPubkey] = useState<PublicKey | null>(null);
 
-  const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(null);
   const [choices, setChoices] = useState<ProposalChoice[]>([
     { id: 0, title: 'Approve', votingPower: new BN(0) },
     { id: 1, title: 'Reject', votingPower: new BN(0) },
