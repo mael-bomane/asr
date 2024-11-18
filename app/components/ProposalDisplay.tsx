@@ -322,8 +322,9 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 <span className="flex space-x-4">
                   <span className="text-base-content">Status:</span>
                   <div className={cn("badge badge-outline p-3", {
+                    "badge-info": proposal.executed,
                     //@ts-ignore
-                    "badge-success": (proposal.endsAt.toNumber() * 1000) < (new Date().getTime()) &&
+                    "badge-success": !proposal.executed && (proposal.endsAt.toNumber() * 1000) < (new Date().getTime()) &&
                       (proposal.choices.reduce((acc: any, obj: any) => {
                         return acc + obj.votingPower.toNumber();
                       }, 0) / (1 * 10 ** lock.decimals)) > (
@@ -339,10 +340,9 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                         lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
                       ),
                     //@ts-ignore
-                    "badge-info": (proposal.endsAt.toNumber() * 1000) > (new Date().getTime())
                   })}>
                     {/*@ts-ignore*/}
-                    {(proposal.endsAt.toNumber() * 1000) < (new Date().getTime()) ? (
+                    {((proposal.endsAt.toNumber() * 1000) < (new Date().getTime())) && !proposal.executed ? (
                       <>
                         {(proposal.choices.reduce((acc: any, obj: any) => {
                           return acc + obj.votingPower.toNumber();
@@ -356,7 +356,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                         )}
                       </>
                     ) : (
-                      <>Voting</>
+                      <>{`${proposal.executed ? 'Executed' : 'Voting'}`}</>
                     )}
                   </div>
                 </span>
