@@ -440,7 +440,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 <li>
                   <hr className={cn('', {
                     // @ts-ignore
-                    "bg-info": proposal.endsAt.toNumber() > new Date().getTime()
+                    "bg-info": proposal.executed
                   })}
                   />
                   <div className="timeline-middle">
