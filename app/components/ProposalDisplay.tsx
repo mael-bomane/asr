@@ -22,7 +22,7 @@ import {
 
 import type { FC } from "react";
 import Link from "next/link";
-import { ellipsis } from "@/lib/utils";
+import { cn, ellipsis } from "@/lib/utils";
 
 import { DepositPopup } from "./DepositPopup";
 import Skeleton from "react-loading-skeleton";
@@ -295,6 +295,73 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   <span>{new Date((proposal.endsAt.toNumber()) * 1000).getHours()}:{(new Date((proposal.endsAt.toNumber()) * 1000).getMinutes())}</span>
                 </span>
               </div>
+            </div>
+            <div className="w-full flex flex-col justify-start items-start bg-primary text-white rounded-xl space-y-4 p-8">
+              <ul className="timeline timeline-vertical timeline-compact self-start">
+                <li>
+                  <div className="timeline-middle">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className="h-5 w-5 text-info">
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                        clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="timeline-end">Created</div>
+                  <hr className="bg-info" />
+                </li>
+                <li>
+                  <hr className="bg-info" />
+                  <div className="timeline-middle">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className={cn('h-5 w-5', {
+                        // @ts-ignore
+                        "text-info": proposal.endsAt.toNumber() > new Date().getTime()
+                      })}>
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                        clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="timeline-end">Succeeded/Failed</div>
+                  <hr className={cn('', {
+                    // @ts-ignore
+                    "bg-info": proposal.endsAt.toNumber() > new Date().getTime()
+                  })}
+                  />
+                </li>
+                <li>
+                  <hr className={cn('', {
+                    // @ts-ignore
+                    "bg-info": proposal.endsAt.toNumber() > new Date().getTime()
+                  })}
+                  />
+                  <div className="timeline-middle">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      className={cn('h-5 w-5', {
+                        // @ts-ignore
+                        "text-info": proposal.executed
+                      })}>
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                        clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="timeline-end">Executed</div>
+                </li>
+              </ul>
             </div>
           </>
         ) : (
