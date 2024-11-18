@@ -216,7 +216,20 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                     )}
                   />
                 </div>
-                <button type="submit" className="btn w-full mt-4">Vote</button>
+                {currentUser && currentUser.deposits.reduce((acc: any, obj: any) => {
+                  return acc + obj.amount.toNumber();
+                }, 0) / (1 * 10 ** lock.decimals) == 0 || !currentUser && (
+                  <div className="badge badge-warning badge-outline badge-lg rounded-box p-4 w-full mt-4">
+                    Oops, you don’t have any voting power
+                  </div>
+                )}
+                <button type="submit" className="btn w-full mt-4"
+                  disabled={!publicKey || !currentUser || currentUser.deposits.reduce((acc: any, obj: any) => {
+                    return acc + obj.amount.toNumber();
+                  }, 0) / (1 * 10 ** lock.decimals) == 0}
+                >
+                  Vote
+                </button>
               </Form>
             </form>
           </div>
@@ -240,13 +253,16 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
             <div className="w-full flex flex-col justify-center items-start bg-primary text-white rounded-xl space-y-4 p-8">
               <div className="w-full flex justify-start items-center space-x-1">
                 <FaWaveSquare className="text-base-content" />
-                <span className="flex space-x-1">
-                  <span className="text-base-content">Status:</span> <div className="badge badge-info p-3">Voting</div>
+                <span className="flex space-x-4">
+                  <span className="text-base-content">Status:</span>
+                  <div className="badge badge-info badge-outline p-3">
+                    Voting
+                  </div>
                 </span>
               </div>
               <div className="w-full flex justify-start items-center space-x-1">
                 <FaWallet className="text-base-content" />
-                <span className="flex space-x-1">
+                <span className="flex space-x-4">
                   <span className="text-base-content">Created by:</span>
                   <Link
                     href={`https://explorer.solana.com/address/${proposal.summoner.toString()}?cluster=devnet`}
@@ -259,7 +275,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
               </div>
               <div className="w-full flex justify-start items-center space-x-1">
                 <FaCalendar className="text-base-content" />
-                <span className="flex space-x-1">
+                <span className="flex space-x-4">
                   <span className="text-base-content">Start:</span>
                   {/* @ts-ignore */}
                   <span>{new Date(proposal.createdAt.toNumber() * 1000).toDateString()}</span>
@@ -269,7 +285,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
               </div>
               <div className="w-full flex justify-start items-center space-x-1">
                 <FaCalendar className="text-base-content" />
-                <span className="flex space-x-1">
+                <span className="flex space-x-4">
                   <span className="text-base-content">End:</span>
                   {/* @ts-ignore */}
                   <span>{new Date((proposal.endsAt.toNumber()) * 1000).toDateString()}</span>

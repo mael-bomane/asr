@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { FaCheck, FaPlusCircle } from "react-icons/fa";
 import { Progress } from "./ui/progress"
 
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow, HeaderTableRow } from "./ui/table";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Input } from "./ui/input";
 
@@ -41,14 +41,14 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
       <Table className="overflow-x-scroll">
         <TableCaption>{lock && lock.name} Proposals</TableCaption>
         <TableHeader>
-          <TableRow>
+          <HeaderTableRow>
             <TableHead className="">Title</TableHead>
             <TableHead className="text-center">Voted</TableHead>
             <TableHead className="text-center">Status</TableHead>
             <TableHead className="text-left">Results</TableHead>
             <TableHead className="text-left">Start</TableHead>
             <TableHead className="text-left">End</TableHead>
-          </TableRow>
+          </HeaderTableRow>
         </TableHeader>
         <TableBody>
           {/*@ts-ignore*/}
@@ -61,7 +61,6 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
             >
               <TableCell className="font-medium">
                 <div>{account.title}</div>
-                {/*<div>{proposal.text}</div>*/}
               </TableCell>
               <TableCell className="text-center">
                 {currentUser && currentUser.votes.filter((vote) => vote.poll.toNumber() == account.id.toNumber()).length ?
@@ -72,7 +71,7 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
                   )}
               </TableCell>
               <TableCell className="text-center">
-                <div className="badge p-4">
+                <div className="badge badge-info badge-outline p-4">
                   Voting
                 </div>
               </TableCell>
