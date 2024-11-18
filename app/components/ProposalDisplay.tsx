@@ -167,7 +167,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
   }
 
   return (
-    <section className="my-6 md:my-10 w-full max-w-7xl flex justify-center items-start md:p-4 text-base-content space-x-4">
+    <section className="my-6 md:my-10 w-full max-w-7xl flex flex-col md:flex-row justify-center items-start md:p-4 text-base-content md:space-x-4">
       {
         proposal && lock ? (
           <div className="w-full md:w-[66%] flex flex-col items-center justify-center space-y-4 ">
@@ -183,59 +183,61 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
               </h1>
 
             </div>
-            <form onSubmit={form.handleSubmit(onSubmit)}
-              className="w-full bg-primary text-white rounded-box p-8">
-              <Form {...form}>
-                <div className="w-full flex justify-between">
-                  <span className="text-xl font-extrabold">Cast your vote</span>
-                  <span className="flex justify-center items-center text-base-content space-x-2"><IoDiamond /><span>Voting Power : {' '}
-                    {currentUser ? currentUser.deposits.reduce((acc: any, obj: any) => {
-                      return acc + obj.amount.toNumber();
-                    }, 0) / (1 * 10 ** lock.decimals) : 0}</span></span>
-                </div>
-                <div>
-                  <FormField
-                    control={form.control}
-                    name="choice"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <RadioGroup className="mt-4"
-                            onValueChange={field.onChange}
-                            defaultValue={field.value.toString()}>
-                            {proposal.choices.map(choice => (
-                              <div className="flex items-center space-x-2" key={choice.id}>
-                                <RadioGroupItem value={choice.id.toString()} id={choice.id.toString()} />
-                                <Label htmlFor={choice.id.toString()} className="text-lg">{choice.title}</Label>
-                              </div>
-                            ))}
-                          </RadioGroup>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                {currentUser && currentUser.deposits.reduce((acc: any, obj: any) => {
-                  return acc + obj.amount.toNumber();
-                }, 0) / (1 * 10 ** lock.decimals) == 0 || !currentUser && (
-                  <div className="badge badge-warning badge-outline badge-lg rounded-box p-4 w-full mt-4">
-                    Oops, you don’t have any voting power
+            {publicKey && (
+              <form onSubmit={form.handleSubmit(onSubmit)}
+                className="w-full bg-primary text-white rounded-box p-8">
+                <Form {...form}>
+                  <div className="w-full flex justify-between">
+                    <span className="text-xl font-extrabold">Cast your vote</span>
+                    <span className="flex justify-center items-center text-base-content space-x-2"><IoDiamond /><span>Voting Power : {' '}
+                      {currentUser ? currentUser.deposits.reduce((acc: any, obj: any) => {
+                        return acc + obj.amount.toNumber();
+                      }, 0) / (1 * 10 ** lock.decimals) : 0}</span></span>
                   </div>
-                )}
-                <button type="submit" className="btn w-full mt-4"
-                  disabled={!publicKey || !currentUser || currentUser.deposits.reduce((acc: any, obj: any) => {
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="choice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <RadioGroup className="mt-4"
+                              onValueChange={field.onChange}
+                              defaultValue={field.value.toString()}>
+                              {proposal.choices.map(choice => (
+                                <div className="flex items-center space-x-2" key={choice.id}>
+                                  <RadioGroupItem value={choice.id.toString()} id={choice.id.toString()} />
+                                  <Label htmlFor={choice.id.toString()} className="text-lg">{choice.title}</Label>
+                                </div>
+                              ))}
+                            </RadioGroup>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  {currentUser && currentUser.deposits.reduce((acc: any, obj: any) => {
                     return acc + obj.amount.toNumber();
-                  }, 0) / (1 * 10 ** lock.decimals) == 0}
-                >
-                  Vote
-                </button>
-              </Form>
-            </form>
+                  }, 0) / (1 * 10 ** lock.decimals) == 0 || !currentUser && (
+                    <div className="badge badge-warning badge-outline badge-lg rounded-box p-4 w-full mt-4">
+                      Oops, you don’t have any voting power
+                    </div>
+                  )}
+                  <button type="submit" className="btn w-full mt-4"
+                    disabled={!publicKey || !currentUser || currentUser.deposits.reduce((acc: any, obj: any) => {
+                      return acc + obj.amount.toNumber();
+                    }, 0) / (1 * 10 ** lock.decimals) == 0}
+                  >
+                    Vote
+                  </button>
+                </Form>
+              </form>
+            )}
           </div>
         ) : <>not found</>
       }
-      <div className="w-[33%] md:max-w-xl flex flex-col items-center justify-center space-y-4">
+      <div className="w-full md:w-[33%] md:max-w-xl flex flex-col items-center justify-center mt-4 md:mt-0 space-y-4">
         {proposal && lock ? (
           <>
             <div className="w-full flex flex-col justify-center items-center bg-primary text-white rounded-xl space-y-4 p-8">
