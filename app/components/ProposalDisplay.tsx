@@ -35,6 +35,7 @@ import { proposalVoteIx } from "@/lib/program/proposalVote";
 import { Progress } from "./ui/progress";
 import { FaCheck } from "react-icons/fa6";
 import { proposalExecuteIx } from "@/lib/program/proposalExecute";
+import { BadgeProposalStatus } from "./BadgeProposalStatus";
 
 type Props = {
   address: string
@@ -63,6 +64,8 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isReady, setIsReady] = useState<boolean>(false);
+  const [isExecuted, setIsExecuted] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchProposal = async () => {
@@ -80,6 +83,15 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
         .catch(err => console.log(err));
     }
   }, []);
+
+  useEffect(() => {
+    if (proposal) {
+      // @ts-ignore
+      if ((proposal.endsAt.toNumber() * 1000) < new Date().getTime()) {
+        setIsReady(true)
+      }
+    }
+  }, [proposal]);
 
   useEffect(() => {
     const fetchLock = async () => {
@@ -321,44 +333,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 <FaWaveSquare className="text-base-content" />
                 <span className="flex space-x-4">
                   <span className="text-base-content">Status:</span>
-                  <div className={cn("badge badge-outline p-3", {
-                    "badge-info": proposal.executed,
-                    //@ts-ignore
-                    "badge-success": !proposal.executed && (proposal.endsAt.toNumber() * 1000) < (new Date().getTime()) &&
-                      (proposal.choices.reduce((acc: any, obj: any) => {
-                        return acc + obj.votingPower.toNumber();
-                      }, 0) / (1 * 10 ** lock.decimals)) > (
-                        //@ts-ignore
-                        lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
-                      ),
-                    //@ts-ignore
-                    "badge-error": (proposal.endsAt.toNumber() * 1000) < (new Date().getTime()) &&
-                      (proposal.choices.reduce((acc: any, obj: any) => {
-                        return acc + obj.votingPower.toNumber();
-                      }, 0) / (1 * 10 ** lock.decimals)) < (
-                        //@ts-ignore
-                        lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
-                      ),
-                    //@ts-ignore
-                  })}>
-                    {/*@ts-ignore*/}
-                    {((proposal.endsAt.toNumber() * 1000) < (new Date().getTime())) && !proposal.executed ? (
-                      <>
-                        {(proposal.choices.reduce((acc: any, obj: any) => {
-                          return acc + obj.votingPower.toNumber();
-                        }, 0) / (1 * 10 ** lock.decimals)) > (
-                            //@ts-ignore
-                            lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
-                          ) ? (
-                          <>Success</>
-                        ) : (
-                          <>Failed</>
-                        )}
-                      </>
-                    ) : (
-                      <>{`${proposal.executed ? 'Executed' : 'Voting'}`}</>
-                    )}
-                  </div>
+                  <BadgeProposalStatus proposal={proposal} lock={lock} isReady={isReady} />
                 </span>
               </div>
               <div className="w-full flex justify-start items-center space-x-1">
@@ -461,10 +436,12 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   <div className="timeline-end timeline-box text-sm">Executed</div>
                 </li>
               </ul>
+              {!proposal.executed && isReady &&
+                <button className="btn w-full mt-4" onClick={onClick}>
+                  Execute
+                </button>
 
-              <button className="btn w-full mt-4" onClick={onClick}>
-                Execute
-              </button>
+              }
             </div>
           </>
         ) : (

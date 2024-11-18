@@ -12,6 +12,7 @@ import { Input } from "./ui/input";
 import type { FC } from "react"
 import type { Proposal, Lock, User } from "@/types";
 import { cn } from "@/lib/utils";
+import { BadgeProposalStatus } from "./BadgeProposalStatus";
 
 type Props = {
   lock: Lock | null
@@ -53,77 +54,48 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
         </TableHeader>
         <TableBody>
           {/*@ts-ignore*/}
-          {proposals.length > 0 && proposals.map(({ account, publicKey }, i) => (
-            <TableRow key={i}
-              onClick={() => {
-                router.push(`/proposal/${publicKey}`)
-              }}
-              className="cursor-pointer"
-            >
-              <TableCell className="font-medium">
-                <div>{account.title}</div>
-              </TableCell>
-              <TableCell className="text-center">
-                {currentUser && currentUser.votes.filter((vote) => vote.poll.toNumber() == account.id.toNumber()).length > 0 ?
-                  (
-                    <div className="text-center w-full flex justify-center items-center text-success"><FaCheck /></div>
-                  ) : (
-                    <div className="text-center w-full flex justify-center items-center">-</div>
-                  )}
-              </TableCell>
-              <TableCell className="text-center">
-                <div className={cn("badge badge-outline p-4", {
-                  "badge-success": (account.endsAt.toNumber() * 1000) < (new Date().getTime()) &&
-                    (account.choices.reduce((acc: any, obj: any) => {
-                      return acc + obj.votingPower.toNumber();
-                    }, 0) / (1 * 10 ** lock.decimals)) > (
-                      //@ts-ignore
-                      lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
-                    ),
-                  "badge-error": (account.endsAt.toNumber() * 1000) < (new Date().getTime()) &&
-                    (account.choices.reduce((acc: any, obj: any) => {
-                      return acc + obj.votingPower.toNumber();
-                    }, 0) / (1 * 10 ** lock.decimals)) < (
-                      //@ts-ignore
-                      lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
-                    ),
-                  "badge-info": (account.endsAt.toNumber() * 1000) > (new Date().getTime())
-                })}>
-                  {(account.endsAt.toNumber() * 1000) < (new Date().getTime()) ? (
-                    <>
-                      {(account.choices.reduce((acc: any, obj: any) => {
-                        return acc + obj.votingPower.toNumber();
-                      }, 0) / (1 * 10 ** lock.decimals)) > (
-                          //@ts-ignore
-                          lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
-                        ) ? (
-                        <>Success</>
-                      ) : (
-                        <>Failed</>
-                      )}
-                    </>
-                  ) : (
-                    <>Voting</>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Progress className="bg-base-100" />
-              </TableCell>
-              <TableCell className="text-left">
-                {/* @ts-ignore */}
-                <div>{new Date(account.createdAt.toNumber() * 1000).toDateString()}</div>
-                {/* @ts-ignore */}
-                <div>{new Date(account.createdAt.toNumber() * 1000).getHours()}:{(new Date(account.createdAt.toNumber() * 1000).getMinutes())}</div>
-              </TableCell>
-              <TableCell className="text-left">
-                {/* @ts-ignore */}
-                <div>{new Date(account.endsAt.toNumber() * 1000).toDateString()}</div>
-                {/* @ts-ignore */}
-                <div>{new Date(account.endsAt.toNumber() * 1000).getHours()}:{(new Date(account.endsAt.toNumber() * 1000).getMinutes())}</div>
-              </TableCell>
-            </TableRow>
-          ))}
+          {proposals.length > 0 && proposals.map(({ account, publicKey }, i) => {
+            const isReady = (account.endsAt.toNumber() * 1000) < new Date().getTime() ? true : false;
+
+            return (
+              <TableRow key={i}
+                onClick={() => {
+                  router.push(`/proposal/${publicKey}`)
+                }}
+                className="cursor-pointer"
+              >
+                <TableCell className="font-medium">
+                  <div>{account.title}</div>
+                </TableCell>
+                <TableCell className="text-center">
+                  {currentUser && currentUser.votes.filter((vote) => vote.poll.toNumber() == account.id.toNumber()).length > 0 ?
+                    (
+                      <div className="text-center w-full flex justify-center items-center text-success"><FaCheck /></div>
+                    ) : (
+                      <div className="text-center w-full flex justify-center items-center">-</div>
+                    )}
+                </TableCell>
+                <TableCell className="text-center">
+                  <BadgeProposalStatus lock={lock} proposal={account} isReady={isReady} />
+                </TableCell>
+                <TableCell>
+                  <Progress className="bg-base-100" />
+                </TableCell>
+                <TableCell className="text-left">
+                  {/* @ts-ignore */}
+                  <div>{new Date(account.createdAt.toNumber() * 1000).toDateString()}</div>
+                  {/* @ts-ignore */}
+                  <div>{new Date(account.createdAt.toNumber() * 1000).getHours()}:{(new Date(account.createdAt.toNumber() * 1000).getMinutes())}</div>
+                </TableCell>
+                <TableCell className="text-left">
+                  {/* @ts-ignore */}
+                  <div>{new Date(account.endsAt.toNumber() * 1000).toDateString()}</div>
+                  {/* @ts-ignore */}
+                  <div>{new Date(account.endsAt.toNumber() * 1000).getHours()}:{(new Date(account.endsAt.toNumber() * 1000).getMinutes())}</div>
+                </TableCell>
+              </TableRow>
+            )
+          })}
         </TableBody>
       </Table>
       <div className="px-6 max-w-[600px] flex flex-col gap-4 overflow-y-scroll pb-8">

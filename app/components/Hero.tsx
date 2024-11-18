@@ -33,7 +33,8 @@ export const Hero: FC = () => {
               {/* End Title */}
               <div className="mt-5 max-w-3xl">
                 <div className="text-xl text-muted-foreground flex flex-row justify-center items-center space-x-2">
-                  <span>Incentivized</span> <WordRotate words={['Voting', 'Feedback', 'Engagement']} className="inline-block" />  <span>Platform</span>
+                  {/*<span>Incentivized</span> <WordRotate words={['Voting', 'Feedback', 'Engagement']} className="inline-block" />  <span>Platform</span>*/}
+                  Get more from your hodlings.
                 </div>
               </div>
               {/* Buttons */}
