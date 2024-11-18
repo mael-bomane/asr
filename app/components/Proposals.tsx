@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FaPlusCircle } from "react-icons/fa";
+import { FaCheck, FaPlusCircle } from "react-icons/fa";
 import { Progress } from "./ui/progress"
 
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
@@ -29,7 +29,7 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold">Proposals</span>
           {currentUser && (currentUser.deposits.reduce((acc: any, obj: any) => {
             return acc + obj.amount.toNumber();
-          }, 0) / (1 * 10 ** 6)) >= (lock.amount.toNumber() / (1 * 10 ** 6)) &&
+          }, 0) / (1 * 10 ** lock.decimals)) >= (lock.amount.toNumber() / (1 * 10 ** lock.decimals)) &&
             <Link href={{ pathname: '/proposal/create', query: { address } }} className="button"><FaPlusCircle className="w-5 h-5" /></Link>
           }
         </h3>
@@ -63,7 +63,14 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
                 <div>{account.title}</div>
                 {/*<div>{proposal.text}</div>*/}
               </TableCell>
-              <TableCell className="text-center">-</TableCell>
+              <TableCell className="text-center">
+                {currentUser.votes.filter((vote) => vote.poll.toNumber() == account.id.toNumber()).length ?
+                  (
+                    <div className="text-center w-full flex justify-center items-center text-success"><FaCheck /></div>
+                  ) : (
+                    <div className="text-center w-full flex justify-center items-center">-</div>
+                  )}
+              </TableCell>
               <TableCell className="text-center">
                 <div className="badge p-4">
                   Voting
@@ -80,7 +87,7 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
               </TableCell>
               <TableCell className="text-left">
                 {/* @ts-ignore */}
-                <div>{new Date(account.createdAt.toNumber() * 1000).toDateString()}</div>
+                <div>{new Date(account.endsAt.toNumber() * 1000).toDateString()}</div>
                 {/* @ts-ignore */}
                 <div>{new Date(account.endsAt.toNumber() * 1000).getHours()}:{(new Date(account.endsAt.toNumber() * 1000).getMinutes())}</div>
               </TableCell>

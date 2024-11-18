@@ -32,9 +32,9 @@ export const Hero: FC = () => {
               </div>
               {/* End Title */}
               <div className="mt-5 max-w-3xl">
-                <p className="text-xl text-muted-foreground flex flex-row justify-center items-center space-x-2">
+                <div className="text-xl text-muted-foreground flex flex-row justify-center items-center space-x-2">
                   <span>Incentivized</span> <WordRotate words={['Voting', 'Feedback', 'Engagement']} className="inline-block" />  <span>Platform</span>
-                </p>
+                </div>
               </div>
               {/* Buttons */}
               <div className="mt-8 gap-3 flex justify-center">

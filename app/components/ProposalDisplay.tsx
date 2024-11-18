@@ -274,7 +274,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   {/* @ts-ignore */}
                   <span>{new Date((proposal.endsAt.toNumber()) * 1000).toDateString()}</span>
                   {/* @ts-ignore */}
-                  <span>{new Date((proposal.endsAt.toNumber()) * 1000).getHours()}:{(new Date((proposal.createdAt.toNumber()) * 1000).getMinutes())}</span>
+                  <span>{new Date((proposal.endsAt.toNumber()) * 1000).getHours()}:{(new Date((proposal.endsAt.toNumber()) * 1000).getMinutes())}</span>
                 </span>
               </div>
             </div>
