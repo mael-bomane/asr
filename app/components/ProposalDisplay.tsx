@@ -286,7 +286,6 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   <p className="text-sm text-base-content">
                     Final voting results will be shown once the voting is closed.
                   </p>
-
                 </>
               )}
             </div>
@@ -295,9 +294,43 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 <FaWaveSquare className="text-base-content" />
                 <span className="flex space-x-4">
                   <span className="text-base-content">Status:</span>
-                  <div className="badge badge-info badge-outline p-3">
+                  <div className={cn("badge badge-outline p-3", {
+                    //@ts-ignore
+                    "badge-success": (proposal.endsAt.toNumber() * 1000) < (new Date().getTime()) &&
+                      (proposal.choices.reduce((acc: any, obj: any) => {
+                        return acc + obj.votingPower.toNumber();
+                      }, 0) / (1 * 10 ** lock.decimals)) > (
+                        //@ts-ignore
+                        lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
+                      ),
+                    //@ts-ignore
+                    "badge-error": (proposal.endsAt.toNumber() * 1000) < (new Date().getTime()) &&
+                      (proposal.choices.reduce((acc: any, obj: any) => {
+                        return acc + obj.votingPower.toNumber();
+                      }, 0) / (1 * 10 ** lock.decimals)) < (
+                        //@ts-ignore
+                        lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
+                      ),
+                    //@ts-ignore
+                    "badge-info": (proposal.endsAt.toNumber() * 1000) > (new Date().getTime())
+                  })}>
                     {/*@ts-ignore*/}
-                    {proposal.endsAt.toNumber() < new Date().getTime() && 'Voting'}
+                    {(proposal.endsAt.toNumber() * 1000) < (new Date().getTime()) ? (
+                      <>
+                        {(proposal.choices.reduce((acc: any, obj: any) => {
+                          return acc + obj.votingPower.toNumber();
+                        }, 0) / (1 * 10 ** lock.decimals)) > (
+                            //@ts-ignore
+                            lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
+                          ) ? (
+                          <>Success</>
+                        ) : (
+                          <>Failed</>
+                        )}
+                      </>
+                    ) : (
+                      <>Voting</>
+                    )}
                   </div>
                 </span>
               </div>
@@ -362,7 +395,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                       fill="currentColor"
                       className={cn('h-5 w-5', {
                         // @ts-ignore
-                        "text-info": proposal.endsAt.toNumber() > new Date().getTime()
+                        "text-info": (proposal.endsAt.toNumber() * 1000) < new Date().getTime()
                       })}>
                       <path
                         fillRule="evenodd"
@@ -373,7 +406,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   <div className="timeline-end timeline-box text-sm">Succeeded/Failed</div>
                   <hr className={cn('', {
                     // @ts-ignore
-                    "bg-info": proposal.endsAt.toNumber() > new Date().getTime()
+                    "bg-info": (proposal.endsAt.toNumber() * 1000) < new Date().getTime()
                   })}
                   />
                 </li>
