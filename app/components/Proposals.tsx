@@ -11,6 +11,7 @@ import { Input } from "./ui/input";
 
 import type { FC } from "react"
 import type { Proposal, Lock, User } from "@/types";
+import { cn } from "@/lib/utils";
 
 type Props = {
   lock: Lock | null
@@ -71,8 +72,39 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
                   )}
               </TableCell>
               <TableCell className="text-center">
-                <div className="badge badge-info badge-outline p-4">
-                  Voting
+                <div className={cn("badge badge-outline p-4", {
+                  "badge-success": (account.endsAt.toNumber() * 1000) < (new Date().getTime()) &&
+                    (account.choices.reduce((acc: any, obj: any) => {
+                      return acc + obj.votingPower.toNumber();
+                    }, 0) / (1 * 10 ** lock.decimals)) > (
+                      //@ts-ignore
+                      lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
+                    ),
+                  "badge-error": (account.endsAt.toNumber() * 1000) < (new Date().getTime()) &&
+                    (account.choices.reduce((acc: any, obj: any) => {
+                      return acc + obj.votingPower.toNumber();
+                    }, 0) / (1 * 10 ** lock.decimals)) < (
+                      //@ts-ignore
+                      lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
+                    ),
+                  "badge-info": (account.endsAt.toNumber() * 1000) > (new Date().getTime())
+                })}>
+                  {(account.endsAt.toNumber() * 1000) < (new Date().getTime()) ? (
+                    <>
+                      {(account.choices.reduce((acc: any, obj: any) => {
+                        return acc + obj.votingPower.toNumber();
+                      }, 0) / (1 * 10 ** lock.decimals)) > (
+                          //@ts-ignore
+                          lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
+                        ) ? (
+                        <>Success</>
+                      ) : (
+                        <>Failed</>
+                      )}
+                    </>
+                  ) : (
+                    <>Voting</>
+                  )}
                 </div>
               </TableCell>
               <TableCell>
