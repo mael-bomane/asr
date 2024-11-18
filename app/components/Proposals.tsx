@@ -64,7 +64,7 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
                 {/*<div>{proposal.text}</div>*/}
               </TableCell>
               <TableCell className="text-center">
-                {currentUser.votes.filter((vote) => vote.poll.toNumber() == account.id.toNumber()).length ?
+                {currentUser && currentUser.votes.filter((vote) => vote.poll.toNumber() == account.id.toNumber()).length ?
                   (
                     <div className="text-center w-full flex justify-center items-center text-success"><FaCheck /></div>
                   ) : (
