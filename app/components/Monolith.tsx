@@ -3,23 +3,17 @@
 import { useEffect, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
-import { IDL, program } from "@/constants";
+import { program } from "@/constants";
 import { Lock, Proposal, User } from "@/types/state";
-
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-
-import type { FC } from "react";
 import { Proposals } from "./Proposals";
 import { VotingPower } from "./VotingPower";
-import Link from "next/link";
-import { ellipsis } from "@/lib/utils";
-
-import { TokenInfo } from "@/types";
 import { RewardsList } from "./RewardsList";
 import { DepositPopup } from "./DepositPopup";
 import { Skeleton } from "@radix-ui/themes";
 import { LockDetails } from "./LockDetails";
 import { LockStaked } from "./LockStaked";
+
+import type { FC } from "react";
 
 type Props = {
   address: string
@@ -28,11 +22,10 @@ type Props = {
 
 export const Monolith: FC<Props> = ({ address }) => {
 
-  const { connection } = useConnection();
   const { publicKey } = useWallet();
 
   const [lock, setLock] = useState<Lock | null>(null);
-  const [season, setSeason] = useState(null);
+  const [season, setSeason] = useState<number>(0);
 
   const [users, setUsers] = useState<User[]>([]);
 
@@ -58,7 +51,7 @@ export const Monolith: FC<Props> = ({ address }) => {
           res.seasons.map((season: any, index: number) => {
             console.log(`season ${index}`, season)
           });
-          setSeason(res.seasons[res.seasons.length - 1])
+          setSeason(res.seasons[res.seasons.length - 1].season)
         }
       })
       .catch(err => console.log(err));
@@ -140,10 +133,7 @@ export const Monolith: FC<Props> = ({ address }) => {
         })
         .catch(err => console.log(err));
     }
-
   }, [lock]);
-
-
 
   return (
     <section className="my-6 md:my-10 w-full flex flex-col justify-center items-center md:p-4 space-y-4">
@@ -155,7 +145,7 @@ export const Monolith: FC<Props> = ({ address }) => {
           <LockStaked lock={lock} users={users} />
           <LockDetails lock={lock} />
           <div className="w-full flex flex-col md:flex-row justify-center items-start p-2 space-y-2 md:space-y-0 md:space-x-4">
-            <RewardsList lock={lock} setIsOpen={setIsOpen} />
+            <RewardsList lock={lock} setIsOpen={setIsOpen} season={season} />
             <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} />
           </div>
           <Proposals proposals={proposals} lock={lock} address={address} users={users} currentUser={currentUser} />
