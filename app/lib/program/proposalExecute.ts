@@ -2,14 +2,14 @@ import { PublicKey, SystemProgram } from "@solana/web3.js";
 
 import { program } from "@/constants/program";
 
-export const asrDepositIx = async (
+export const proposalExecuteIx = async (
   owner: PublicKey,
   lock: PublicKey,
-  poll: PublicKey,
+  proposal: PublicKey,
 ) => {
   console.log("owner : ", owner.toString());
   console.log("lock : ", lock.toString());
-  console.log("proposal : ", poll.toString());
+  console.log("proposal : ", proposal.toString());
 
   const analytics = PublicKey.findProgramAddressSync(
     [Buffer.from("analytics")],
@@ -17,11 +17,11 @@ export const asrDepositIx = async (
   )[0];
 
   // @ts-ignore
-  await program.methods.pollExecute()
+  return await program.methods.proposalExecute()
     .accountsStrict({
       owner,
       lock,
-      poll,
+      proposal,
       analytics,
       systemProgram: SystemProgram.programId,
     }).instruction()

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
 import { program } from "@/constants";
@@ -34,6 +34,7 @@ import { Label } from "./ui/label";
 import { proposalVoteIx } from "@/lib/program/proposalVote";
 import { Progress } from "./ui/progress";
 import { FaCheck } from "react-icons/fa6";
+import { proposalExecuteIx } from "@/lib/program/proposalExecute";
 
 type Props = {
   address: string
@@ -164,9 +165,35 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
       toast.success(`success, redirecting you shortly :\ntx : ${signature}`);
 
     }
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
   }
+
+  const onClick = useCallback(async () => {
+    let signature: TransactionSignature = '';
+    if (publicKey) {
+      try {
+        const instruction = await proposalExecuteIx(publicKey, proposal.lock, new PublicKey(address));
+        let latestBlockhash = await connection.getLatestBlockhash()
+
+        const messageV0 = new TransactionMessage({
+          payerKey: publicKey,
+          recentBlockhash: latestBlockhash.blockhash,
+          instructions: [instruction],
+        }).compileToV0Message();
+
+        const transation = new VersionedTransaction(messageV0)
+
+        signature = await sendTransaction(transation, connection);
+
+        await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
+
+        console.log(signature);
+
+        toast.success(`success : ${ellipsis(signature)}`);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }, [publicKey])
 
   return (
     <section className="my-6 md:my-10 w-full max-w-7xl flex flex-col md:flex-row justify-center items-start md:p-4 text-base-content md:space-x-4">
@@ -406,7 +433,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   <div className="timeline-end timeline-box text-sm">Succeeded/Failed</div>
                   <hr className={cn('', {
                     // @ts-ignore
-                    "bg-info": (proposal.endsAt.toNumber() * 1000) < new Date().getTime()
+                    "bg-info": proposal.executed
                   })}
                   />
                 </li>
@@ -434,6 +461,10 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   <div className="timeline-end timeline-box text-sm">Executed</div>
                 </li>
               </ul>
+
+              <button className="btn w-full mt-4" onClick={onClick}>
+                Execute
+              </button>
             </div>
           </>
         ) : (
