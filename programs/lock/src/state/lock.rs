@@ -33,6 +33,7 @@ impl Lock {
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
 pub struct Config {
     pub mint: Pubkey,
+    pub permissionless: bool,
     pub decimals: u8,
     pub config: u8, // 0 = asr, 1 = ve
     pub voting_period: i64,
@@ -42,15 +43,18 @@ pub struct Config {
     pub amount: u64,
     pub symbol: String,
     pub name: String,
+    pub managers: Vec<Pubkey>,
 }
 
 impl Config {
     pub const LEN: usize = PUBLIC_KEY_LENGTH
+        + BOOL_LENGTH
         + 1 * 2
         + TIMESTAMP_LENGTH * 2
         + 1 * 2
         + 8
-        + VECTOR_LENGTH_PREFIX * 2
+        + STRING_LENGTH_PREFIX * 2
+        + VECTOR_LENGTH_PREFIX
         + MAX_SYMBOL_LENGTH
         + MAX_LOCKER_NAME_LENGTH;
 }

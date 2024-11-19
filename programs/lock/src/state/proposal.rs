@@ -20,6 +20,7 @@ pub struct Proposal {
     pub status: Status,
     pub result: Option<Choice>,
     pub config: Option<Config>,
+    pub manager: Option<Pubkey>,
     pub title: String,
     pub content: String,
     pub choices: Vec<Choice>,
@@ -38,6 +39,8 @@ impl Proposal {
         + Choice::LEN
         + 1
         + Config::LEN
+        + 1
+        + PUBLIC_KEY_LENGTH
         + STRING_LENGTH_PREFIX * 2
         + MAX_TITLE_LENGTH
         + MAX_CONTENT_LENGTH

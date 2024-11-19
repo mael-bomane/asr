@@ -10,6 +10,7 @@ use anchor_lang::prelude::*;
 #[derive(Accounts)]
 #[instruction(
     config: u8,
+    permissionless: Option<bool>,
     voting_period: Option<i64>,
     lock_duration: Option<i64>,
     threshold: Option<u8>, 
@@ -17,7 +18,7 @@ use anchor_lang::prelude::*;
     amount: Option<u64>, 
     name: Option<String>, 
     symbol: Option<String>
-    )]
+)]
 pub struct LockUpdate<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -28,11 +29,10 @@ pub struct LockUpdate<'info> {
     /// CHECK: This is safe, account doesn't exists nor holds data
     pub auth: UncheckedAccount<'info>,
     #[account(
-        init,
-        space = Lock::LEN + Season::LEN,
-        payer = signer,
-        seeds = [b"lock", signer.key().as_ref(), mint.key().as_ref()],
-        bump
+        mut,
+        seeds = [b"lock", lock.creator.key().as_ref(), lock.config.mint.key().as_ref()],
+        bump = lock.lock_bump,
+        constraint = if !lock.config.permissionless { lock.config.managers.iter().any(|i| i == &signer.key())} else { true }
     )]
     pub lock: Box<Account<'info, Lock>>,
     #[account(
@@ -83,6 +83,7 @@ impl<'info> LockUpdate<'info> {
         &mut self,
         bumps: &LockUpdateBumps,
         config: u8,
+        permissionless: Option<bool>,
         voting_period: Option<i64>,
         lock_duration: Option<i64>,
         threshold: Option<u8>, 
@@ -101,13 +102,20 @@ impl<'info> LockUpdate<'info> {
 
         let mut new = lock.config.clone();
 
+        match permissionless {
+            Some(value) => {
+                new.permissionless = value;
+            },
+            None => ()
+        }
+
         match voting_period {
             Some(value) => {
-        require!(
-            value >= ONE_DAY_IN_SECONDS && value <= ONE_WEEK_IN_SECONDS,
-            ErrorCode::VotingPeriodOutOfBounds
-        );
-        new.voting_period = value;
+                require!(
+                    value >= ONE_DAY_IN_SECONDS && value <= ONE_WEEK_IN_SECONDS,
+                    ErrorCode::VotingPeriodOutOfBounds
+                );
+                new.voting_period = value;
             },
             None => ()
         }
@@ -186,7 +194,7 @@ impl<'info> LockUpdate<'info> {
         proposal.ends_at = now + lock.config.voting_period;
         proposal.executed = false;
         proposal.status = Status::Voting;
-        proposal.title = "aaa".to_string();
+        proposal.title = "Proposal : Lock Config Update".to_string();
         proposal.result = None;
         proposal.choices = vec![
             Choice{

@@ -25,7 +25,15 @@ pub struct ASRClaim<'info> {
     #[account(
         mut,
         has_one = owner,
-        realloc = User::LEN + user.deposits.len() * Deposit::LEN +  user.votes.len() * Vote::LEN + ((user.claims.len() + 1) * Claim::LEN),
+        realloc = User::LEN 
+        +  user.votes.len() * Vote::LEN 
+        + ((user.claims.len() + 1) * Claim::LEN)
+        + (
+            if mint.key() == lock.config.mint {
+                (user.deposits.len() + 1) * Deposit::LEN
+        } else {
+            user.deposits.len() * Deposit::LEN
+        }),
         realloc::zero = false,
         realloc::payer = owner,
         seeds = [b"user", lock.key().as_ref(), owner.key().as_ref()],

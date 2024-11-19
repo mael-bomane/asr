@@ -8,7 +8,7 @@ use crate::{Config, Deposit, Lock, Season, User};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(config: u8, voting_period: i64, lock_duration: i64, threshold: u8, quorum: u8, amount: u64, name: String, symbol: String)]
+#[instruction(config: u8, permissionless: bool, voting_period: i64, lock_duration: i64, threshold: u8, quorum: u8, amount: u64, name: String, symbol: String)]
 pub struct LockNew<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -20,7 +20,7 @@ pub struct LockNew<'info> {
     pub auth: UncheckedAccount<'info>,
     #[account(
         init,
-        space = Lock::LEN + Season::LEN,
+        space = Lock::LEN + Season::LEN + 32,
         payer = signer,
         seeds = [b"lock", signer.key().as_ref(), mint.key().as_ref()],
         bump
@@ -68,6 +68,7 @@ impl<'info> LockNew<'info> {
         &mut self,
         bumps: &LockNewBumps,
         config: u8,
+        permissionless: bool,
         voting_period: i64,
         lock_duration: i64,
         threshold: u8,
@@ -117,6 +118,7 @@ impl<'info> LockNew<'info> {
 
         lock.config = Config {
             config,
+            permissionless,
             mint: self.mint.key(),
             decimals: self.mint.decimals,
             voting_period,
@@ -126,6 +128,7 @@ impl<'info> LockNew<'info> {
             amount,
             symbol,
             name,
+            managers: vec![self.signer.key()],
         };
 
         let season_start = Clock::get()?.unix_timestamp;

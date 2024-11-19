@@ -19,7 +19,8 @@ pub struct ProposalNew<'info> {
     #[account(
         mut,
         seeds = [b"lock", lock.creator.as_ref(), lock.config.mint.as_ref()],
-        bump = lock.lock_bump
+        bump = lock.lock_bump,
+        constraint = if !lock.config.permissionless { lock.config.managers.iter().any(|i| i == &owner.key())} else { true }
     )]
     pub lock: Box<Account<'info, Lock>>,
     #[account(

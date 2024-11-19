@@ -35,7 +35,8 @@ pub struct ASRDeposit<'info> {
         realloc::zero = false,
         realloc::payer = creator,
         seeds = [b"lock", creator.key().as_ref(), mint.key().as_ref()],
-        bump = lock.lock_bump
+        bump = lock.lock_bump,
+        constraint = if !lock.config.permissionless { lock.config.managers.iter().any(|i| i == &creator.key())} else { true }
     )]
     pub lock: Box<Account<'info, Lock>>,
     #[account(

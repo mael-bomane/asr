@@ -21,6 +21,7 @@ pub struct ProposalExecute<'info> {
         realloc::payer = owner,
         seeds = [b"lock", lock.creator.as_ref(), lock.config.mint.as_ref()],
         bump = lock.lock_bump, 
+        constraint = if !lock.config.permissionless { lock.config.managers.iter().any(|i| i == &owner.key())} else { true }
     )]
     pub lock: Box<Account<'info, Lock>>,
     #[account(
@@ -50,6 +51,7 @@ impl<'info> ProposalExecute<'info> {
         let (result, is_approved, total_power) = proposal.result(&lock);
         
         match proposal.proposal_type {
+            // lock settings proposal
             0 => {
                 match is_approved {
                     true => {
@@ -71,6 +73,7 @@ impl<'info> ProposalExecute<'info> {
                     }
                 }
             },
+            // standard proposal
             1 => {
                 match is_approved {
                     true => {
@@ -89,12 +92,55 @@ impl<'info> ProposalExecute<'info> {
                     }
                 }
             },
+            // add council member proposal
+            2 => {
+                match is_approved {
+                    true => {
+                        lock.approved += 1;
+                        analytics.approved += 1;
+                        proposal.executed = true;
+                        proposal.status = Status::Approved;
+                        proposal.result = result.clone();
+                        if result.clone().unwrap().id == 0 {
+                            lock.config.managers.push(proposal.manager.clone().unwrap())
+                        }
+                    },
+                    false => {
+                        lock.rejected += 1;
+                        analytics.rejected += 1;
+                        proposal.executed = true;
+                        proposal.status = Status::Rejected;
+                        proposal.result = None;
+                    }
+                }
+            },
+            // remove council member proposal
+            3 => {
+                match is_approved {
+                    true => {
+                        lock.approved += 1;
+                        analytics.approved += 1;
+                        proposal.executed = true;
+                        proposal.status = Status::Approved;
+                        proposal.result = result.clone();
+                        if result.clone().unwrap().id == 0 {
+                            let index = lock.config.managers.iter().position(|x| *x == proposal.manager.clone().unwrap()).unwrap();
+                            lock.config.managers.remove(index);
+                        }
+                    },
+                    false => {
+                        lock.rejected += 1;
+                        analytics.rejected += 1;
+                        proposal.executed = true;
+                        proposal.status = Status::Rejected;
+                        proposal.result = None;
+                    }
+                }
+            },
             _ => {
                 ()
             }
         }
-        
-
         
         let mut season = lock.seasons.clone().into_iter().find(|season| season.season == proposal.season).unwrap();
         season.points += total_power;

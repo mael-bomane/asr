@@ -21,6 +21,7 @@ pub mod lock {
     pub fn lock_new(
         ctx: Context<LockNew>,
         config: u8,
+        permissionless: bool,
         voting_period: i64,
         lock_duration: i64,
         threshold: u8,
@@ -32,6 +33,7 @@ pub mod lock {
         ctx.accounts.lock_new(
             &ctx.bumps,
             config,
+            permissionless,
             voting_period,
             lock_duration,
             threshold,
@@ -48,6 +50,7 @@ pub mod lock {
     pub fn lock_update(
         ctx: Context<LockUpdate>,
         config: u8,
+        permissionless: Option<bool>,
         voting_period: Option<i64>,
         lock_duration: Option<i64>,
         threshold: Option<u8>,
@@ -59,6 +62,7 @@ pub mod lock {
         ctx.accounts.lock_update(
             &ctx.bumps,
             config,
+            permissionless,
             voting_period,
             lock_duration,
             threshold,
@@ -67,13 +71,14 @@ pub mod lock {
             name,
             symbol,
         )
-        // ctx.accounts.register(&ctx.bumps)?;
-        // ctx.accounts.deposit(amount)?;
-        // ctx.accounts.update_analytics()
     }
 
     pub fn register(ctx: Context<Register>) -> Result<()> {
         ctx.accounts.register(&ctx.bumps)
+    }
+
+    pub fn manager_add(ctx: Context<ManagerAdd>) -> Result<()> {
+        ctx.accounts.manager_add(&ctx.bumps)
     }
 
     pub fn stake_new(ctx: Context<StakeNew>, amount: u64) -> Result<()> {
