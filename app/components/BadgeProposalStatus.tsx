@@ -10,10 +10,11 @@ type Props = {
 
 export const BadgeProposalStatus: FC<Props> = ({ proposal, lock, isReady }) => {
   return (
-    <div className={cn("badge badge-outline p-3", {
-      "badge-info": proposal.executed,
+    <div className={cn("w-full badge badge-outline p-3", {
+      "badge-info": !isReady,
+      "badge-success": proposal.executed,
       //@ts-ignore
-      "badge-success": !proposal.executed && isReady &&
+      "badge-warning": !proposal.executed && isReady &&
         (proposal.choices.reduce((acc: any, obj: any) => {
           return acc + obj.votingPower.toNumber();
         }, 0) / (1 * 10 ** lock.decimals)) > (
@@ -45,7 +46,7 @@ export const BadgeProposalStatus: FC<Props> = ({ proposal, lock, isReady }) => {
           )}
         </>
       ) : (
-        <>{`${proposal.executed ? 'Executed' : 'Voting'}`}</>
+        <>{`${proposal.executed ? 'Completed' : 'Active'}`}</>
       )}
     </div>
 

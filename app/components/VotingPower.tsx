@@ -25,6 +25,8 @@ import { cn } from "@/lib/utils";
 import { stakeIx } from "@/lib/program/stake";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { WalletModalButton } from "@solana/wallet-adapter-react-ui";
+import { unstakeIx } from "@/lib/program/unstake";
+import { stakeDeactivateIx } from "@/lib/program/deactivate";
 
 type Props = {
   currentUser: User | null
@@ -147,22 +149,12 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
       } else if (isUnStake) {
         try {
           setLoading(true);
-          const mint = new PublicKey(lock.mint);
-          const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
-          console.log("signer ata : ", signerAta.toString());
-          // amount: number,
-          // decimals: PublicKey,
+
           // owner: PublicKey,
           // lock: PublicKey,
-          // mint: PublicKey,
-          // signerAta: PublicKey,
-          const instruction = await stakeIx(
-            inputs.amount,
-            userTokenAmount.decimals,
+          const instruction = await stakeDeactivateIx(
             publicKey,
             new PublicKey(address),
-            mint,
-            signerAta
           );
 
           let latestBlockhash = await connection.getLatestBlockhash()
@@ -219,7 +211,6 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
 
     <form
       onSubmit={handleSubmit(onSubmit)}
-
       className={`max-w-[500px] mx-auto w-full p-2 md:p-8 bg-primary text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
     >
       <CardTitle className="px-2 pb-4 self-start w-full">
@@ -228,7 +219,11 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
           <IoDiamond className="w-6 h-6" /> <span className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500"> {currentUser ? (
             <>
               {currentUser && currentUser.deposits.reduce((acc: any, obj: any) => {
-                return acc + obj.amount.toNumber();
+                if (!obj.deactivating) {
+                  return acc + obj.amount.toNumber();
+                } else {
+                  return acc
+                }
               }, 0) / (1 * 10 ** lock.decimals)}
             </>
           ) : (
@@ -277,7 +272,11 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
               </div>
               <div className="text-xs flex flex-1 grow w-full justify-end space-x-2">
                 <div className="w-full flex items-center justify-center"><IoWallet className="w-4 h-4" /> <span className="uppercase">{`${isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (`${currentUser.deposits.reduce((acc: any, obj: any) => {
-                  return acc + obj.amount.toNumber();
+                  if (!obj.deactivating) {
+                    return acc + obj.amount.toNumber();
+                  } else {
+                    return acc
+                  }
                 }, 0) / (1 * 10 ** lock.decimals)} Staked`)}`} {lock.symbol}</span></div>
                 <button
                   className="btn btn-xs"

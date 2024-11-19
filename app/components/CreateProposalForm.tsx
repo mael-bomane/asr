@@ -136,7 +136,7 @@ export const CreateProposalForm: FC = () => {
   };
 
   return (
-    <form className="w-full md:max-w-7xl grow w-full mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-base-100 text-base-content rounded-xl"
+    <form className="w-full md:max-w-7xl grow w-full mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-primary text-base-content rounded-xl"
       onSubmit={handleSubmit(onSubmit)}
     >
       <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">
@@ -179,7 +179,7 @@ export const CreateProposalForm: FC = () => {
                 placeholder="choice title"
                 className="w-full p-2"
               />
-              <div className="w-[25%] h-9 flex justify-center items-center cursor-pointer group bg-neutral rounded-lg hover:bg-base-100 border"><FaTrash className="group-hover:text-error" /></div>
+              <div className="w-[25%] h-9 flex justify-center items-center cursor-pointer group bg-primary rounded-lg hover:bg-base-100 border"><FaTrash className="group-hover:text-error" /></div>
             </div>
           ))}
         </div>
