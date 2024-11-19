@@ -208,12 +208,8 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
                         onClick={() => onClickClaim(token.mint)}
                         className="text-white cursor-pointer font-semibold">
                         <TableCell className="flex space-x-1">
-                          <span>
-                            {token.mint.toString() == lock.mint.toString() ? 'Staked ' : ''}
-                          </span>
-                          <span>
-                            MONO
-                          </span>
+                          {token.mint.toString() == lock.mint.toString() ? 'Staked ' : ''}
+                          MONO
                         </TableCell>
                         <TableCell className="text-center">{season.season}</TableCell>
                         <TableCell className="w-full text-center flex justify-center items-center">
