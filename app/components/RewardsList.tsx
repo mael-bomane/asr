@@ -60,6 +60,7 @@ export const RewardsList: FC<Props> = ({ lock, setIsOpen, season }) => {
         {publicKey && publicKey.toString() == lock.creator.toString() && (
           <button className="btn mt-4" onClick={() => setIsOpen(true)}>Deposit ASR</button>
         )}
+        <button className="btn mt-4" onClick={() => setIsOpen(true)}>View ASR Rewards</button>
       </CardContent>
     </Card>
   )
