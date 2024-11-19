@@ -207,7 +207,10 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
                       <TableRow key={index}
                         onClick={() => onClickClaim(token.mint)}
                         className="text-white cursor-pointer font-semibold">
-                        <TableCell className="flex space-x-1">
+                        <TableCell className={cn("flex space-x-1", {
+                          "w-[200px]": token.mint.toString() == lock.mint.toString(),
+                          "w-[100px]": !(token.mint.toString() == lock.mint.toString()),
+                        })}>
                           {token.mint.toString() == lock.mint.toString() ? 'Staked ' : ''}
                           MONO
                         </TableCell>

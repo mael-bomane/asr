@@ -52,7 +52,7 @@ const Header = () => {
   return (
     <header className="bg-[#000]">
       <nav
-        className="container flex items-center justify-between px-8 py-4 mx-auto"
+        className="container flex items-center justify-between px-8 py-2 mx-auto"
         aria-label="Global"
       >
         {/* Your logo/name on large screens */}
@@ -99,7 +99,7 @@ const Header = () => {
         </div>
 
         {/* Your links on large screens */}
-        <div className="hidden lg:flex lg:justify-center lg:gap-12 lg:items-center text-white font-extrabold text-lg">
+        <div className="hidden lg:flex lg:justify-center lg:gap-12 lg:items-center text-white font-extrabold text-lg py-2">
           {pathname == '/' ? links.slice(1).map((link) => (
             <Link
               href={link.href}
@@ -123,11 +123,11 @@ const Header = () => {
         </div>
 
         {/* CTA on large screens */}
-        <div className="hidden lg:flex lg:justify-end lg:flex-1 flex items-center justify-center pt-4">
+        <div className="hidden lg:flex lg:justify-end lg:flex-1 flex items-center justify-center py-2">
           <div className="w-full flex items-center justify-end space-x-8">
             {config.xTwitter &&
               <Link href={`https://x.com/@${config.xTwitter}`} target="_blank">
-                <FaXTwitter className="w-8 h-8 text-base-content" />
+                <FaXTwitter className="w-6 h-6 text-base-content" />
               </Link>
             }
             {config.discord &&

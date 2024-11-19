@@ -3,7 +3,7 @@ import * as ProgressPrimitive from "@radix-ui/react-progress"
 
 import { cn } from "@/lib/utils"
 
-type ProgressSegment = {
+export type ProgressSegment = {
   value: number
   color?: string
 }
@@ -23,7 +23,7 @@ export const StackedProgress = React.forwardRef<
       <ProgressPrimitive.Root
         ref={ref}
         className={cn(
-          "relative h-6 w-full overflow-hidden rounded bg-secondary",
+          "relative h-4 w-full overflow-hidden rounded bg-secondary",
           className
         )}
         {...props}

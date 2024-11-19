@@ -13,6 +13,7 @@ import type { FC } from "react"
 import type { Proposal, Lock, User } from "@/types";
 import { cn } from "@/lib/utils";
 import { BadgeProposalStatus } from "./BadgeProposalStatus";
+import { ProgressSegment, StackedProgress } from "./ui/stacked-progress";
 
 type Props = {
   lock: Lock | null
@@ -57,6 +58,17 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
           {proposals.length > 0 && proposals.map(({ account, publicKey }, i) => {
             const isReady = (account.endsAt.toNumber() * 1000) < new Date().getTime() ? true : false;
 
+            const segments: ProgressSegment[] = [];
+
+            const colors = ['bg-info', 'bg-warning', 'bg-error'];
+
+            account.choices.forEach((choice: any, index: number) => {
+              segments.push({
+                value: choice.votingPower,
+                color: colors[index]
+              })
+            })
+
             return (
               <TableRow key={i}
                 onClick={() => {
@@ -79,7 +91,7 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
                   <BadgeProposalStatus lock={lock} proposal={account} isReady={isReady} />
                 </TableCell>
                 <TableCell>
-                  <Progress className="bg-base-100" />
+                  <StackedProgress segments={segments} className="bg-base-100" />
                 </TableCell>
                 <TableCell className="text-left">
                   {/* @ts-ignore */}
