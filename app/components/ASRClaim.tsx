@@ -2,6 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import React from "react";
+
 import { useCallback, useEffect, useState, CSSProperties } from "react"
 
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
@@ -36,14 +38,14 @@ import { BN } from "bn.js";
 type Props = {
   currentUser: User | null
   currentUserLoading: boolean
+  setCurrentUserLoading: React.Dispatch<React.SetStateAction<boolean>>
   lock: Lock | null
   address: string
 }
 
-export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, address }) => {
+export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurrentUserLoading, lock, address }) => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
-  const [loading, setLoading] = useState<boolean>(false);
 
   type UserTokenAmount = {
     value: string
@@ -57,7 +59,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
     let signature: TransactionSignature = '';
     if (publicKey) {
       try {
-        setLoading(true);
+        setCurrentUserLoading(true);
         const mint = new PublicKey(lock.mint);
         const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
         console.log("signer ata : ", signerAta.toString());
@@ -81,10 +83,10 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
         console.log(signature);
 
         toast.success(`success:\ntx : ${signature}`);
-        setLoading(false)
+        setCurrentUserLoading(false)
       } catch (error) {
         console.log(error);
-        setLoading(false);
+        setCurrentUserLoading(false);
       }
     } else {
       toast.error('please connect your wallet');
@@ -95,7 +97,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
     let signature: TransactionSignature = '';
     if (publicKey && currentUser && lock) {
       try {
-        setLoading(true);
+        setCurrentUserLoading(true);
         const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
         console.log("signer ata : ", signerAta.toString());
 
@@ -118,15 +120,23 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
         console.log(signature);
 
         toast.success(`success:\ntx : ${signature}`);
-        setLoading(false)
+        setCurrentUserLoading(false)
       } catch (error) {
         console.log(error);
-        setLoading(false);
+        setCurrentUserLoading(false);
       }
     } else {
-      toast.error('please connect your wallet');
+      if (!lock) {
+        toast.error('lock not found');
+      }
+      if (!currentUser) {
+        toast.error('user not found');
+      }
+      if (!publicKey) {
+        toast.error('please connect your wallet');
+      }
     }
-  }, [publicKey]);
+  }, [publicKey, currentUser, lock]);
 
   useEffect(() => {
     const fetchUserBalance = async () => {
@@ -169,7 +179,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
                 <span className="ml-4">{new Date(lock.createdAt * 1000).toDateString()} - {new Date(lock.seasons[lock.seasons.length - 2]?.seasonEnd * 1000).toDateString()}</span>
               </div>
             </div>
-            <div className="flex flex-col w-full justify-end items-end space-x-4">
+            <div className="flex flex-col w-[50%] justify-end items-end space-x-4">
               <div className="w-full flex flex-col items-center space-y-4">
                 <div className="w-full text-right text-xs font-extrabold">Votes Participated</div>
                 <div className="w-full text-right text-xl font-extrabold text-white">
@@ -193,7 +203,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
                 {/*@ts-ignore*/}
                 {lock?.seasons?.filter(season => (season.seasonEnd.toNumber() * 1000) < new Date().getTime()).concat()?.map((season, id) => (
                   <TableBody key={id} >
-                    {season.asr.map((token, index) => (
+                    {currentUser.votes.filter(vote => vote.season == season.season).length > 0 && season.asr.map((token, index) => (
                       <TableRow key={index}
                         onClick={() => onClickClaim(token.mint)}
                         className="text-white cursor-pointer font-semibold">
@@ -222,21 +232,25 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
                         </TableCell>
                       </TableRow>
                     ))}
+
                   </TableBody>
                 ))}
+
+
               </Table>
+
             ) : (
               <div className="w-full bg-[#121212] p-8 flex flex-col mt-4 rounded-xl text-sm text-center space-y-4">
                 <div>You&apos;re not registered on this Lock</div>
-                <button className={cn("w-full btn btn-[#000] mx-auto text-white")} disabled={loading}
+                <button className={cn("w-full btn btn-[#000] mx-auto text-white")} disabled={currentUserLoading}
                   onClick={onClickRegister}
                 >
-                  {loading ? (
+                  {currentUserLoading ? (
                     <RingLoader
                       color={"#ffffff"}
-                      loading={loading}
+                      loading={currentUserLoading}
                       cssOverride={override}
-                      size={150}
+                      size={10}
                       aria-label="Loading Spinner"
                       data-testid="loader"
                     />

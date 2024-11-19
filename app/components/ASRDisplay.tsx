@@ -76,7 +76,7 @@ export const ASRDisplay: FC<Props> = ({ address }) => {
       setCurrentUser(null);
     }
 
-  }, [lock, publicKey, address]);
+  }, [lock, publicKey, address, currentUserLoading]);
 
   return (
     <section className="my-6 md:my-10 w-full flex flex-col justify-center items-center md:p-4 space-y-4">
@@ -87,7 +87,7 @@ export const ASRDisplay: FC<Props> = ({ address }) => {
           </h1>
           <div className="w-full flex flex-col md:flex-row justify-center items-start p-2 space-y-2 md:space-y-0 md:space-x-4">
             <ASRRewards lock={lock} setIsOpen={setIsOpen} season={season} address={address} />
-            <ASRClaim currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} />
+            <ASRClaim currentUser={currentUser} currentUserLoading={currentUserLoading} setCurrentUserLoading={setCurrentUserLoading} lock={lock} address={address} />
           </div>
         </>
       ) : <Skeleton />
