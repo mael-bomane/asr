@@ -25,8 +25,8 @@ import { IconCommand } from "@tabler/icons-react";
 import { IconCaretLeftFilled } from "@tabler/icons-react";
 import { IconCaretDownFilled } from "@tabler/icons-react";
 import Image from "next/image";
-import { Monolith } from "../Monolith";
 import { MONOLITH_ID } from "@/constants";
+import { LockDisplay } from "../LockDisplay";
 
 export const MacbookScroll = ({
   src,
@@ -168,7 +168,7 @@ export const Lid = ({
         className="h-96 w-[32rem] absolute inset-0 bg-[#010101] rounded-2xl p-2"
       >
         <div className="absolute h-96 overflow-hidden overflow-y-scroll inset-0 bg-[#272729] rounded-lg" >
-          <Monolith address={MONOLITH_ID} />
+          <LockDisplay address={MONOLITH_ID} />
         </div>
       </motion.div>
     </div>
