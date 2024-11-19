@@ -20,7 +20,7 @@ pub struct StakeNew<'info> {
     pub auth: UncheckedAccount<'info>,
     #[account(
         mut,
-        seeds = [b"lock", lock.creator.as_ref(), lock.mint.as_ref()],
+        seeds = [b"lock", lock.creator.as_ref(), lock.config.mint.as_ref()],
         bump = lock.lock_bump
     )]
     pub lock: Box<Account<'info, Lock>>,
@@ -40,7 +40,7 @@ pub struct StakeNew<'info> {
     )]
     pub signer_ata: Box<Account<'info, TokenAccount>>,
     #[account(
-        address = lock.mint @ ErrorCode::WrongLockerMint
+        address = lock.config.mint @ ErrorCode::WrongLockerMint
     )]
     pub mint: Box<Account<'info, Mint>>,
     #[account(
@@ -93,7 +93,7 @@ impl<'info> StakeNew<'info> {
             deactivating: false,
             deactivation_start: None,
             created_at: Clock::get()?.unix_timestamp,
-            expires_at: Clock::get()?.unix_timestamp + lock.lock_duration,
+            expires_at: Clock::get()?.unix_timestamp + lock.config.lock_duration,
         };
 
         user.deposits.push(deposit);

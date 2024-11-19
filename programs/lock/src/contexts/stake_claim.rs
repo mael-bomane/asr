@@ -23,7 +23,7 @@ pub struct StakeClaim<'info> {
     pub auth: UncheckedAccount<'info>,
     #[account(
         mut,
-        seeds = [b"lock", lock.creator.as_ref(), lock.mint.as_ref()],
+        seeds = [b"lock", lock.creator.as_ref(), lock.config.mint.as_ref()],
         bump = lock.lock_bump
     )]
     pub lock: Box<Account<'info, Lock>>,
@@ -40,7 +40,7 @@ pub struct StakeClaim<'info> {
     )]
     pub signer_ata: Box<Account<'info, TokenAccount>>,
     #[account(
-        address = lock.mint @ ErrorCode::WrongLockerMint
+        address = lock.config.mint @ ErrorCode::WrongLockerMint
     )]
     pub mint: Box<Account<'info, Mint>>,
     #[account(
@@ -76,7 +76,7 @@ impl<'info> StakeClaim<'info> {
             .clone()
             .into_iter()
             .filter(|deposit| {
-                time > (if lock.config == 0 {
+                time > (if lock.config.config == 0 {
                     Some(deposit.deactivation_start).unwrap().unwrap() + ONE_MONTH_IN_SECONDS
                 } else {
                     deposit.expires_at
@@ -97,7 +97,7 @@ impl<'info> StakeClaim<'info> {
             .clone()
             .into_iter()
             .filter(|deposit| {
-                time < (if lock.config == 0 {
+                time < (if lock.config.config == 0 {
                     Some(deposit.deactivation_start).unwrap().unwrap() + ONE_MONTH_IN_SECONDS
                 } else {
                     deposit.expires_at

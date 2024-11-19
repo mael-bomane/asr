@@ -20,12 +20,12 @@ pub struct VoteNew<'info> {
         realloc::payer = owner,
         seeds = [b"user", lock.key().as_ref(), owner.key().as_ref()],
         bump = user.bump, 
-        constraint = !user.votes.clone().into_iter().any(|vote| vote.poll == index ) @ ErrorCode::UserAlreadyVotedThisPoll
+        constraint = !user.votes.clone().into_iter().any(|vote| vote.proposal == index ) @ ErrorCode::UserAlreadyVotedThisPoll
     )]
     pub user: Box<Account<'info, User>>,
     #[account(
         mut,
-        seeds = [b"lock", lock.creator.as_ref(), lock.mint.as_ref()],
+        seeds = [b"lock", lock.creator.as_ref(), lock.config.mint.as_ref()],
         bump = lock.lock_bump, 
     )]
     pub lock: Box<Account<'info, Lock>>,
@@ -50,11 +50,11 @@ impl<'info> VoteNew<'info> {
         let lock = &mut self.lock;
         let user = &mut self.user;
 
-        require!(user.total_user_deposit_amount() > 0, ErrorCode::UserHaveNoVotingPowerInThisLock);
+        require!(user.voting_power(&lock) > 0, ErrorCode::UserHaveNoVotingPowerInThisLock);
 
         let proposal = &mut self.proposal;
         
-        require!(Clock::get()?.unix_timestamp < (proposal.created_at + lock.voting_period), ErrorCode::VotingPeriodExpired);
+        require!(Clock::get()?.unix_timestamp < (proposal.created_at + lock.config.voting_period), ErrorCode::VotingPeriodExpired);
         
         let choice = proposal.choices[usize::from(id as usize)].clone();
         let title = choice.title.clone();
@@ -66,7 +66,7 @@ impl<'info> VoteNew<'info> {
         
         let vote = Vote {
             season,
-            poll: index,
+            proposal: index,
             voting_power,
             choice: id,
             created_at: Clock::get()?.unix_timestamp,

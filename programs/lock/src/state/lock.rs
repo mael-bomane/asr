@@ -5,14 +5,7 @@ use crate::constants::*;
 #[account]
 pub struct Lock {
     pub creator: Pubkey,
-    pub mint: Pubkey,
-    pub decimals: u8,
-    pub config: u8, // 0 = asr, 1 = ve
-    pub voting_period: i64,
-    pub lock_duration: i64, // only for ve
-    pub threshold: u8,      // 51% to 100%
-    pub quorum: u8,         // 0% to 100%
-    pub amount: u64,
+    pub config: Config,
     pub total_deposits: u64,
     pub polls: u64,
     pub votes: u64,
@@ -22,26 +15,44 @@ pub struct Lock {
     pub updated_at: i64,
     pub lock_bump: u8,
     pub vault_bump: u8,
-    pub symbol: String,
-    pub name: String,
     pub seasons: Vec<Season>,
 }
 
 impl Lock {
     pub const LEN: usize = DISCRIMINATOR_LENGTH
-        + PUBLIC_KEY_LENGTH * 2 // creator, mint 
-        + 1 * 4 // config, decimals, threshold 51 => 100, quorum 0 => 100
-        + 8 * 6 // amount, approved, rejected, min 
-        + TIMESTAMP_LENGTH * 4
+        + PUBLIC_KEY_LENGTH // creator 
+        + 8 * 5 // amount, approved, rejected, min 
+        + TIMESTAMP_LENGTH * 2
         + BUMP_LENGTH * 2 // bumps
-        + VECTOR_LENGTH_PREFIX 
-        + STRING_LENGTH_PREFIX * 2
-        + MAX_LOCKER_NAME_LENGTH 
-        + MAX_SYMBOL_LENGTH;
-
+        + VECTOR_LENGTH_PREFIX;
     pub fn total_asr(&self) -> usize {
         self.seasons.iter().map(|season| season.asr.len()).sum()
     }
+}
+
+#[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
+pub struct Config {
+    pub mint: Pubkey,
+    pub decimals: u8,
+    pub config: u8, // 0 = asr, 1 = ve
+    pub voting_period: i64,
+    pub lock_duration: i64, // only for ve
+    pub threshold: u8,      // 51% to 100%
+    pub quorum: u8,         // 0% to 100%
+    pub amount: u64,
+    pub symbol: String,
+    pub name: String,
+}
+
+impl Config {
+    pub const LEN: usize = PUBLIC_KEY_LENGTH
+        + 1 * 2
+        + TIMESTAMP_LENGTH * 2
+        + 1 * 2
+        + 8
+        + VECTOR_LENGTH_PREFIX * 2
+        + MAX_SYMBOL_LENGTH
+        + MAX_LOCKER_NAME_LENGTH;
 }
 
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]

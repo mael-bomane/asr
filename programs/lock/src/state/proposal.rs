@@ -1,5 +1,8 @@
 use {
-    crate::{constants::*, state::Lock},
+    crate::{
+        constants::*,
+        state::{Config, Lock},
+    },
     anchor_lang::prelude::*,
 };
 
@@ -13,8 +16,10 @@ pub struct Proposal {
     pub ends_at: i64,
     pub executed: bool,
     pub bump: u8,
+    pub proposal_type: u8, // 0 = lock settings, 2 = standard
     pub status: Status,
     pub result: Option<Choice>,
+    pub config: Option<Config>,
     pub title: String,
     pub content: String,
     pub choices: Vec<Choice>,
@@ -31,6 +36,8 @@ impl Proposal {
         + 1
         + 1
         + Choice::LEN
+        + 1
+        + Config::LEN
         + STRING_LENGTH_PREFIX * 2
         + MAX_TITLE_LENGTH
         + MAX_CONTENT_LENGTH
@@ -47,7 +54,7 @@ impl Proposal {
             total_power += choice.voting_power
         }
 
-        let quorum = lock.quorum as u64;
+        let quorum = lock.config.quorum as u64;
         // ensure we pass the quorum
         let min = quorum
             .checked_mul(lock.total_deposits)

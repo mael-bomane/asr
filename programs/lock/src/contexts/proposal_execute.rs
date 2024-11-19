@@ -19,7 +19,7 @@ pub struct ProposalExecute<'info> {
         + lock.total_asr() * ASR::LEN,
         realloc::zero = false,
         realloc::payer = owner,
-        seeds = [b"lock", lock.creator.as_ref(), lock.mint.as_ref()],
+        seeds = [b"lock", lock.creator.as_ref(), lock.config.mint.as_ref()],
         bump = lock.lock_bump, 
     )]
     pub lock: Box<Account<'info, Lock>>,
@@ -43,28 +43,59 @@ pub struct ProposalExecute<'info> {
 impl<'info> ProposalExecute<'info> {
     pub fn proposal_execute(&mut self) -> Result<()> {
         let lock = &mut self.lock;
+
         let proposal = &mut self.proposal;
         let analytics = &mut self.analytics;
         
         let (result, is_approved, total_power) = proposal.result(&lock);
-
-        match is_approved {
-            true => {
-                lock.approved += 1;
-                analytics.approved += 1;
-                proposal.executed = true;
-                proposal.status = Status::Approved;
-                proposal.result = result;
+        
+        match proposal.proposal_type {
+            0 => {
+                match is_approved {
+                    true => {
+                        lock.approved += 1;
+                        analytics.approved += 1;
+                        proposal.executed = true;
+                        proposal.status = Status::Approved;
+                        proposal.result = result.clone();
+                        if result.clone().unwrap().id == 0 {
+                            lock.config = proposal.config.clone().unwrap()
+                        }
+                    },
+                    false => {
+                        lock.rejected += 1;
+                        analytics.rejected += 1;
+                        proposal.executed = true;
+                        proposal.status = Status::Rejected;
+                        proposal.result = None;
+                    }
+                }
             },
-            false => {
-                lock.rejected += 1;
-                analytics.rejected += 1;
-                proposal.executed = true;
-                proposal.status = Status::Rejected;
-                proposal.result = None;
+            1 => {
+                match is_approved {
+                    true => {
+                        lock.approved += 1;
+                        analytics.approved += 1;
+                        proposal.executed = true;
+                        proposal.status = Status::Approved;
+                        proposal.result = result;
+                    },
+                    false => {
+                        lock.rejected += 1;
+                        analytics.rejected += 1;
+                        proposal.executed = true;
+                        proposal.status = Status::Rejected;
+                        proposal.result = None;
+                    }
+                }
+            },
+            _ => {
+                ()
             }
         }
+        
 
+        
         let mut season = lock.seasons.clone().into_iter().find(|season| season.season == proposal.season).unwrap();
         season.points += total_power;
 

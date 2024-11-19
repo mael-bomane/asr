@@ -18,7 +18,7 @@ pub struct ProposalNew<'info> {
     pub user: Box<Account<'info, User>>,
     #[account(
         mut,
-        seeds = [b"lock", lock.creator.as_ref(), lock.mint.as_ref()],
+        seeds = [b"lock", lock.creator.as_ref(), lock.config.mint.as_ref()],
         bump = lock.lock_bump
     )]
     pub lock: Box<Account<'info, Lock>>,
@@ -57,7 +57,7 @@ impl<'info> ProposalNew<'info> {
         let proposal = &mut self.proposal;
 
         require!(
-            user.total_user_deposit_amount() >= lock.amount,
+            user.total_user_deposit_amount() >= lock.config.amount,
             ErrorCode::NotEnoughDepositsToStartPoll
         );
 
@@ -66,12 +66,13 @@ impl<'info> ProposalNew<'info> {
         proposal.id = lock.polls + 1;
         let now = Clock::get()?.unix_timestamp;
         proposal.created_at = now;
-        proposal.ends_at = now + lock.voting_period;
+        proposal.ends_at = now + lock.config.voting_period;
         proposal.executed = false;
         proposal.status = Status::Voting;
         proposal.title = title;
         proposal.result = None;
         proposal.choices = choices;
+        proposal.proposal_type = 1;
         proposal.bump = bumps.proposal;
 
         Ok(())

@@ -45,6 +45,33 @@ pub mod lock {
         // ctx.accounts.update_analytics()
     }
 
+    pub fn lock_update(
+        ctx: Context<LockUpdate>,
+        config: u8,
+        voting_period: Option<i64>,
+        lock_duration: Option<i64>,
+        threshold: Option<u8>,
+        quorum: Option<u8>,
+        amount: Option<u64>,
+        name: Option<String>,
+        symbol: Option<String>,
+    ) -> Result<()> {
+        ctx.accounts.lock_update(
+            &ctx.bumps,
+            config,
+            voting_period,
+            lock_duration,
+            threshold,
+            quorum,
+            amount,
+            name,
+            symbol,
+        )
+        // ctx.accounts.register(&ctx.bumps)?;
+        // ctx.accounts.deposit(amount)?;
+        // ctx.accounts.update_analytics()
+    }
+
     pub fn register(ctx: Context<Register>) -> Result<()> {
         ctx.accounts.register(&ctx.bumps)
     }

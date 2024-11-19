@@ -14,7 +14,7 @@ pub struct Register<'info> {
     pub auth: UncheckedAccount<'info>,
     #[account(
         mut,
-        seeds = [b"lock", lock.creator.as_ref(), lock.mint.as_ref()],
+        seeds = [b"lock", lock.creator.as_ref(), lock.config.mint.as_ref()],
         bump = lock.lock_bump
     )]
     pub lock: Box<Account<'info, Lock>>,

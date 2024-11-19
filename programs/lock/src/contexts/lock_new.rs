@@ -3,7 +3,7 @@ use anchor_spl::metadata::MetadataAccount;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
 use crate::{constants::*, errors::ErrorCode, state::Analytics};
-use crate::{Deposit, Lock, Season, User};
+use crate::{Config, Deposit, Lock, Season, User};
 
 use anchor_lang::prelude::*;
 
@@ -114,12 +114,20 @@ impl<'info> LockNew<'info> {
         let lock = &mut self.lock;
 
         lock.creator = self.signer.key();
-        lock.mint = self.mint.key();
-        //lock.symbol = self.metadata.symbol.clone();
-        lock.name = name;
-        lock.symbol = symbol;
-        lock.decimals = self.mint.decimals;
-        lock.config = config;
+
+        lock.config = Config {
+            config,
+            mint: self.mint.key(),
+            decimals: self.mint.decimals,
+            voting_period,
+            lock_duration,
+            threshold,
+            quorum,
+            amount,
+            symbol,
+            name,
+        };
+
         let season_start = Clock::get()?.unix_timestamp;
         lock.seasons.push(Season {
             season: 0,
@@ -128,11 +136,6 @@ impl<'info> LockNew<'info> {
             season_end: Clock::get()?.unix_timestamp + THREE_MONTH_IN_SECONDS,
             asr: Vec::new(),
         });
-        lock.voting_period = voting_period;
-        lock.lock_duration = lock_duration;
-        lock.threshold = threshold;
-        lock.quorum = quorum;
-        lock.amount = amount;
         lock.total_deposits = 0;
         lock.approved = 0;
         lock.rejected = 0;

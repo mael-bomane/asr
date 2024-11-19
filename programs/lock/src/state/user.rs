@@ -52,7 +52,7 @@ impl User {
 
     pub fn voting_power(&self, lock: &Lock) -> u64 {
         // active staking rewards (asr) math
-        if lock.config == 0 {
+        if lock.config.config == 0 {
             self.deposits
                 .iter()
                 .map(|deposit| {
@@ -66,7 +66,7 @@ impl User {
                 })
                 .sum()
         // voting escrow (ve) math
-        } else if lock.config == 1 {
+        } else if lock.config.config == 1 {
             self.deposits
                 .iter()
                 .map(|deposit| {
@@ -106,7 +106,7 @@ impl Deposit {
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]
 pub struct Vote {
     pub season: u8,
-    pub poll: u64,
+    pub proposal: u64,
     pub voting_power: u64,
     pub choice: u8,
     pub created_at: i64,
