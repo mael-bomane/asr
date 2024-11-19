@@ -24,6 +24,7 @@ import type { User, Lock, TokenInfo } from "@/types";
 import { cn } from "@/lib/utils";
 import { stakeIx } from "@/lib/program/stake";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { WalletModalButton } from "@solana/wallet-adapter-react-ui";
 
 type Props = {
   currentUser: User | null
@@ -99,47 +100,93 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
   const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
     let signature: TransactionSignature = '';
     if (publicKey) {
-      try {
-        setLoading(true);
-        const mint = new PublicKey(lock.mint);
-        const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
-        console.log("signer ata : ", signerAta.toString());
-        // amount: number,
-        // decimals: PublicKey,
-        // owner: PublicKey,
-        // lock: PublicKey,
-        // mint: PublicKey,
-        // signerAta: PublicKey,
-        const instruction = await stakeIx(
-          inputs.amount,
-          userTokenAmount.decimals,
-          publicKey,
-          new PublicKey(address),
-          mint,
-          signerAta
-        );
+      if (isStake) {
+        try {
+          setLoading(true);
+          const mint = new PublicKey(lock.mint);
+          const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+          console.log("signer ata : ", signerAta.toString());
+          // amount: number,
+          // decimals: PublicKey,
+          // owner: PublicKey,
+          // lock: PublicKey,
+          // mint: PublicKey,
+          // signerAta: PublicKey,
+          const instruction = await stakeIx(
+            inputs.amount,
+            userTokenAmount.decimals,
+            publicKey,
+            new PublicKey(address),
+            mint,
+            signerAta
+          );
 
-        let latestBlockhash = await connection.getLatestBlockhash()
+          let latestBlockhash = await connection.getLatestBlockhash()
 
-        const messageV0 = new TransactionMessage({
-          payerKey: publicKey,
-          recentBlockhash: latestBlockhash.blockhash,
-          instructions: [instruction],
-        }).compileToV0Message();
+          const messageV0 = new TransactionMessage({
+            payerKey: publicKey,
+            recentBlockhash: latestBlockhash.blockhash,
+            instructions: [instruction],
+          }).compileToV0Message();
 
-        const transation = new VersionedTransaction(messageV0)
+          const transation = new VersionedTransaction(messageV0)
 
-        signature = await sendTransaction(transation, connection);
+          signature = await sendTransaction(transation, connection);
 
-        await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
+          await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
 
-        console.log(signature);
+          console.log(signature);
 
-        toast.success(`success:\ntx : ${signature}`);
-        setLoading(false)
-      } catch (error) {
-        console.log(error);
-        setLoading(false);
+          toast.success(`success:\ntx : ${signature}`);
+          setLoading(false)
+        } catch (error) {
+          console.log(error);
+          setLoading(false);
+        }
+
+      } else if (isUnStake) {
+        try {
+          setLoading(true);
+          const mint = new PublicKey(lock.mint);
+          const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+          console.log("signer ata : ", signerAta.toString());
+          // amount: number,
+          // decimals: PublicKey,
+          // owner: PublicKey,
+          // lock: PublicKey,
+          // mint: PublicKey,
+          // signerAta: PublicKey,
+          const instruction = await stakeIx(
+            inputs.amount,
+            userTokenAmount.decimals,
+            publicKey,
+            new PublicKey(address),
+            mint,
+            signerAta
+          );
+
+          let latestBlockhash = await connection.getLatestBlockhash()
+
+          const messageV0 = new TransactionMessage({
+            payerKey: publicKey,
+            recentBlockhash: latestBlockhash.blockhash,
+            instructions: [instruction],
+          }).compileToV0Message();
+
+          const transation = new VersionedTransaction(messageV0)
+
+          signature = await sendTransaction(transation, connection);
+
+          await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
+
+          console.log(signature);
+
+          toast.success(`success:\ntx : ${signature}`);
+          setLoading(false)
+        } catch (error) {
+          console.log(error);
+          setLoading(false);
+        }
       }
     } else {
       toast.error('please connect your wallet');
@@ -259,7 +306,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
             <div className="w-full flex mt-4 justify-center items-center">
               <button className="btn btn-sm text-xs">
                 <Image src={logo} width={30} height={30} alt="mono token" className="rounded-full" />
-                {isUnStake ? 'Staked ' : ''} MONO
+                {isUnStake ? 'Staked ' : ''} {lock.symbol}
               </button>
               <Input
                 type="number"
@@ -276,25 +323,28 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
         )}
       </CardTitle>
       <CardDescription className="w-full p-2">
-        {publicKey && currentUser ? (
-          <button
-            className={cn("btn btn-lg w-full mx-auto", {
-              "btn-disabled": !userTokenAmount || loading,
-            })}
-            type="submit"
-          >
-            <span className={cn('', {
-              "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500": isStake || isUnStake,
-            })}>{userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : 'insufficient MONO'}</span>
-          </button>
-        ) : (
-          <button className="w-full btn btn-lg mx-auto"
-            onClick={onClickRegister}
-          >
-            {publicKey ? "Register To Locker" : "Connect Your Wallet"}
-          </button>
-        )
-        }
+        {publicKey && currentUser && (
+          <>
+            {currentUser ? (
+              <button
+                className={cn("btn btn-lg w-full mx-auto", {
+                  "btn-disabled": !userTokenAmount || loading,
+                })}
+                type="submit"
+              >
+                <span className={cn('', {
+                  "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500": isStake || isUnStake,
+                })}>{userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : 'insufficient MONO'}</span>
+              </button>
+            ) : (
+              <button className={cn("w-full btn btn-lg mx-auto")} disabled={!publicKey}
+                onClick={onClickRegister}
+              >
+                {publicKey ? "Register To Locker" : "Connect Your Wallet"}
+              </button>
+            )}
+          </>
+        )}
       </CardDescription>
     </form>
   )

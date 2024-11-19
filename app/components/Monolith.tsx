@@ -67,7 +67,7 @@ export const Monolith: FC<Props> = ({ address }) => {
       //@ts-ignore
       return await program.account.user.fetch(user);
     }
-    if (lock) {
+    if (publicKey && lock && address) {
       setCurrentUserLoading(true)
       fetchUser()
         .then(res => {
@@ -81,9 +81,11 @@ export const Monolith: FC<Props> = ({ address }) => {
           console.log(err);
           setCurrentUserLoading(false);
         });
+    } else {
+      setCurrentUser(null);
     }
 
-  }, [lock, publicKey]);
+  }, [lock, publicKey, address]);
 
   useEffect(() => {
     const fetchProposals = async () => {
