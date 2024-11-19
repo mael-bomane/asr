@@ -1,5 +1,4 @@
 use anchor_lang::prelude::*;
-use anchor_spl::metadata::mpl_token_metadata::MAX_SYMBOL_LENGTH;
 
 use crate::constants::*;
 
@@ -50,8 +49,8 @@ pub struct Season {
     pub season: u8,
     pub points: u64,
     pub asr: Vec<ASR>,
-    pub season_start: i64, // 0 = asr, 1 = ve
-    pub season_end: i64, // 0 = asr, 1 = ve
+    pub season_start: i64,
+    pub season_end: i64,
 }
 
 impl Season {
@@ -62,9 +61,10 @@ impl Season {
 pub struct ASR {
     pub mint: Pubkey,
     pub decimals: u8,
+    pub symbol: String,
     pub amount: u64,
 }
 
 impl ASR {
-    pub const LEN: usize = PUBLIC_KEY_LENGTH + 1 + 8;
+    pub const LEN: usize = PUBLIC_KEY_LENGTH + 1 + STRING_LENGTH_PREFIX + 8 + MAX_SYMBOL_LENGTH;
 }

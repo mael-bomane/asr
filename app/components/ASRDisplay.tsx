@@ -1,41 +1,32 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import Skeleton from "react-loading-skeleton";
 import { PublicKey } from "@solana/web3.js";
+import { useWallet } from "@solana/wallet-adapter-react";
+
 import { program } from "@/constants";
-import { Lock, Proposal, User } from "@/types/state";
-import { Proposals } from "./Proposals";
-import { VotingPower } from "./VotingPower";
-import { RewardsList } from "./RewardsList";
-import { DepositPopup } from "./DepositPopup";
-import { Skeleton } from "@radix-ui/themes";
-import { LockDetails } from "./LockDetails";
-import { LockStaked } from "./LockStaked";
 
 import type { FC } from "react";
+import type { User, Lock } from "@/types";
+import { DepositPopup } from "./DepositPopup";
+import { ASRRewards } from "./ASRRewards";
+import { ASRClaim } from "./ASRClaim";
+import Link from "next/link";
 
 type Props = {
   address: string
 };
+export const ASRDisplay: FC<Props> = ({ address }) => {
 
-
-export const Monolith: FC<Props> = ({ address }) => {
-
-  const { publicKey } = useWallet();
+  const { publicKey } = useWallet()
 
   const [lock, setLock] = useState<Lock | null>(null);
   const [season, setSeason] = useState<number>(0);
-
   const [users, setUsers] = useState<User[]>([]);
-
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
-
-  const [proposals, setProposals] = useState<Proposal[]>([]);
-
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
 
   useEffect(() => {
     const fetchMonolith = async () => {
@@ -87,74 +78,20 @@ export const Monolith: FC<Props> = ({ address }) => {
 
   }, [lock, publicKey, address]);
 
-  useEffect(() => {
-    const fetchProposals = async () => {
-      //@ts-ignore
-      return await program.account.proposal.all([
-        {
-          memcmp: {
-            offset: 8 + 8,
-            bytes: new PublicKey(address).toBase58(),
-          },
-        },
-      ]);
-    }
-    if (lock) {
-      fetchProposals()
-        .then(res => {
-          if (res) {
-            console.log("proposals : ", res);
-            console.log(res);
-            // @ts-ignore
-            // const proposalsMap = res.map(({ account, publicKey }) => {
-            //   const result = account
-            //   account.pubkey = publicKey
-            //   return result
-            // })
-            // console.log('monoliths : ', proposalsMap)
-            setProposals(res);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-
-  }, [lock, publicKey]);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      //@ts-ignore
-      return await program.account.user.all();
-    }
-    if (lock) {
-      fetchUsers()
-        .then(res => {
-          if (res) {
-            console.log("total users : ", res);
-            setUsers(res);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-  }, [lock]);
-
   return (
     <section className="my-6 md:my-10 w-full flex flex-col justify-center items-center md:p-4 space-y-4">
       {lock ? (
         <>
           <h1 className="text-3xl md:text-3xl font-extrabold flex">
-            {lock.name}
+            <Link href={`/lock/${address}`} className="mr-2">{lock.name}</Link> Active Staking Rewards
           </h1>
-          <LockStaked lock={lock} users={users} />
-          <LockDetails lock={lock} />
           <div className="w-full flex flex-col md:flex-row justify-center items-start p-2 space-y-2 md:space-y-0 md:space-x-4">
-            <RewardsList lock={lock} setIsOpen={setIsOpen} season={season} />
-            <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} />
+            <ASRRewards lock={lock} setIsOpen={setIsOpen} season={season} address={address} />
+            <ASRClaim currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} />
           </div>
-          <Proposals proposals={proposals} lock={lock} address={address} users={users} currentUser={currentUser} />
         </>
       ) : <Skeleton />
       }
       {isOpen && <DepositPopup isOpen={isOpen} setIsOpen={setIsOpen} />}
-    </section>
-  )
+    </section>)
 }

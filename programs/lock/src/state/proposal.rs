@@ -16,6 +16,7 @@ pub struct Proposal {
     pub status: Status,
     pub result: Option<Choice>,
     pub title: String,
+    pub content: String,
     pub choices: Vec<Choice>,
 }
 
@@ -30,8 +31,9 @@ impl Proposal {
         + 1
         + 1
         + Choice::LEN
-        + STRING_LENGTH_PREFIX
+        + STRING_LENGTH_PREFIX * 2
         + MAX_TITLE_LENGTH
+        + MAX_CONTENT_LENGTH
         + VECTOR_LENGTH_PREFIX;
 
     pub fn result(&self, lock: &Lock) -> (Option<Choice>, bool, u64) {

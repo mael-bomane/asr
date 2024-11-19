@@ -1,13 +1,14 @@
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
+use anchor_spl::metadata::MetadataAccount;
 use crate::constants::THREE_MONTH_IN_SECONDS;
 use crate::{Analytics, Lock, Season, ASR};
 
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(amount: u64)]
+#[instruction(amount: u64, symbol: String)]
 pub struct ASRDeposit<'info> {
     #[account(mut)]
     pub creator: Signer<'info>,
@@ -44,6 +45,8 @@ pub struct ASRDeposit<'info> {
     )]
     pub signer_ata: Box<Account<'info, TokenAccount>>,
     pub mint: Box<Account<'info, Mint>>,
+    //#[account(constraint = metadata.mint.key() == mint.key())]
+    //pub metadata: Box<Account<'info, MetadataAccount>>,
     #[account(
         init_if_needed,
         payer = creator,
@@ -65,7 +68,7 @@ pub struct ASRDeposit<'info> {
 }
 
 impl<'info> ASRDeposit<'info> {
-    pub fn asr_deposit(&mut self, amount: u64) -> Result<()> {
+    pub fn asr_deposit(&mut self, amount: u64, symbol: String) -> Result<()> {
         let lock = &mut self.lock;
 
         let now = Clock::get()?.unix_timestamp;
@@ -82,6 +85,7 @@ impl<'info> ASRDeposit<'info> {
                 asr: vec![ASR {
                     mint: self.mint.key(),
                     decimals: self.mint.decimals,
+                    symbol,
                     amount,
                 }],
             });
@@ -95,6 +99,7 @@ impl<'info> ASRDeposit<'info> {
                 season.asr.push(ASR {
                     mint: self.mint.key(),
                     decimals: self.mint.decimals,
+                    symbol,
                     amount,
                 });
             }

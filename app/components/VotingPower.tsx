@@ -27,6 +27,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { WalletModalButton } from "@solana/wallet-adapter-react-ui";
 import { unstakeIx } from "@/lib/program/unstake";
 import { stakeDeactivateIx } from "@/lib/program/deactivate";
+import { UNSTAKING_TIME } from "@/constants";
 
 type Props = {
   currentUser: User | null
@@ -333,7 +334,9 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
               >
                 <span className={cn('', {
                   "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500": isStake || isUnStake,
-                })}>{userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : 'insufficient MONO'}</span>
+                })}>
+                  {userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : 'insufficient MONO'}
+                </span>
               </button>
             ) : (
               <button className={cn("w-full btn btn-lg mx-auto")} disabled={!publicKey}
@@ -343,6 +346,25 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
               </button>
             )}
           </>
+        )}
+        {currentUser?.deposits.filter(deposit => deposit.deactivating)?.length > 0 && (
+          <div className="w-full flex flex-col justify-center items-center space-y-2 mt-2">
+            <div className="self-start">Deactivating Stake : </div>
+            <>{currentUser.deposits.filter(deposit => deposit.deactivating && deposit.amount.toNumber() !== 0)?.map(deposit => {
+              return (
+                <div className="w-full bg-base-100 p-2 rounded-xl">
+                  <div className="w-full flex items-between">
+                    <div className="w-full flex items-between">
+                      {deposit.amount.toNumber() / (1 * 10 ** lock.decimals)}
+                    </div>
+                    {/* @ts-ignore */}
+                    <div className="w-full">Claimable : {new Date((deposit.deactivationStart.toNumber() + UNSTAKING_TIME) * 1000).toDateString()}</div>
+                  </div>
+                </div>
+              )
+            })}
+            </>
+          </div>
         )}
       </CardDescription>
     </form>
