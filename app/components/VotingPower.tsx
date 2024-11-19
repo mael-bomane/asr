@@ -350,9 +350,9 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
         {currentUser?.deposits.filter(deposit => deposit.deactivating)?.length > 0 && (
           <div className="w-full flex flex-col justify-center items-center space-y-2 mt-2">
             <div className="self-start">Deactivating Stake : </div>
-            <>{currentUser.deposits.filter(deposit => deposit.deactivating && deposit.amount.toNumber() !== 0)?.map(deposit => {
+            <>{currentUser.deposits.filter(deposit => deposit.deactivating && deposit.amount.toNumber() !== 0)?.map((deposit, index) => {
               return (
-                <div className="w-full bg-base-100 p-2 rounded-xl">
+                <div className="w-full bg-base-100 p-2 rounded-xl" key={index}>
                   <div className="w-full flex items-between">
                     <div className="w-full flex items-between">
                       {deposit.amount.toNumber() / (1 * 10 ** lock.decimals)}
