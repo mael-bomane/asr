@@ -27,9 +27,11 @@ import { stakeIx } from "@/lib/program/stake";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { stakeDeactivateIx } from "@/lib/program/deactivate";
 import { UNSTAKING_TIME } from "@/constants";
-import { FaGift } from "react-icons/fa";
+import { FaCheck, FaGift } from "react-icons/fa";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { HeaderTableRow, Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "./ui/table";
+import { asrClaimIx } from "@/lib/program/asrClaim";
+import { BN } from "bn.js";
 
 type Props = {
   currentUser: User | null
@@ -42,14 +44,13 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [loading, setLoading] = useState<boolean>(false);
-  const [isStake, setIsStake] = useState<boolean>(true);
-  const [isUnStake, setIsUnStake] = useState<boolean>(false);
 
   type UserTokenAmount = {
     value: string
     decimals: number
     uiAmount: number
   }
+
   const [userTokenAmount, setUserTokenAmount] = useState<UserTokenAmount | null>(null);
 
   const onClickRegister = useCallback(async () => {
@@ -90,104 +91,42 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
     }
   }, [publicKey]);
 
-  type Inputs = {
-    amount: number
-  }
-
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-  } = useForm<Inputs>();
-
-  const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
+  const onClickClaim = useCallback(async (mint: PublicKey) => {
     let signature: TransactionSignature = '';
-    if (publicKey) {
-      if (isStake) {
-        try {
-          setLoading(true);
-          const mint = new PublicKey(lock.mint);
-          const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
-          console.log("signer ata : ", signerAta.toString());
-          // amount: number,
-          // decimals: PublicKey,
-          // owner: PublicKey,
-          // lock: PublicKey,
-          // mint: PublicKey,
-          // signerAta: PublicKey,
-          const instruction = await stakeIx(
-            inputs.amount,
-            userTokenAmount.decimals,
-            publicKey,
-            new PublicKey(address),
-            mint,
-            signerAta
-          );
+    if (publicKey && currentUser && lock) {
+      try {
+        setLoading(true);
+        const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+        console.log("signer ata : ", signerAta.toString());
 
-          let latestBlockhash = await connection.getLatestBlockhash()
+        const instruction = await asrClaimIx(publicKey, new PublicKey(address), mint, signerAta, new BN(0));
 
-          const messageV0 = new TransactionMessage({
-            payerKey: publicKey,
-            recentBlockhash: latestBlockhash.blockhash,
-            instructions: [instruction],
-          }).compileToV0Message();
+        let latestBlockhash = await connection.getLatestBlockhash()
 
-          const transation = new VersionedTransaction(messageV0)
+        const messageV0 = new TransactionMessage({
+          payerKey: publicKey,
+          recentBlockhash: latestBlockhash.blockhash,
+          instructions: [instruction],
+        }).compileToV0Message();
 
-          signature = await sendTransaction(transation, connection);
+        const transation = new VersionedTransaction(messageV0)
 
-          await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
+        signature = await sendTransaction(transation, connection);
 
-          console.log(signature);
+        await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
 
-          toast.success(`success:\ntx : ${signature}`);
-          setLoading(false)
-        } catch (error) {
-          console.log(error);
-          setLoading(false);
-        }
+        console.log(signature);
 
-      } else if (isUnStake) {
-        try {
-          setLoading(true);
-
-          // owner: PublicKey,
-          // lock: PublicKey,
-          const instruction = await stakeDeactivateIx(
-            publicKey,
-            new PublicKey(address),
-          );
-
-          let latestBlockhash = await connection.getLatestBlockhash()
-
-          const messageV0 = new TransactionMessage({
-            payerKey: publicKey,
-            recentBlockhash: latestBlockhash.blockhash,
-            instructions: [instruction],
-          }).compileToV0Message();
-
-          const transation = new VersionedTransaction(messageV0)
-
-          signature = await sendTransaction(transation, connection);
-
-          await connection.confirmTransaction({ signature, ...latestBlockhash }, 'confirmed');
-
-          console.log(signature);
-
-          toast.success(`success:\ntx : ${signature}`);
-          setLoading(false)
-        } catch (error) {
-          console.log(error);
-          setLoading(false);
-        }
+        toast.success(`success:\ntx : ${signature}`);
+        setLoading(false)
+      } catch (error) {
+        console.log(error);
+        setLoading(false);
       }
     } else {
       toast.error('please connect your wallet');
     }
-  };
-
+  }, [publicKey]);
 
   useEffect(() => {
     const fetchUserBalance = async () => {
@@ -215,55 +154,11 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
     margin: "0 auto",
     borderColor: "red",
   };
-  const invoices = [
-    {
-      invoice: "INV001",
-      paymentStatus: "Paid",
-      totalAmount: "$250.00",
-      paymentMethod: "Credit Card",
-    },
-    {
-      invoice: "INV002",
-      paymentStatus: "Pending",
-      totalAmount: "$150.00",
-      paymentMethod: "PayPal",
-    },
-    {
-      invoice: "INV003",
-      paymentStatus: "Unpaid",
-      totalAmount: "$350.00",
-      paymentMethod: "Bank Transfer",
-    },
-    {
-      invoice: "INV004",
-      paymentStatus: "Paid",
-      totalAmount: "$450.00",
-      paymentMethod: "Credit Card",
-    },
-    {
-      invoice: "INV005",
-      paymentStatus: "Paid",
-      totalAmount: "$550.00",
-      paymentMethod: "PayPal",
-    },
-    {
-      invoice: "INV006",
-      paymentStatus: "Pending",
-      totalAmount: "$200.00",
-      paymentMethod: "Bank Transfer",
-    },
-    {
-      invoice: "INV007",
-      paymentStatus: "Unpaid",
-      totalAmount: "$300.00",
-      paymentMethod: "Credit Card",
-    },
-  ]
+
   return (
     <>
       {publicKey ? (
-        <form
-          onSubmit={handleSubmit(onSubmit)}
+        <div
           className={`mx-auto w-full p-2 md:p-8 bg-primary text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
         >
           <CardTitle className="p-4 self-start w-full flex justify-between">
@@ -295,31 +190,40 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
                     <TableHead className="text-right">Amount</TableHead>
                   </HeaderTableRow>
                 </TableHeader>
-                <TableBody>
-                  {/*@ts-ignore*/}
-                  {lock?.seasons?.filter(season => (season.seasonEnd.toNumber() * 1000) < new Date().getTime()).concat()?.map((season) => (
-                    <>
-                      {season.asr.map((token, index) => (
-                        <TableRow key={index} className="text-white cursor-pointer">
-                          <TableCell className="w-[100px] font-medium">MONO</TableCell>
-                          <TableCell className="text-center">{season.season}</TableCell>
-                          <TableCell className="text-center">
-                            {currentUser.claims.filter((claim) => (claim.mint == token.mint) && (claim.season == season.season)).length > 0 ? 'Yes' : 'Click To Claim'}
-                          </TableCell>
-                          <TableCell className="text-right">{((currentUser.votes.reduce((acc, obj) => {
-                            if (obj.season == season.season) {
-                              // @ts-ignore
-                              return acc + obj.votingPower.toNumber();
-                            } else {
-                              return acc + 0
-                            }
-                          }, 0)) / (1 * 10 ** lock.decimals) * (token.amount.toNumber() / (1 * 10 ** token.decimals))) / (season.points.toNumber() / (1 * 10 ** lock.decimals))}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </>
-                  ))}
-                </TableBody>
+                {/*@ts-ignore*/}
+                {lock?.seasons?.filter(season => (season.seasonEnd.toNumber() * 1000) < new Date().getTime()).concat()?.map((season, id) => (
+                  <TableBody key={id} >
+                    {season.asr.map((token, index) => (
+                      <TableRow key={index}
+                        onClick={() => onClickClaim(token.mint)}
+                        className="text-white cursor-pointer font-semibold">
+                        <TableCell className="flex space-x-1">
+                          <span>
+                            {token.mint.toString() == lock.mint.toString() ? 'Staked ' : ''}
+                          </span>
+                          <span>
+                            MONO
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-center">{season.season}</TableCell>
+                        <TableCell className="w-full text-center flex justify-center items-center">
+                          {(currentUser.claims.filter((claim) => (claim.mint.toString() == token.mint.toString()) && (claim.season == season.season)).length > 0) ? (
+                            <FaCheck className="text-success" />
+                          ) : 'Click To Claim'}
+                        </TableCell>
+                        <TableCell className="text-right">{new Intl.NumberFormat().format(((currentUser.votes.reduce((acc, obj) => {
+                          if (obj.season == season.season) {
+                            // @ts-ignore
+                            return acc + obj.votingPower.toNumber();
+                          } else {
+                            return acc + 0
+                          }
+                        }, 0)) / (1 * 10 ** lock.decimals) * (token.amount.toNumber() / (1 * 10 ** token.decimals))) / (season.points.toNumber() / (1 * 10 ** lock.decimals)))}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                ))}
               </Table>
             ) : (
               <div className="w-full bg-[#121212] p-8 flex flex-col mt-4 rounded-xl text-sm text-center space-y-4">
@@ -341,7 +245,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, lock, add
               </div>
             )}
           </CardDescription>
-        </form>
+        </div>
       ) : (
         <div className={`mx-auto w-full p-2 md:p-8 bg-primary text-base-content rounded-box flex flex-col items-center justify-center space-y-8`}>
           <div className="avatar p-8 rounded-full bg-base-100">

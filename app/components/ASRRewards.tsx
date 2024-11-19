@@ -44,7 +44,7 @@ export const ASRRewards: FC<Props> = ({ lock, setIsOpen, season, address }) => {
         </div>
         {lock.seasons.length > 1 && (<div className="w-full flex flex-col items-start justify-between">
           <div className="text-xl tracking-wide font-extrabold text-white">Season {season - 1} Rewards </div>
-          <div className="w-full grid grid-cols-4 text-center p-4">
+          <div className="w-full grid grid-cols-2 md:grid-cols-4 text-center p-2 md:p-4">
             {lock.seasons[lock.seasons.length - 2]?.asr.map((token, index) => (
               <div className="w-full border h-32 w-32 flex flex-col justify-center items-center rounded-box" key={index}>
                 <div className="avatar">
