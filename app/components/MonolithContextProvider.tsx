@@ -5,22 +5,21 @@ import type { ReactNode } from 'react'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { Program } from '@coral-xyz/anchor'
 import { IDL } from '@/constants/idl'
+import { program } from '@/constants'
 import { PublicKey } from '@solana/web3.js'
 
 import type { Analytics, Lock } from '@/types'
 
 interface MonolithInterface {
-  program: Program<IDL> | null
   analytics: Analytics | null
-  monoliths: Lock[] | null
-  monolith: Lock | null
+  locks: Lock[] | null
+  selectedLock: Lock | null
 }
 
 export const MonolithContext = createContext<MonolithInterface>({
-  program: null,
   analytics: null,
-  monolith: null,
-  monoliths: null,
+  locks: null,
+  selectedLock: null,
 })
 
 export const MonolithProvider = ({ children }: { children: ReactNode }) => {
@@ -33,28 +32,18 @@ export const MonolithProvider = ({ children }: { children: ReactNode }) => {
 
 
 
-  const [program, setProgram] = useState<Program<IDL> | null>(null)
   const [analytics, setAnalytics] = useState<Analytics | null>(null)
-  const [monolith, setMonolith] = useState<Lock | null>(null)
-  const [monoliths, setMonoliths] = useState<Lock[] | null>(null)
+  const [selectedLock, setSelectedLock] = useState<Lock | null>(null)
+  const [locks, setLocks] = useState<Lock[] | null>(null)
 
   const value = {
-    program,
     analytics,
-    monolith,
-    monoliths,
+    locks,
+    selectedLock,
   }
 
   useEffect(() => {
-    if (!program) {
-      setProgram(new Program(IDL, {
-        connection
-      }));
-    }
-  }, [publicKey])
-
-  useEffect(() => {
-    if (program && !analytics) {
+    if (!analytics) {
       const pda = PublicKey.findProgramAddressSync(
         [Buffer.from('analytics')],
         program.programId
@@ -89,7 +78,7 @@ export const MonolithProvider = ({ children }: { children: ReactNode }) => {
       }
       fetchMonoliths()
         .then((response) => {
-          setMonoliths(response);
+          setLocks(response);
           // @ts-ignore
           // const monolithsMap = response.map(({ account, publicKey }) => {
           //   const result = account

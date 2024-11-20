@@ -21,10 +21,12 @@ pub struct Lock {
 impl Lock {
     pub const LEN: usize = DISCRIMINATOR_LENGTH
         + PUBLIC_KEY_LENGTH // creator 
+        + Config::LEN
         + 8 * 5 // amount, approved, rejected, min 
         + TIMESTAMP_LENGTH * 2
         + BUMP_LENGTH * 2 // bumps
         + VECTOR_LENGTH_PREFIX;
+
     pub fn total_asr(&self) -> usize {
         self.seasons.iter().map(|season| season.asr.len()).sum()
     }
@@ -63,13 +65,13 @@ impl Config {
 pub struct Season {
     pub season: u8,
     pub points: u64,
-    pub asr: Vec<ASR>,
     pub season_start: i64,
     pub season_end: i64,
+    pub asr: Vec<ASR>,
 }
 
 impl Season {
-    pub const LEN: usize = 1 + 8 + VECTOR_LENGTH_PREFIX + TIMESTAMP_LENGTH;
+    pub const LEN: usize = 1 + 8 + VECTOR_LENGTH_PREFIX + TIMESTAMP_LENGTH * 2;
 }
 
 #[derive(Debug, Clone, AnchorSerialize, AnchorDeserialize, PartialEq)]

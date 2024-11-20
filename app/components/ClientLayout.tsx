@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState, ReactNode, useMemo } from "react";
-import { usePathname } from "next/navigation";
+import { ReactNode, useMemo } from "react";
 import NextTopLoader from "nextjs-toploader";
-import { Toaster } from "react-hot-toast";
+import { Toaster } from "@/components/ui/sonner";
 import { Tooltip } from "react-tooltip";
 import config from "@/config";
-import { RecoilRoot, atom } from "recoil";
+import { RecoilRoot } from "recoil";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets'
 import { clusterApiUrl } from "@solana/web3.js";
 import { Theme } from "@radix-ui/themes";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 
 import { WalletContextProvider } from './WalletContextProvider'
 import { MonolithProvider } from "./MonolithContextProvider";
@@ -42,7 +43,11 @@ export const ClientLayout = ({ children }: { children: ReactNode }) => {
         <MonolithProvider>
           <RecoilRoot>
             <Theme>
-              {children}
+              <SidebarProvider>
+                <AppSidebar />
+                <SidebarTrigger />
+                {children}
+              </SidebarProvider>
             </Theme>
           </RecoilRoot>
         </MonolithProvider>

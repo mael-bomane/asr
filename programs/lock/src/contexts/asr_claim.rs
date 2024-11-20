@@ -1,8 +1,8 @@
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
-use crate::{errors::ErrorCode, Analytics, Claim, Lock, User};
-use crate::{Deposit, Vote};
+use crate::{errors::ErrorCode, Analytics, Claim, Lock, User, constants::*};
+use crate::{Deposit, Season, Vote};
 
 use anchor_lang::prelude::*;
 
@@ -78,8 +78,22 @@ pub struct ASRClaim<'info> {
 impl<'info> ASRClaim<'info> {
     pub fn asr_claim(&mut self) -> Result<()> {
         let lock = &mut self.lock;
+        let now = Clock::get()?.unix_timestamp;
+        
+        let current_season = lock.seasons[lock.seasons.len() - 1].clone();
 
+        if now > current_season.season_end {
+            lock.seasons.push(Season {
+                season: current_season.season + 1,
+                points: 0,
+                season_start: now,
+                season_end: now + THREE_MONTH_IN_SECONDS,
+                asr: vec![],
+            });
+        }
+        
         let season = &lock.seasons.clone()[lock.seasons.len() as usize - 2];
+        
         let asr = season
             .asr
             .clone()

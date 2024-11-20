@@ -42,9 +42,6 @@ pub mod lock {
             name,
             symbol,
         )
-        // ctx.accounts.register(&ctx.bumps)?;
-        // ctx.accounts.deposit(amount)?;
-        // ctx.accounts.update_analytics()
     }
 
     pub fn lock_update(
@@ -81,6 +78,10 @@ pub mod lock {
         ctx.accounts.manager_add(&ctx.bumps)
     }
 
+    pub fn manager_remove(ctx: Context<ManagerRemove>) -> Result<()> {
+        ctx.accounts.manager_remove(&ctx.bumps)
+    }
+
     pub fn stake_new(ctx: Context<StakeNew>, amount: u64) -> Result<()> {
         ctx.accounts.stake_new(amount)
     }
@@ -96,9 +97,11 @@ pub mod lock {
     pub fn proposal_new(
         ctx: Context<ProposalNew>,
         title: String,
+        content: String,
         choices: Vec<Choice>,
     ) -> Result<()> {
-        ctx.accounts.proposal_new(&ctx.bumps, title, choices)?;
+        ctx.accounts
+            .proposal_new(&ctx.bumps, title, content, choices)?;
         ctx.accounts.update_analytics()
     }
 

@@ -42,7 +42,7 @@ impl User {
             .iter()
             .map(|vote| {
                 if vote.season == season {
-                    vote.voting_power as u64
+                    vote.voting_power
                 } else {
                     0u64
                 }
@@ -59,9 +59,14 @@ impl User {
                     if !deposit.deactivating {
                         deposit.amount
                     } else {
-                        // y = 100%
+                        // deactivation_start = deposit.amount (100%)
+                        // expires_at = 0
+                        // remaining = expires_at - now
                         // x = x*100/y
-                        deposit.amount.checked_mul(100).unwrap().div_ceil(deposit.expires_at as u64)
+                        let now = Clock::get().unwrap().unix_timestamp;
+                        let delta = (deposit.deactivation_start.unwrap() + THREE_MONTH_IN_SECONDS) - (deposit.deactivation_start.unwrap() + THREE_MONTH_IN_SECONDS - now);
+                        let remaining = delta.checked_mul(deposit.amount as i64).unwrap() as u64;
+                        remaining.div_ceil(deposit.deactivation_start.unwrap() as u64 + THREE_MONTH_IN_SECONDS as u64) as u64
                     }
                 })
                 .sum()
@@ -74,6 +79,8 @@ impl User {
                         // y = 100%
                         // x = z
                         // z = x*100/y
+                        let now = Clock::get().unwrap().unix_timestamp;
+                        let remaining = deposit.deactivation_start.unwrap() + THREE_MONTH_IN_SECONDS - now; 
                         deposit.amount.checked_mul(100).unwrap().div_ceil(deposit.expires_at as u64)
                     } else {
                         0u64

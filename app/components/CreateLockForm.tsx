@@ -143,7 +143,7 @@ export const CreateLockForm: FC = () => {
   };
 
   return (
-    <form className="w-full md:max-w-3xl grow w-full mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-primary text-white rounded-xl"
+    <form className="w-full relative overflow-hidden md:max-w-3xl grow w-full mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-primary text-white rounded-xl"
       onSubmit={handleSubmit(onSubmit)}
     >
       <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">

@@ -11,7 +11,7 @@ lock = "1ckXSJ2TDNizSpBWftmgCtxCZ22crs2ELsrdgeeAfi8"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

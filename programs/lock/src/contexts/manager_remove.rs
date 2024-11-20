@@ -1,5 +1,4 @@
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::metadata::MetadataAccount;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
 use crate::{constants::*, errors::ErrorCode, state::Analytics};
@@ -68,14 +67,9 @@ pub struct ManagerRemove<'info> {
 }
 
 impl<'info> ManagerRemove<'info> {
-    pub fn manager_add(&mut self, bumps: &ManagerRemoveBumps) -> Result<()> {
+    pub fn manager_remove(&mut self, bumps: &ManagerRemoveBumps) -> Result<()> {
         let lock = &mut self.lock;
         let user = &mut self.user;
-
-        require!(
-            user.voting_power(&lock) >= lock.config.amount,
-            ErrorCode::NotEnoughDepositsToStartPoll
-        );
 
         let proposal = &mut self.proposal;
         proposal.summoner = self.signer.key();
@@ -86,7 +80,7 @@ impl<'info> ManagerRemove<'info> {
         proposal.ends_at = now + lock.config.voting_period;
         proposal.executed = false;
         proposal.status = Status::Voting;
-        proposal.title = format!("Proposal : Add Manager {}", user.owner);
+        proposal.title = format!("Proposal : Remove Manager {}", user.owner);
         proposal.result = None;
         proposal.choices = vec![
             Choice {
@@ -109,12 +103,6 @@ impl<'info> ManagerRemove<'info> {
         proposal.manager = Some(user.owner);
         proposal.bump = bumps.proposal;
 
-        Ok(())
-    }
-
-    pub fn update_analytics(&mut self) -> Result<()> {
-        let analytics = &mut self.analytics;
-        analytics.locks += 1;
         Ok(())
     }
 }

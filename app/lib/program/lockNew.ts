@@ -58,7 +58,6 @@ export const lockNewIx = async (
   //  quorum: u8,
   //  min: u64,
   //  name: String,
-  // @ts-ignore
   return await program.methods.lockNew(config, votingPeriod, lockDuration, threshold, quorum, amount, name, symbol)
     .accountsStrict({
       signer,

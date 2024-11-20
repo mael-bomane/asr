@@ -5,7 +5,7 @@ use crate::{
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(title: String, choices: Vec<Choice>)]
+#[instruction(title: String, content: String, choices: Vec<Choice>)]
 pub struct ProposalNew<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
@@ -45,6 +45,7 @@ impl<'info> ProposalNew<'info> {
         &mut self,
         bumps: &ProposalNewBumps,
         title: String,
+        content: String,
         choices: Vec<Choice>,
     ) -> Result<()> {
         if title.len() > MAX_TITLE_LENGTH {
@@ -71,6 +72,7 @@ impl<'info> ProposalNew<'info> {
         proposal.executed = false;
         proposal.status = Status::Voting;
         proposal.title = title;
+        proposal.content = content;
         proposal.result = None;
         proposal.choices = choices;
         proposal.proposal_type = 1;

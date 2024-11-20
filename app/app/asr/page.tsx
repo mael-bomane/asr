@@ -30,7 +30,7 @@ export async function generateMetadata() {
 export default async function LockPage() {
 
   return (
-    <main className="my-6 md:my-10 w-full flex flex-col justify-center items-center">
+    <main className="w-full my-6 md:my-10 w-full flex flex-col justify-center items-center">
       <h1 className="text-3xl md:text-3xl font-extrabold flex text-center">meet the 3-1337
         <Image src={"/hacker.gif"} width={40} height={40} alt="adhd cat dev" className="ml-4 rounded-full" unoptimized />
       </h1>

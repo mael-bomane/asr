@@ -12,13 +12,13 @@ export const Hero: FC = () => {
       {/* Hero */}
       <div className="w-full relative overflow-hidden pt-16">
         {/* Gradients */}
-        <div
+        {/*<div
           aria-hidden="true"
           className="flex absolute -top-96 start-1/2 transform -translate-x-1/2"
         >
           <div className="bg-gradient-to-r from-background/50 to-background blur-3xl w-[25rem] h-[44rem] rotate-[-60deg] transform -translate-x-[10rem]" />
           <div className="bg-gradient-to-tl blur-3xl w-[90rem] h-[50rem] rounded-full origin-top-left -rotate-12 -translate-x-[15rem] from-primary-foreground via-primary-foreground to-background" />
-        </div>
+        </div>*/}
         {/* End Gradients */}
         <div className="w-full flex flex-col justify-center items-center relative z-10">
           <div className="container py-10 lg:py-16">
