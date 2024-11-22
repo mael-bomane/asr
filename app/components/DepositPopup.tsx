@@ -13,7 +13,6 @@ import { getAssociatedTokenAddressSync, getMint, TOKEN_PROGRAM_ID } from "@solan
 import { asrDepositIx } from "@/lib/program/asrDeposit";
 
 import type { FC } from "react";
-import type { Lock, TokenInfo } from "@/types";
 import { BN } from "bn.js";
 
 type Props = {
@@ -29,6 +28,7 @@ export const DepositPopup: FC<Props> = ({ isOpen, setIsOpen }) => {
 
   type Inputs = {
     mint: string
+    symbol: string
     amount: number
   }
 
@@ -63,6 +63,7 @@ export const DepositPopup: FC<Props> = ({ isOpen, setIsOpen }) => {
         const instruction = await asrDepositIx(
           publicKey,
           mint,
+          inputs.symbol,
           signerAta,
           new BN(inputs.amount * 1 * 10 ** mintInfo.decimals),
         );
@@ -93,7 +94,7 @@ export const DepositPopup: FC<Props> = ({ isOpen, setIsOpen }) => {
   }
   return (
     <form onSubmit={handleSubmit(onSubmit)}
-      className="bg-base-100 p-8 opacity-100 absolute top-[25%] left-0 md:left-[25%] w-full md:w-[50vw] z-[999] shadow-md flex flex-col justify-center items-center space-y-4"
+      className="bg-primary text-white p-8 opacity-100 rounded-box border absolute top-[25%] left-0 md:left-[25%] w-full md:w-[50vw] z-[999] shadow-md flex flex-col justify-center items-center space-y-4"
     >
       <div className="flex w-full justify-between">
         <h3 className="font-bold text-lg">Deposit ASR</h3>
@@ -109,6 +110,15 @@ export const DepositPopup: FC<Props> = ({ isOpen, setIsOpen }) => {
         step="1"
       />
       {errors.mint && <span>This field is required</span>}
+      <Label className="w-full">Symbol : </Label>
+      <Input
+        type="text"
+        min={0}
+        {...register("symbol", { required: true })}
+        className="p-2"
+        step="1"
+      />
+      {errors.symbol && <span>This field is required</span>}
 
       <Label className="w-full">Amount : </Label>
       <Input

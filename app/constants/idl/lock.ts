@@ -1,4 +1,10 @@
-{
+/**
+ * Program IDL in camelCase format in order to be used in JS/TS.
+ *
+ * Note that this is only a type helper and is not the actual IDL. The original
+ * IDL can be found at `target/idl/lock.json`.
+ */
+export type IDL = {
   "address": "ASRB7cGR7e3RQEWPg3PqgCBTFgCmZvjmXsgfzsxo4zTr",
   "metadata": {
     "name": "lock",
@@ -8,7 +14,7 @@
   },
   "instructions": [
     {
-      "name": "asr_claim",
+      "name": "asrClaim",
       "discriminator": [
         208,
         204,
@@ -65,7 +71,7 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
@@ -100,7 +106,7 @@
           }
         },
         {
-          "name": "user_vault",
+          "name": "userVault",
           "writable": true,
           "pda": {
             "seeds": [
@@ -126,7 +132,7 @@
           }
         },
         {
-          "name": "signer_ata",
+          "name": "signerAta",
           "writable": true,
           "pda": {
             "seeds": [
@@ -267,22 +273,22 @@
           }
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
-          "name": "associated_token_program",
+          "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
     },
     {
-      "name": "asr_deposit",
+      "name": "asrDeposit",
       "discriminator": [
         195,
         224,
@@ -348,7 +354,7 @@
           }
         },
         {
-          "name": "signer_ata",
+          "name": "signerAta",
           "writable": true,
           "pda": {
             "seeds": [
@@ -489,15 +495,15 @@
           }
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
-          "name": "associated_token_program",
+          "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -573,14 +579,14 @@
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
     },
     {
-      "name": "lock_new",
+      "name": "lockNew",
       "discriminator": [
         99,
         67,
@@ -643,7 +649,7 @@
           }
         },
         {
-          "name": "signer_ata",
+          "name": "signerAta",
           "writable": true,
           "pda": {
             "seeds": [
@@ -784,15 +790,15 @@
           }
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
-          "name": "associated_token_program",
+          "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -806,11 +812,11 @@
           "type": "bool"
         },
         {
-          "name": "voting_period",
+          "name": "votingPeriod",
           "type": "i64"
         },
         {
-          "name": "lock_duration",
+          "name": "lockDuration",
           "type": "i64"
         },
         {
@@ -836,7 +842,7 @@
       ]
     },
     {
-      "name": "lock_update",
+      "name": "lockUpdate",
       "discriminator": [
         146,
         166,
@@ -890,12 +896,12 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
                 "path": "lock.config.mint",
-                "account": "Lock"
+                "account": "lock"
               }
             ]
           }
@@ -930,7 +936,7 @@
           }
         },
         {
-          "name": "signer_ata",
+          "name": "signerAta",
           "writable": true,
           "pda": {
             "seeds": [
@@ -1071,15 +1077,15 @@
           }
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
-          "name": "associated_token_program",
+          "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -1095,13 +1101,13 @@
           }
         },
         {
-          "name": "voting_period",
+          "name": "votingPeriod",
           "type": {
             "option": "i64"
           }
         },
         {
-          "name": "lock_duration",
+          "name": "lockDuration",
           "type": {
             "option": "i64"
           }
@@ -1139,7 +1145,7 @@
       ]
     },
     {
-      "name": "manager_add",
+      "name": "managerAdd",
       "discriminator": [
         123,
         110,
@@ -1193,12 +1199,12 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
                 "path": "lock.config.mint",
-                "account": "Lock"
+                "account": "lock"
               }
             ]
           }
@@ -1228,13 +1234,13 @@
               {
                 "kind": "account",
                 "path": "user.owner",
-                "account": "User"
+                "account": "user"
               }
             ]
           }
         },
         {
-          "name": "signer_ata",
+          "name": "signerAta",
           "writable": true,
           "pda": {
             "seeds": [
@@ -1375,22 +1381,22 @@
           }
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
-          "name": "associated_token_program",
+          "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
     },
     {
-      "name": "manager_remove",
+      "name": "managerRemove",
       "discriminator": [
         12,
         182,
@@ -1444,12 +1450,12 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
                 "path": "lock.config.mint",
-                "account": "Lock"
+                "account": "lock"
               }
             ]
           }
@@ -1479,13 +1485,13 @@
               {
                 "kind": "account",
                 "path": "user.owner",
-                "account": "User"
+                "account": "user"
               }
             ]
           }
         },
         {
-          "name": "signer_ata",
+          "name": "signerAta",
           "writable": true,
           "pda": {
             "seeds": [
@@ -1626,22 +1632,22 @@
           }
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
-          "name": "associated_token_program",
+          "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
     },
     {
-      "name": "proposal_execute",
+      "name": "proposalExecute",
       "discriminator": [
         11,
         199,
@@ -1675,12 +1681,12 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
                 "path": "lock.config.mint",
-                "account": "Lock"
+                "account": "lock"
               }
             ]
           }
@@ -1710,7 +1716,7 @@
               {
                 "kind": "account",
                 "path": "proposal.id",
-                "account": "Proposal"
+                "account": "proposal"
               }
             ]
           }
@@ -1738,14 +1744,14 @@
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
     },
     {
-      "name": "proposal_new",
+      "name": "proposalNew",
       "discriminator": [
         94,
         164,
@@ -1807,12 +1813,12 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
                 "path": "lock.config.mint",
-                "account": "Lock"
+                "account": "lock"
               }
             ]
           }
@@ -1844,7 +1850,7 @@
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -1862,7 +1868,7 @@
           "type": {
             "vec": {
               "defined": {
-                "name": "Choice"
+                "name": "choice"
               }
             }
           }
@@ -1924,12 +1930,12 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
                 "path": "lock.config.mint",
-                "account": "Lock"
+                "account": "lock"
               }
             ]
           }
@@ -1982,14 +1988,14 @@
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
     },
     {
-      "name": "stake_claim",
+      "name": "stakeClaim",
       "discriminator": [
         206,
         208,
@@ -2043,12 +2049,12 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
                 "path": "lock.config.mint",
-                "account": "Lock"
+                "account": "lock"
               }
             ]
           }
@@ -2079,7 +2085,7 @@
           }
         },
         {
-          "name": "signer_ata",
+          "name": "signerAta",
           "writable": true,
           "pda": {
             "seeds": [
@@ -2220,22 +2226,22 @@
           }
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
-          "name": "associated_token_program",
+          "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
     },
     {
-      "name": "stake_deactivate",
+      "name": "stakeDeactivate",
       "discriminator": [
         224,
         10,
@@ -2272,12 +2278,12 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
                 "path": "lock.config.mint",
-                "account": "Lock"
+                "account": "lock"
               }
             ]
           }
@@ -2330,14 +2336,14 @@
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
       "args": []
     },
     {
-      "name": "stake_new",
+      "name": "stakeNew",
       "discriminator": [
         84,
         232,
@@ -2391,12 +2397,12 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
                 "path": "lock.config.mint",
-                "account": "Lock"
+                "account": "lock"
               }
             ]
           }
@@ -2427,7 +2433,7 @@
           }
         },
         {
-          "name": "signer_ata",
+          "name": "signerAta",
           "writable": true,
           "pda": {
             "seeds": [
@@ -2568,15 +2574,15 @@
           }
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         },
         {
-          "name": "associated_token_program",
+          "name": "associatedTokenProgram",
           "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -2588,7 +2594,7 @@
       ]
     },
     {
-      "name": "vote_new",
+      "name": "voteNew",
       "discriminator": [
         44,
         255,
@@ -2650,12 +2656,12 @@
               {
                 "kind": "account",
                 "path": "lock.creator",
-                "account": "Lock"
+                "account": "lock"
               },
               {
                 "kind": "account",
                 "path": "lock.config.mint",
-                "account": "Lock"
+                "account": "lock"
               }
             ]
           }
@@ -2685,7 +2691,7 @@
               {
                 "kind": "account",
                 "path": "proposal.id",
-                "account": "Proposal"
+                "account": "proposal"
               }
             ]
           }
@@ -2713,7 +2719,7 @@
           }
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -2731,7 +2737,7 @@
   ],
   "accounts": [
     {
-      "name": "Analytics",
+      "name": "analytics",
       "discriminator": [
         135,
         28,
@@ -2744,7 +2750,7 @@
       ]
     },
     {
-      "name": "Lock",
+      "name": "lock",
       "discriminator": [
         8,
         255,
@@ -2757,7 +2763,7 @@
       ]
     },
     {
-      "name": "Proposal",
+      "name": "proposal",
       "discriminator": [
         26,
         94,
@@ -2770,7 +2776,7 @@
       ]
     },
     {
-      "name": "User",
+      "name": "user",
       "discriminator": [
         159,
         117,
@@ -2786,133 +2792,133 @@
   "errors": [
     {
       "code": 6000,
-      "name": "LockerNameEmpty",
+      "name": "lockerNameEmpty",
       "msg": "Locker Name Empty."
     },
     {
       "code": 6001,
-      "name": "LockerNameTooLong",
+      "name": "lockerNameTooLong",
       "msg": "Locker Name Too Long, 50 Characters Max."
     },
     {
       "code": 6002,
-      "name": "SymbolEmpty",
+      "name": "symbolEmpty",
       "msg": "Symbol Empty"
     },
     {
       "code": 6003,
-      "name": "SymbolTooLong",
+      "name": "symbolTooLong",
       "msg": "Symbol Too Long, 10 Characters Max."
     },
     {
       "code": 6004,
-      "name": "PollTitleEmpty",
+      "name": "pollTitleEmpty",
       "msg": "Poll Title Empty."
     },
     {
       "code": 6005,
-      "name": "PollTitleTooLong",
+      "name": "pollTitleTooLong",
       "msg": "Poll Title Too Long, 50 Characters Max."
     },
     {
       "code": 6006,
-      "name": "PollContentEmpty",
+      "name": "pollContentEmpty",
       "msg": "Poll Content Empty."
     },
     {
       "code": 6007,
-      "name": "PollContentTooLong",
+      "name": "pollContentTooLong",
       "msg": "Poll Content Too Long, 280 Characters Max."
     },
     {
       "code": 6008,
-      "name": "VotingPeriodOutOfBounds",
+      "name": "votingPeriodOutOfBounds",
       "msg": "Voting Period Out Of Bounds : Min 1 Day, Max 1 Week"
     },
     {
       "code": 6009,
-      "name": "LockDurationOutOfBounds",
+      "name": "lockDurationOutOfBounds",
       "msg": "Lock Duration Out Of Bounds : Min 1 Month, Max 5 Years"
     },
     {
       "code": 6010,
-      "name": "InvalidLockDuration",
+      "name": "invalidLockDuration",
       "msg": "Invalid Lock Duration"
     },
     {
       "code": 6011,
-      "name": "ThresholdOutOfBounds",
+      "name": "thresholdOutOfBounds",
       "msg": "Threshold Out Of Bounds : Min 50%, Max 100%"
     },
     {
       "code": 6012,
-      "name": "QuorumOutOfBounds",
+      "name": "quorumOutOfBounds",
       "msg": "Quorum Out Of Bounds : Min 0%, Max 100%"
     },
     {
       "code": 6013,
-      "name": "WrongLockerMint",
+      "name": "wrongLockerMint",
       "msg": "Wrong Locker Mint"
     },
     {
       "code": 6014,
-      "name": "NotEnoughDepositsToStartPoll",
+      "name": "notEnoughDepositsToStartPoll",
       "msg": "Not Enough Deposits To Start Poll."
     },
     {
       "code": 6015,
-      "name": "NoDepositsForThisUserInThisLocker",
+      "name": "noDepositsForThisUserInThisLocker",
       "msg": "No Deposits For This User In This Locker"
     },
     {
       "code": 6016,
-      "name": "UserHaveNoVotingPowerInThisLock",
+      "name": "userHaveNoVotingPowerInThisLock",
       "msg": "No Voting Power For This User Found In This Lock"
     },
     {
       "code": 6017,
-      "name": "VotingPeriodExpired",
+      "name": "votingPeriodExpired",
       "msg": "Voting Period Expired."
     },
     {
       "code": 6018,
-      "name": "UserAlreadyVotedThisPoll",
+      "name": "userAlreadyVotedThisPoll",
       "msg": "User Already Voted This Poll."
     },
     {
       "code": 6019,
-      "name": "WaitForVotingPeriodToEnd",
+      "name": "waitForVotingPeriodToEnd",
       "msg": "Wait For Voting Period To End."
     },
     {
       "code": 6020,
-      "name": "PollAlreadyExecuted",
+      "name": "pollAlreadyExecuted",
       "msg": "Poll Already Executed."
     },
     {
       "code": 6021,
-      "name": "NoDepositsReadyToClaimForThisUserInThisLocker",
+      "name": "noDepositsReadyToClaimForThisUserInThisLocker",
       "msg": "No Deposits Ready To Claim For This User In This Locker"
     },
     {
       "code": 6022,
-      "name": "ConfigUnrecognized",
+      "name": "configUnrecognized",
       "msg": "Config Unrecognized"
     },
     {
       "code": 6023,
-      "name": "InstructionUnavailableForThisLock",
+      "name": "instructionUnavailableForThisLock",
       "msg": "Instruction Unavailable For This Lock"
     },
     {
       "code": 6024,
-      "name": "UserAlreadyClaimedThis",
+      "name": "userAlreadyClaimedThis",
       "msg": "User Already Claimed This"
     }
   ],
   "types": [
     {
-      "name": "ASR",
+      "name": "asr",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2936,7 +2942,7 @@
       }
     },
     {
-      "name": "Analytics",
+      "name": "analytics",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2969,22 +2975,22 @@
             "type": "u64"
           },
           {
-            "name": "created_at",
+            "name": "createdAt",
             "type": "i64"
           },
           {
-            "name": "auth_bump",
+            "name": "authBump",
             "type": "u8"
           },
           {
-            "name": "state_bump",
+            "name": "stateBump",
             "type": "u8"
           }
         ]
       }
     },
     {
-      "name": "Choice",
+      "name": "choice",
       "type": {
         "kind": "struct",
         "fields": [
@@ -2993,7 +2999,7 @@
             "type": "u8"
           },
           {
-            "name": "voting_power",
+            "name": "votingPower",
             "type": "u64"
           },
           {
@@ -3004,7 +3010,7 @@
       }
     },
     {
-      "name": "Claim",
+      "name": "claim",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3021,14 +3027,14 @@
             "type": "u64"
           },
           {
-            "name": "created_at",
+            "name": "createdAt",
             "type": "i64"
           }
         ]
       }
     },
     {
-      "name": "Config",
+      "name": "config",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3049,11 +3055,11 @@
             "type": "u8"
           },
           {
-            "name": "voting_period",
+            "name": "votingPeriod",
             "type": "i64"
           },
           {
-            "name": "lock_duration",
+            "name": "lockDuration",
             "type": "i64"
           },
           {
@@ -3086,7 +3092,7 @@
       }
     },
     {
-      "name": "Deposit",
+      "name": "deposit",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3095,11 +3101,11 @@
             "type": "u64"
           },
           {
-            "name": "created_at",
+            "name": "createdAt",
             "type": "i64"
           },
           {
-            "name": "expires_at",
+            "name": "expiresAt",
             "type": "i64"
           },
           {
@@ -3107,7 +3113,7 @@
             "type": "bool"
           },
           {
-            "name": "deactivation_start",
+            "name": "deactivationStart",
             "type": {
               "option": "i64"
             }
@@ -3116,7 +3122,7 @@
       }
     },
     {
-      "name": "Lock",
+      "name": "lock",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3128,12 +3134,12 @@
             "name": "config",
             "type": {
               "defined": {
-                "name": "Config"
+                "name": "config"
               }
             }
           },
           {
-            "name": "total_deposits",
+            "name": "totalDeposits",
             "type": "u64"
           },
           {
@@ -3153,19 +3159,19 @@
             "type": "u64"
           },
           {
-            "name": "created_at",
+            "name": "createdAt",
             "type": "i64"
           },
           {
-            "name": "updated_at",
+            "name": "updatedAt",
             "type": "i64"
           },
           {
-            "name": "lock_bump",
+            "name": "lockBump",
             "type": "u8"
           },
           {
-            "name": "vault_bump",
+            "name": "vaultBump",
             "type": "u8"
           },
           {
@@ -3173,7 +3179,7 @@
             "type": {
               "vec": {
                 "defined": {
-                  "name": "Season"
+                  "name": "season"
                 }
               }
             }
@@ -3182,7 +3188,7 @@
       }
     },
     {
-      "name": "Proposal",
+      "name": "proposal",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3203,11 +3209,11 @@
             "type": "u8"
           },
           {
-            "name": "created_at",
+            "name": "createdAt",
             "type": "i64"
           },
           {
-            "name": "ends_at",
+            "name": "endsAt",
             "type": "i64"
           },
           {
@@ -3219,14 +3225,14 @@
             "type": "u8"
           },
           {
-            "name": "proposal_type",
+            "name": "proposalType",
             "type": "u8"
           },
           {
             "name": "status",
             "type": {
               "defined": {
-                "name": "Status"
+                "name": "status"
               }
             }
           },
@@ -3235,7 +3241,7 @@
             "type": {
               "option": {
                 "defined": {
-                  "name": "Choice"
+                  "name": "choice"
                 }
               }
             }
@@ -3245,7 +3251,7 @@
             "type": {
               "option": {
                 "defined": {
-                  "name": "Config"
+                  "name": "config"
                 }
               }
             }
@@ -3269,7 +3275,7 @@
             "type": {
               "vec": {
                 "defined": {
-                  "name": "Choice"
+                  "name": "choice"
                 }
               }
             }
@@ -3278,7 +3284,7 @@
       }
     },
     {
-      "name": "Season",
+      "name": "season",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3291,11 +3297,11 @@
             "type": "u64"
           },
           {
-            "name": "season_start",
+            "name": "seasonStart",
             "type": "i64"
           },
           {
-            "name": "season_end",
+            "name": "seasonEnd",
             "type": "i64"
           },
           {
@@ -3303,7 +3309,7 @@
             "type": {
               "vec": {
                 "defined": {
-                  "name": "ASR"
+                  "name": "asr"
                 }
               }
             }
@@ -3312,24 +3318,24 @@
       }
     },
     {
-      "name": "Status",
+      "name": "status",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "Approved"
+            "name": "approved"
           },
           {
-            "name": "Rejected"
+            "name": "rejected"
           },
           {
-            "name": "Voting"
+            "name": "voting"
           }
         ]
       }
     },
     {
-      "name": "User",
+      "name": "user",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3346,7 +3352,7 @@
             "type": "u64"
           },
           {
-            "name": "created_at",
+            "name": "createdAt",
             "type": "i64"
           },
           {
@@ -3358,7 +3364,7 @@
             "type": {
               "vec": {
                 "defined": {
-                  "name": "Deposit"
+                  "name": "deposit"
                 }
               }
             }
@@ -3368,7 +3374,7 @@
             "type": {
               "vec": {
                 "defined": {
-                  "name": "Vote"
+                  "name": "vote"
                 }
               }
             }
@@ -3378,7 +3384,7 @@
             "type": {
               "vec": {
                 "defined": {
-                  "name": "Claim"
+                  "name": "claim"
                 }
               }
             }
@@ -3387,7 +3393,7 @@
       }
     },
     {
-      "name": "Vote",
+      "name": "vote",
       "type": {
         "kind": "struct",
         "fields": [
@@ -3400,7 +3406,7 @@
             "type": "u64"
           },
           {
-            "name": "voting_power",
+            "name": "votingPower",
             "type": "u64"
           },
           {
@@ -3408,11 +3414,11 @@
             "type": "u8"
           },
           {
-            "name": "created_at",
+            "name": "createdAt",
             "type": "i64"
           }
         ]
       }
     }
   ]
-}
+};

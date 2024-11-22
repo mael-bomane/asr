@@ -216,7 +216,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
               <div
                 className="font-extrabold self-start">
                 <Link href={`/lock/${proposal.lock.toString()}`} className="" target="_blank">
-                  {lock.name}
+                  {lock.config.name}
                 </Link> &gt; Proposal
               </div>
               <h1 className="text-3xl md:text-3xl font-extrabold flex">
@@ -233,7 +233,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                     <span className="flex justify-center items-center text-base-content space-x-2"><IoDiamond /><span>Voting Power : {' '}
                       {currentUser ? currentUser.deposits.reduce((acc: any, obj: any) => {
                         return acc + obj.amount.toNumber();
-                      }, 0) / (1 * 10 ** lock.decimals) : 0}</span></span>
+                      }, 0) / (1 * 10 ** lock.config.decimals) : 0}</span></span>
                   </div>
                   <div>
                     <FormField
@@ -260,7 +260,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   </div>
                   {currentUser && currentUser.deposits.reduce((acc: any, obj: any) => {
                     return acc + obj.amount.toNumber();
-                  }, 0) / (1 * 10 ** lock.decimals) == 0 || !currentUser && (
+                  }, 0) / (1 * 10 ** lock.config.decimals) == 0 || !currentUser && (
                     <div className="badge badge-warning badge-outline badge-lg rounded-box p-4 w-full mt-4">
                       Oops, you don’t have any voting power
                     </div>
@@ -268,9 +268,9 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   <button type="submit" className="btn w-full mt-4"
                     disabled={!publicKey || !currentUser || (currentUser.deposits.reduce((acc: any, obj: any) => {
                       return acc + obj.amount.toNumber();
-                    }, 0) / (1 * 10 ** lock.decimals) == 0) || currentUser.votes.filter((vote) => vote.poll.toNumber() == proposal.id.toNumber()).length > 0}
+                    }, 0) / (1 * 10 ** lock.config.decimals) == 0) || currentUser.votes.filter((vote) => vote.proposal.toNumber() == proposal.id.toNumber()).length > 0}
                   >
-                    {currentUser && currentUser.votes.filter((vote) => vote.poll.toNumber() == proposal.id.toNumber()).length > 0 ?
+                    {currentUser && currentUser.votes.filter((vote) => vote.proposal.toNumber() == proposal.id.toNumber()).length > 0 ?
                       (
                         <span className="text-white flex justify-center items-center space-x-2">
                           <span>Voted</span> <FaCheck className="text-success" />
@@ -298,8 +298,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                     return (
                       <div className="w-full flex justify-between" key={choice.id}>
                         <span>{choice.title}</span>
-                        {/*@ts-ignore*/}
-                        <span>{choice.votingPower.toNumber() / (1 * 10 ** lock.decimals)}</span>
+                        <span>{choice.votingPower.toNumber() / (1 * 10 ** lock.config.decimals)}</span>
                       </div>
                     )
                   })}
@@ -312,13 +311,12 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                       <span className="text-base-content">Votes : </span>
                       <span>{proposal.choices.reduce((acc: any, obj: any) => {
                         return acc + obj.votingPower.toNumber();
-                      }, 0) / (1 * 10 ** lock.decimals)}
+                      }, 0) / (1 * 10 ** lock.config.decimals)}
                       </span>
                     </div>
                     <div className="w-full text-sm text-right">
                       <span className="text-base-content">Min threshold : </span>
-                      {/*@ts-ignore*/}
-                      <span>{lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100}
+                      <span>{lock.config.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.config.decimals)) / 100}
                       </span>
                     </div>
                   </div>
@@ -353,9 +351,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 <FaCalendar className="text-base-content" />
                 <span className="flex space-x-4">
                   <span className="text-base-content">Start:</span>
-                  {/* @ts-ignore */}
                   <span>{new Date(proposal.createdAt.toNumber() * 1000).toDateString()}</span>
-                  {/* @ts-ignore */}
                   <span>{new Date(proposal.createdAt.toNumber() * 1000).getHours()}:{(new Date(proposal.createdAt.toNumber() * 1000).getMinutes())}</span>
                 </span>
               </div>
@@ -363,9 +359,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 <FaCalendar className="text-base-content" />
                 <span className="flex space-x-4">
                   <span className="text-base-content">End:</span>
-                  {/* @ts-ignore */}
                   <span>{new Date((proposal.endsAt.toNumber()) * 1000).toDateString()}</span>
-                  {/* @ts-ignore */}
                   <span>{new Date((proposal.endsAt.toNumber()) * 1000).getHours()}:{(new Date((proposal.endsAt.toNumber()) * 1000).getMinutes())}</span>
                 </span>
               </div>
@@ -396,7 +390,6 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       className={cn('h-5 w-5', {
-                        // @ts-ignore
                         "text-info": (proposal.endsAt.toNumber() * 1000) < new Date().getTime()
                       })}>
                       <path
@@ -407,14 +400,12 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   </div>
                   <div className="timeline-end timeline-box text-sm">Succeeded/Failed</div>
                   <hr className={cn('', {
-                    // @ts-ignore
                     "bg-info": proposal.executed
                   })}
                   />
                 </li>
                 <li>
                   <hr className={cn('', {
-                    // @ts-ignore
                     "bg-info": proposal.executed
                   })}
                   />
@@ -424,7 +415,6 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       className={cn('h-5 w-5', {
-                        // @ts-ignore
                         "text-info": proposal.executed
                       })}>
                       <path

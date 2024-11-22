@@ -17,6 +17,7 @@ import type { FC } from "react";
 import { useRouter } from "next/navigation";
 import { lockNewIx } from "@/lib/program/lockNew";
 import { program } from "@/constants";
+import { WalletConnectButton } from "@solana/wallet-adapter-react-ui";
 
 export const CreateLockForm: FC = () => {
   const { publicKey, sendTransaction } = useWallet();
@@ -32,6 +33,7 @@ export const CreateLockForm: FC = () => {
     mint: PublicKey
     symbol: string
     config: number
+    permissionless: boolean
     votingPeriod: number
     lockDuration: number
     threshold: number
@@ -81,6 +83,7 @@ export const CreateLockForm: FC = () => {
           mint,
           signerAta,
           inputs.config ?? 0,
+          inputs.permissionless ?? true,
           new BN(inputs.votingPeriod ? (inputs.votingPeriod / 1000) : 86400),
           new BN(inputs.lockDuration ? inputs.lockDuration : new BN(0)),
           inputs.threshold,
@@ -215,7 +218,11 @@ export const CreateLockForm: FC = () => {
           step={86400 * 1000}
         />
       </div>
-      <Button className="cursor-pointer mt-8 w-full font-extrabold text-lg hover:bg-base-100 border" size="lg" type="submit">Create</Button>
+      {publicKey ? (
+        <Button className="cursor-pointer mt-8 w-full font-extrabold text-lg hover:bg-base-100 border" size="lg" type="submit">Create</Button>
+      ) : (
+        <><WalletConnectButton /></>
+      )}
     </form>
   );
 }

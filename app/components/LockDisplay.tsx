@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
 import { program } from "@/constants";
@@ -14,6 +14,7 @@ import { LockDetails } from "./LockDetails";
 import { LockStaked } from "./LockStaked";
 
 import type { FC } from "react";
+import { LockContext } from "./LockContextProvider";
 
 type Props = {
   address: string
@@ -23,12 +24,11 @@ type Props = {
 export const LockDisplay: FC<Props> = ({ address }) => {
 
   const { publicKey } = useWallet();
+  const { currentUser, currentLock } = useContext(LockContext);
 
-  const [lock, setLock] = useState<Lock | null>(null);
   const [season, setSeason] = useState<number>(0);
 
   const [users, setUsers] = useState<User[]>([]);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
 
   const [proposals, setProposals] = useState<Proposal[]>([]);
@@ -36,55 +36,6 @@ export const LockDisplay: FC<Props> = ({ address }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
 
-  useEffect(() => {
-    const fetchMonolith = async () => {
-      //@ts-ignore
-      return await program.account.lock.fetch(new PublicKey(address));
-    }
-
-    fetchMonolith()
-      .then(async res => {
-        if (res) {
-          console.log(res);
-          setLock(res);
-          res.seasons.map((season: any, index: number) => {
-            console.log(`season ${index}`, season)
-          });
-          setSeason(res.seasons[res.seasons.length - 1].season)
-        }
-      })
-      .catch(err => console.log(err));
-  }, []);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const user = PublicKey.findProgramAddressSync(
-        // seeds = [b"user", lock.key().as_ref(), signer.key().as_ref()]
-        [Buffer.from("user"), new PublicKey(address).toBytes(), publicKey.toBytes()],
-        program.programId
-      )[0];
-      //@ts-ignore
-      return await program.account.user.fetch(user);
-    }
-    if (publicKey && lock && address) {
-      setCurrentUserLoading(true)
-      fetchUser()
-        .then(res => {
-          if (res) {
-            console.log("current user : ", res);
-            setCurrentUser(res);
-            setCurrentUserLoading(false);
-          }
-        })
-        .catch(err => {
-          console.log(err);
-          setCurrentUserLoading(false);
-        });
-    } else {
-      setCurrentUser(null);
-    }
-
-  }, [lock, publicKey, address]);
 
   useEffect(() => {
     const fetchProposals = async () => {
@@ -93,12 +44,12 @@ export const LockDisplay: FC<Props> = ({ address }) => {
         {
           memcmp: {
             offset: 8 + 8,
-            bytes: new PublicKey(address).toBase58(),
+            bytes: currentLock.publicKey.toBase58(),
           },
         },
       ]);
     }
-    if (lock) {
+    if (currentLock) {
       fetchProposals()
         .then(res => {
           if (res) {
@@ -117,43 +68,28 @@ export const LockDisplay: FC<Props> = ({ address }) => {
         .catch(err => console.log(err));
     }
 
-  }, [lock, publicKey]);
+  }, [currentLock, publicKey]);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      //@ts-ignore
-      return await program.account.user.all();
-    }
-    if (lock) {
-      fetchUsers()
-        .then(res => {
-          if (res) {
-            console.log("total users : ", res);
-            setUsers(res);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-  }, [lock]);
+
 
   return (
-    <section className="my-6 md:my-10 w-full flex flex-col justify-center items-center md:p-4 space-y-4">
-      {lock ? (
-        <>
+    <>
+      {currentLock ? (
+        <section className="my-6 md:my-10 grow md:w-full flex flex-col justify-center items-center md:p-4 space-y-4">
           <h1 className="text-3xl md:text-3xl font-extrabold flex">
-            {lock.name}
+            {currentLock.account.config.name}
           </h1>
-          <LockStaked lock={lock} users={users} />
-          <LockDetails lock={lock} />
-          <div className="w-full flex flex-col md:flex-row justify-center items-start p-2 space-y-2 md:space-y-0 md:space-x-4">
-            <RewardsList lock={lock} setIsOpen={setIsOpen} season={season} address={address} />
-            <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={lock} address={address} />
+          <LockStaked lock={currentLock} users={users} />
+          <LockDetails lock={currentLock} />
+          <div className="grow md:w-full mx-auto flex flex-col md:flex-row justify-center items-start p-2 space-y-2 md:space-y-0">
+            <RewardsList lock={currentLock} setIsOpen={setIsOpen} season={season} address={address} />
+            <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={currentLock} address={address} />
           </div>
-          <Proposals proposals={proposals} lock={lock} address={address} users={users} currentUser={currentUser} />
-        </>
+          <Proposals proposals={proposals} lock={currentLock} address={address} users={users} currentUser={currentUser} />
+        </section>
       ) : <Skeleton />
       }
       {isOpen && <DepositPopup isOpen={isOpen} setIsOpen={setIsOpen} />}
-    </section>
+    </>
   )
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -8,6 +8,8 @@ import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransacti
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { toast } from "react-hot-toast";
 import { BN } from "bn.js";
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -21,17 +23,22 @@ import { FaTrash } from "react-icons/fa";
 
 import type { FC } from "react";
 import type { ProposalChoice, Lock } from "@/types";
+import { LockContext } from "./LockContextProvider";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { Textarea } from "./ui/textarea";
 
 export const CreateProposalForm: FC = () => {
-  const { publicKey, sendTransaction } = useWallet();
+  const wallet = useWallet();
+  const { sendTransaction } = useWallet();
   const { connection } = useConnection();
+  const { locks, currentLock, setCurrentLock, currentUser } = useContext(LockContext);
   const router = useRouter();
   const searchParams = useSearchParams()
   const address = searchParams.get('address');
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const [lock, setLock] = useState<Lock | null>(null);
   const [lockPubkey, setLockPubkey] = useState<PublicKey | null>(null);
 
   const [choices, setChoices] = useState<ProposalChoice[]>([
@@ -39,46 +46,34 @@ export const CreateProposalForm: FC = () => {
     { id: 1, title: 'Reject', votingPower: new BN(0) },
   ]);
 
-  useEffect(() => {
-    if (address) {
-      setLockPubkey(new PublicKey(address));
-    }
-  }, [address])
-
-  useEffect(() => {
-    const fetchMonolith = async () => {
-      //@ts-ignore
-      return await program.account.lock.fetch(lockPubkey);
-    }
-    if (lockPubkey) {
-      fetchMonolith()
-        .then(async response => {
-          if (response) {
-            console.log(response);
-            setLock(response);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-
-  }, [lockPubkey]);
-
   type Inputs = {
     title: string
   }
 
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm<Inputs>();
+  const FormSchema = z.object({
+    title: z
+      .string({
+        required_error: "Please input Title",
+      }).min(1).max(50)
+    ,
+    content: z
+      .string({
+        required_error: "Please input Content",
+      }).min(1).max(280),
+    address: z
+      .string({
+        required_error: "Please input Content",
+      }).min(1).max(280)
+  })
 
-  const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
-    console.log(inputs);
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+  })
+
+  const onSubmit: SubmitHandler<Inputs> = async (data: z.infer<typeof FormSchema>) => {
+    console.log(data);
     let signature: TransactionSignature = '';
-    if (publicKey) {
+    if (wallet.publicKey) {
       try {
         setLoading(true)
 
@@ -89,18 +84,18 @@ export const CreateProposalForm: FC = () => {
         // id: BN
 
         const instruction = await proposalNewIx(
-          publicKey,
+          wallet.publicKey,
           lockPubkey,
-          inputs.title,
+          data.title,
           choices,
-          new BN(lock.polls.toNumber() + 1),
+          new BN(currentLock.account.polls.toNumber() + 1),
         );
 
 
         let latestBlockhash = await connection.getLatestBlockhash()
 
         const messageV0 = new TransactionMessage({
-          payerKey: publicKey,
+          payerKey: wallet.publicKey,
           recentBlockhash: latestBlockhash.blockhash,
           instructions: [instruction],
         }).compileToV0Message();
@@ -117,7 +112,7 @@ export const CreateProposalForm: FC = () => {
 
         const proposal = PublicKey.findProgramAddressSync(
           // seeds = [b"proposal", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
-          [Buffer.from("proposal"), new PublicKey(address).toBytes(), new BN(lock.polls.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
+          [Buffer.from("proposal"), new PublicKey(address).toBytes(), new BN(currentLock.account.polls.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
           program.programId
         )[0];
 
@@ -136,56 +131,133 @@ export const CreateProposalForm: FC = () => {
   };
 
   return (
-    <form className="w-full md:max-w-7xl grow w-full mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-primary text-base-content rounded-xl"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">
-        Create Proposal
-      </h1>
-      <div>for <Link href={`/lock/${address}`} className="underline text-white">{`${ellipsis(address)}`}</Link></div>
-      <div className="w-full flex flex-col items-center justify-center space-y-4 grow">
-        <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
-          <Label htmlFor="name" className="self-start md:text-xl font-extrabold">title : {errors.title && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
-          <Input placeholder="ex : fire gary !" id="name" type="text"
-            {...register("title", { required: true })}
-          />
-        </div>
-        <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
-          <Label htmlFor="choices" className="self-start md:text-xl font-extrabold">choices : {errors.title && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
-          <div
-            className="btn btn-xs btn-primary md:max-w-36 md:margin-x-auto text-base-100 self-start"
-            onClick={() => {
-              setChoices([...choices, {
-                id: choices.length,
-                title: '',
-                votingPower: new BN(0),
-              }])
-            }}
-          >
-            Add Choice
-          </div>
-        </div>
-        <div className="w-full flex flex-col mt-4 space-y-2">
-          {choices.length > 0 && choices.map((choice, index) => (
-            <div className="w-full flex justify-center space-x-2" key={index}>
-              <Input
-                type="text"
-                defaultValue={choice.title ?? ''}
-                onChange={(e) => {
-                  e.preventDefault();
-                  choices[index].title = e.target.value;
-                  setChoices(choices)
+    <Form {...form}>
+      <form className="w-full grow mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-primary text-base-content"
+        onSubmit={form.handleSubmit(onSubmit)}
+      >
+        <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">
+          Create Proposal
+        </h1>
+        <div className="w-full flex flex-col items-center justify-center space-y-4 grow">
+          <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Lock</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={currentLock?.publicKey.toString() ?? field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Lock" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {locks?.map(({ account, publicKey }) => (
+                        <SelectItem value={publicKey.toString()} onClick={() => setCurrentLock({ account, publicKey })} key={publicKey.toString()}>{account.config.name} {ellipsis(publicKey.toString())}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    {currentLock && (
+                      <>
+                        You need <span className="font-extrabold text-white">{currentLock.account.config.amount.toNumber() / (1 * 10 ** currentLock.account.config.decimals)} Staked {currentLock.account.config.symbol}</span> to create a Proposal.
+                      </>
+                    )}
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ex : Ready For Mainnet !" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Max 50 Characters
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem className="w-full">
+                  <FormLabel>Body</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Tell us a little bit about yourself"
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Max 280 Characters
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="w-full flex flex-col items-center justify-center space-y-2">
+              <Label htmlFor="choices" className="self-start md:text-xl font-extrabold">choices : {form.formState.errors.title && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
+              <div
+                className="btn btn-xs btn-primary md:max-w-36 md:margin-x-auto text-base-100 self-start"
+                onClick={() => {
+                  console.log("choices : ", choices);
+                  setChoices([...choices, {
+                    id: choices.length,
+                    title: '',
+                    votingPower: new BN(0),
+                  }])
                 }}
-                placeholder="choice title"
-                className="w-full p-2"
-              />
-              <div className="w-[25%] h-9 flex justify-center items-center cursor-pointer group bg-primary rounded-lg hover:bg-base-100 border"><FaTrash className="group-hover:text-error" /></div>
+              >
+                Add Choice
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="w-full flex flex-col mt-4 space-y-2">
+              {choices.map((choice, index) => (
+                <div className="w-full flex justify-center space-x-2" key={index}>
+                  <Input
+                    type="text"
+                    defaultValue={choice.title ?? ''}
+                    onChange={(e) => {
+                      e.preventDefault();
+                      choices[index].title = e.target.value;
+                      setChoices(choices)
+                    }}
+                    placeholder="choice title"
+                    className="w-full p-2"
+                  />
+                  <div className="w-[25%] h-9 flex justify-center items-center cursor-pointer group bg-primary rounded-lg hover:bg-base-100 border"
+                    onClick={() => {
+                      const newChoices = choices.filter((cx) => cx.id !== choice.id).map(cx => {
+                        if (cx.id > choice.id) {
+                          cx.id -= 1
+                        }
+                        return cx
+                      });
+                      console.log("new choices : ", newChoices);
+                      setChoices(newChoices);
+                    }}
+                  >
+                    <FaTrash className="group-hover:text-error" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
 
-      <Button className="cursor-pointer mt-8" size="lg" type="submit">create</Button>
-    </form>
+        </div>
+
+        <Button className="cursor-pointer mt-8" size="lg" type="submit">create</Button>
+      </form>
+    </Form>
   );
 }

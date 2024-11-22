@@ -10,29 +10,29 @@ import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Input } from "./ui/input";
 
 import type { FC } from "react"
-import type { Proposal, Lock, User } from "@/types";
+import type { Proposal, User, LockMap } from "@/types";
 import { cn } from "@/lib/utils";
 import { BadgeProposalStatus } from "./BadgeProposalStatus";
 import { ProgressSegment, StackedProgress } from "./ui/stacked-progress";
 
 type Props = {
-  lock: Lock | null
+  lock: LockMap
   address: string | null
   proposals: Proposal[]
   users: User[]
   currentUser: User | null
 }
 
-export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentUser }) => {
+export const Proposals: FC<Props> = ({ lock: { account, publicKey }, address, proposals, users, currentUser }) => {
   const router = useRouter();
   return (
-    <div className="w-full bg-[#000] text-white space-y-4 p-4 rounded-box">
+    <div className="w-full bg-primary text-white space-y-4 p-4 rounded-box">
       <div className="px-6 w-full flex items-center justify-between">
         <h3 className="font-bold text-lg lg:text-xl flex justify-center items-center space-x-4">
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500 font-extrabold">Proposals</span>
+          <span className="font-extrabold">Proposals</span>
           {currentUser && (currentUser.deposits.reduce((acc: any, obj: any) => {
             return acc + obj.amount.toNumber();
-          }, 0) / (1 * 10 ** lock.decimals)) >= (lock.amount.toNumber() / (1 * 10 ** lock.decimals)) &&
+          }, 0) / (1 * 10 ** account.config.decimals)) >= (account.config.amount.toNumber() / (1 * 10 ** account.config.decimals)) &&
             <Link href={{ pathname: '/proposal/create', query: { address } }} className="button"><FaPlusCircle className="w-5 h-5" /></Link>
           }
         </h3>
@@ -42,7 +42,7 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
         </div>
       </div>
       <Table className="overflow-x-scroll">
-        <TableCaption>{lock && lock.name} Proposals</TableCaption>
+        <TableCaption>{account.config.name} Proposals</TableCaption>
         <TableHeader>
           <HeaderTableRow>
             <TableHead className="">Title</TableHead>
@@ -54,15 +54,14 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
           </HeaderTableRow>
         </TableHeader>
         <TableBody>
-          {/*@ts-ignore*/}
-          {proposals.length > 0 && proposals.map(({ account, publicKey }, i) => {
-            const isReady = (account.endsAt.toNumber() * 1000) < new Date().getTime() ? true : false;
+          {proposals.length > 0 && proposals.map((proposal, i) => {
+            const isReady = (proposal.endsAt.toNumber() * 1000) < new Date().getTime() ? true : false;
 
             const segments: ProgressSegment[] = [];
 
             const colors = ['bg-info', 'bg-warning', 'bg-error'];
 
-            account.choices.forEach((choice: any, index: number) => {
+            proposal.choices.forEach((choice: any, index: number) => {
               segments.push({
                 value: choice.votingPower,
                 color: colors[index]
@@ -77,10 +76,10 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
                 className="cursor-pointer"
               >
                 <TableCell className="font-medium">
-                  <div>{account.title}</div>
+                  <div>{proposal.title}</div>
                 </TableCell>
                 <TableCell className="text-center">
-                  {currentUser && currentUser.votes.filter((vote) => vote.poll.toNumber() == account.id.toNumber()).length > 0 ?
+                  {currentUser && currentUser.votes.filter((vote) => vote.proposal.toNumber() == proposal.id.toNumber()).length > 0 ?
                     (
                       <div className="text-center w-full flex justify-center items-center text-success"><FaCheck /></div>
                     ) : (
@@ -88,22 +87,18 @@ export const Proposals: FC<Props> = ({ lock, address, proposals, users, currentU
                     )}
                 </TableCell>
                 <TableCell className="text-center">
-                  <BadgeProposalStatus lock={lock} proposal={account} isReady={isReady} />
+                  <BadgeProposalStatus lock={account} proposal={proposal} isReady={isReady} />
                 </TableCell>
                 <TableCell>
                   <StackedProgress segments={segments} className="bg-base-100" />
                 </TableCell>
                 <TableCell className="text-left">
-                  {/* @ts-ignore */}
-                  <div>{new Date(account.createdAt.toNumber() * 1000).toDateString()}</div>
-                  {/* @ts-ignore */}
-                  <div>{new Date(account.createdAt.toNumber() * 1000).getHours()}:{(new Date(account.createdAt.toNumber() * 1000).getMinutes())}</div>
+                  <div>{new Date(proposal.createdAt.toNumber() * 1000).toDateString()}</div>
+                  <div>{new Date(proposal.createdAt.toNumber() * 1000).getHours()}:{(new Date(proposal.createdAt.toNumber() * 1000).getMinutes())}</div>
                 </TableCell>
                 <TableCell className="text-left">
-                  {/* @ts-ignore */}
-                  <div>{new Date(account.endsAt.toNumber() * 1000).toDateString()}</div>
-                  {/* @ts-ignore */}
-                  <div>{new Date(account.endsAt.toNumber() * 1000).getHours()}:{(new Date(account.endsAt.toNumber() * 1000).getMinutes())}</div>
+                  <div>{new Date(proposal.endsAt.toNumber() * 1000).toDateString()}</div>
+                  <div>{new Date(proposal.endsAt.toNumber() * 1000).getHours()}:{(new Date(proposal.endsAt.toNumber() * 1000).getMinutes())}</div>
                 </TableCell>
               </TableRow>
             )

@@ -14,7 +14,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 
 import { WalletContextProvider } from './WalletContextProvider'
-import { MonolithProvider } from "./MonolithContextProvider";
+import { LockContextProvider } from "./LockContextProvider";
 
 export const ClientLayout = ({ children }: { children: ReactNode }) => {
   const cluster =
@@ -40,7 +40,7 @@ export const ClientLayout = ({ children }: { children: ReactNode }) => {
         network={network}
         wallets={wallets}
       >
-        <MonolithProvider>
+        <LockContextProvider>
           <RecoilRoot>
             <Theme>
               <SidebarProvider>
@@ -50,7 +50,7 @@ export const ClientLayout = ({ children }: { children: ReactNode }) => {
               </SidebarProvider>
             </Theme>
           </RecoilRoot>
-        </MonolithProvider>
+        </LockContextProvider>
       </WalletContextProvider>
 
       <Toaster

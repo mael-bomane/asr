@@ -1,17 +1,13 @@
 
-import { BN, IdlAccounts } from "@coral-xyz/anchor";
-import type { PublicKey } from "@solana/web3.js";
+import type { BN, IdlAccounts } from "@coral-xyz/anchor";
 import type { IDL } from '@/constants';
+import type { PublicKey } from "@solana/web3.js";
 
-export type Lock = IdlAccounts<IDL>["Lock"] & { account: PublicKey };
-export type User = IdlAccounts<IDL>["User"] & { account: PublicKey };
-export type Proposal = IdlAccounts<IDL>["Proposal"];
-export type Analytics = IdlAccounts<IDL>["Analytics"] & { account: PublicKey };
-
-export type TokenInfo = {
-  mint: PublicKey,
-  decimals: number
-};
+export type LockMap = { account: Lock } & { publicKey: PublicKey };
+export type Lock = IdlAccounts<IDL>["lock"];
+export type User = IdlAccounts<IDL>["user"];
+export type Proposal = IdlAccounts<IDL>["proposal"];
+export type Analytics = IdlAccounts<IDL>["analytics"]
 
 export type ProposalChoice = {
   id: number

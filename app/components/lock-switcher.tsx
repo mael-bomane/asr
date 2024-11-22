@@ -23,18 +23,19 @@ import {
 } from "@/components/ui/sidebar"
 import Image from "next/image";
 import Link from "next/link";
+import type { LockMap } from "@/types";
 
-export function TeamSwitcher({
-  teams,
-}: {
-  teams: {
-    name: string
-    logo: React.ElementType
-    plan: string
-  }[]
-}) {
+import type { FC } from "react";
+import { LockContext } from "./LockContextProvider";
+
+type Props = {
+  locks: LockMap[] | null
+}
+
+export const LockSwitcher: FC<Props> = ({ locks }) => {
+  const { setCurrentLock } = React.useContext(LockContext)
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState(teams[0])
+  const [activeLock, setActiveLock] = React.useState(locks[0])
 
   return (
     <SidebarMenu>
@@ -46,13 +47,15 @@ export function TeamSwitcher({
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <activeTeam.logo className="size-4" />
+                {/*
+                             <activeTeam.logo className="size-4" />
+                */}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {activeTeam.name}
+                  {activeLock.account.config.name}
                 </span>
-                <span className="truncate text-xs">{activeTeam.plan}</span>
+                <span className="truncate text-xs">{activeLock.account.config.mint.toString()}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -66,22 +69,29 @@ export function TeamSwitcher({
             <DropdownMenuLabel className="text-xs text-muted-foreground">
               Your Locks
             </DropdownMenuLabel>
-            {teams.map((team, index) => (
+            {locks.map((lock, index) => (
               <DropdownMenuItem
-                key={team.name}
-                onClick={() => setActiveTeam(team)}
+                key={lock.publicKey.toString()}
+                onClick={() => setActiveLock(lock)}
                 className="gap-2 p-2"
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
-                  <team.logo className="size-4 shrink-0" />
-                </div>
-                {team.name}
-                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                <Link
+                  className="w-full flex justify-start gap-2 items-center"
+                  href={`/lock/${lock.publicKey.toString()}`}
+                  onClick={() => setCurrentLock(lock)}
+                >
+                  <div className="flex size-6 items-center justify-center rounded-sm border">
+                    {/*<team.logo className="size-4 shrink-0" />*/}
+                  </div>
+                  {lock.account.config.name}
+                  <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                </Link>
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2">
-              <Link href="lock/create" className="w-full flex justify-start gap-2 items-center">
+              <Link href={`/lock/create`} className="w-full flex justify-start gap-2 items-center"
+              >
                 <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                   <Plus className="size-4" />
                 </div>

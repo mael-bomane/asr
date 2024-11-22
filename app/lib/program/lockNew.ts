@@ -9,6 +9,7 @@ export const lockNewIx = async (
   mint: PublicKey,
   signerAta: PublicKey,
   config: number,
+  permissionless: boolean,
   votingPeriod: BN,
   lockDuration: BN,
   threshold: number,
@@ -21,6 +22,7 @@ export const lockNewIx = async (
   console.log("mint", mint.toString());
   console.log("signerAta", signerAta.toString());
   console.log("config", config);
+  console.log("permissionless", permissionless);
   console.log("votingPeriod", votingPeriod.toNumber());
   console.log("lockDuration", lockDuration.toNumber());
   console.log("threshold", threshold);
@@ -58,7 +60,7 @@ export const lockNewIx = async (
   //  quorum: u8,
   //  min: u64,
   //  name: String,
-  return await program.methods.lockNew(config, votingPeriod, lockDuration, threshold, quorum, amount, name, symbol)
+  return await program.methods.lockNew(config, permissionless, votingPeriod, lockDuration, threshold, quorum, amount, name, symbol)
     .accountsStrict({
       signer,
       auth,

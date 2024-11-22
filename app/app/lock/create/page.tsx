@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { CreateLockForm } from "@/components/CreateLockForm";
 
 export const dynamic = "force-dynamic";

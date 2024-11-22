@@ -7,6 +7,7 @@ import { program } from "@/constants/program";
 export const asrDepositIx = async (
   creator: PublicKey,
   mint: PublicKey,
+  symbol: string,
   signerAta: PublicKey,
   amount: BN,
 ) => {
@@ -37,8 +38,7 @@ export const asrDepositIx = async (
     program.programId
   )[0];
 
-  // @ts-ignore
-  return await program.methods.asrDeposit(amount)
+  return await program.methods.asrDeposit(amount, "MONO")
     .accountsStrict({
       creator,
       signerAta,

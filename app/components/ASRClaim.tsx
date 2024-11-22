@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 
 
 import type { FC } from "react"
-import type { User, Lock, TokenInfo } from "@/types";
+import type { User, LockMap } from "@/types";
 import { cn } from "@/lib/utils";
 import { stakeIx } from "@/lib/program/stake";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -39,12 +39,12 @@ type Props = {
   currentUser: User | null
   currentUserLoading: boolean
   setCurrentUserLoading: React.Dispatch<React.SetStateAction<boolean>>
-  lock: Lock | null
-  address: string
+  lock: LockMap
 }
 
-export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurrentUserLoading, lock, address }) => {
-  const { publicKey, sendTransaction } = useWallet();
+export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurrentUserLoading, lock: { account, publicKey } }) => {
+  const wallet = useWallet();
+  const { sendTransaction } = useWallet();
   const { connection } = useConnection();
 
   type UserTokenAmount = {
@@ -57,19 +57,18 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
 
   const onClickRegister = useCallback(async () => {
     let signature: TransactionSignature = '';
-    if (publicKey) {
+    if (wallet.publicKey) {
       try {
         setCurrentUserLoading(true);
-        const mint = new PublicKey(lock.mint);
-        const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+        const signerAta = getAssociatedTokenAddressSync(account.config.mint, wallet.publicKey);
         console.log("signer ata : ", signerAta.toString());
 
-        const instruction = await registerIx(publicKey, new PublicKey(address));
+        const instruction = await registerIx(wallet.publicKey, publicKey);
 
         let latestBlockhash = await connection.getLatestBlockhash()
 
         const messageV0 = new TransactionMessage({
-          payerKey: publicKey,
+          payerKey: wallet.publicKey,
           recentBlockhash: latestBlockhash.blockhash,
           instructions: [instruction],
         }).compileToV0Message();
@@ -95,18 +94,18 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
 
   const onClickClaim = useCallback(async (mint: PublicKey) => {
     let signature: TransactionSignature = '';
-    if (publicKey && currentUser && lock) {
+    if (wallet.publicKey && currentUser && account) {
       try {
         setCurrentUserLoading(true);
-        const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+        const signerAta = getAssociatedTokenAddressSync(mint, wallet.publicKey);
         console.log("signer ata : ", signerAta.toString());
 
-        const instruction = await asrClaimIx(publicKey, new PublicKey(address), mint, signerAta, new BN(0));
+        const instruction = await asrClaimIx(wallet.publicKey, publicKey, mint, signerAta, new BN(0));
 
         let latestBlockhash = await connection.getLatestBlockhash()
 
         const messageV0 = new TransactionMessage({
-          payerKey: publicKey,
+          payerKey: wallet.publicKey,
           recentBlockhash: latestBlockhash.blockhash,
           instructions: [instruction],
         }).compileToV0Message();
@@ -126,25 +125,24 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
         setCurrentUserLoading(false);
       }
     } else {
-      if (!lock) {
+      if (!account) {
         toast.error('lock not found');
       }
       if (!currentUser) {
         toast.error('user not found');
       }
-      if (!publicKey) {
+      if (!wallet.publicKey) {
         toast.error('please connect your wallet');
       }
     }
-  }, [publicKey, currentUser, lock]);
+  }, [wallet.publicKey, currentUser, account]);
 
   useEffect(() => {
     const fetchUserBalance = async () => {
-      const mint = new PublicKey(lock.mint);
-      const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+      const signerAta = getAssociatedTokenAddressSync(account.config.mint, wallet.publicKey);
       return await connection.getTokenAccountBalance(signerAta);
     }
-    if (lock && publicKey) {
+    if (account && wallet.publicKey) {
       fetchUserBalance().then(res => {
         console.log("user token balance", res);
         if (res) {
@@ -157,7 +155,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
 
       })
     }
-  }, [publicKey, lock])
+  }, [wallet.publicKey, account])
 
   const override: CSSProperties = {
     display: "block",
@@ -167,7 +165,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
 
   return (
     <>
-      {publicKey ? (
+      {wallet.publicKey ? (
         <div
           className={`mx-auto w-full p-2 md:p-8 bg-primary text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
         >
@@ -175,8 +173,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
             <div className="w-full">
               <div className="text-lg font-extrabold text-white">Voting Summary</div>
               <div className="w-full text-sm font-semibold text-base-content mt-2">ASR Period :
-                {/* @ts-ignore */}
-                <span className="ml-4">{new Date(lock.createdAt * 1000).toDateString()} - {new Date(lock.seasons[lock.seasons.length - 2]?.seasonEnd * 1000).toDateString()}</span>
+                <span className="ml-4">{new Date(account.createdAt.toNumber() * 1000).toDateString()} - {new Date(account.seasons[account.seasons.length - 1]?.seasonEnd.toNumber() * 1000).toDateString()}</span>
               </div>
             </div>
             <div className="flex flex-col w-[50%] justify-end items-end space-x-4">
@@ -189,9 +186,9 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
             </div>
           </CardTitle>
           <CardDescription className="w-full p-2">
-            {currentUser && lock ? (
+            {currentUser && account ? (
               <Table>
-                <TableCaption>{lock.name}&apos;s Active Staking Rewards</TableCaption>
+                <TableCaption>{account.config.name}&apos;s Active Staking Rewards</TableCaption>
                 <TableHeader>
                   <HeaderTableRow>
                     <TableHead className="w-[100px]">Token</TableHead>
@@ -200,18 +197,17 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
                     <TableHead className="text-right">Amount</TableHead>
                   </HeaderTableRow>
                 </TableHeader>
-                {/*@ts-ignore*/}
-                {lock?.seasons?.filter(season => (season.seasonEnd.toNumber() * 1000) < new Date().getTime()).concat()?.map((season, id) => (
+                {account?.seasons?.filter(season => (season.seasonEnd.toNumber() * 1000) < new Date().getTime()).concat()?.map((season, id) => (
                   <TableBody key={id} >
                     {currentUser.votes.filter(vote => vote.season == season.season).length > 0 && season.asr.map((token, index) => (
                       <TableRow key={index}
                         onClick={() => onClickClaim(token.mint)}
                         className="text-white cursor-pointer font-semibold">
                         <TableCell className={cn("flex space-x-1", {
-                          "w-[200px]": token.mint.toString() == lock.mint.toString(),
-                          "w-[100px]": !(token.mint.toString() == lock.mint.toString()),
+                          "w-[200px]": token.mint.toString() == account.config.mint.toString(),
+                          "w-[100px]": !(token.mint.toString() == account.config.mint.toString()),
                         })}>
-                          {token.mint.toString() == lock.mint.toString() ? 'Staked ' : ''}
+                          {token.mint.toString() == account.config.mint.toString() ? 'Staked ' : ''}
                           MONO
                         </TableCell>
                         <TableCell className="text-center">{season.season}</TableCell>
@@ -222,12 +218,11 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
                         </TableCell>
                         <TableCell className="text-right">{new Intl.NumberFormat().format(((currentUser.votes.reduce((acc, obj) => {
                           if (obj.season == season.season) {
-                            // @ts-ignore
                             return acc + obj.votingPower.toNumber();
                           } else {
                             return acc + 0
                           }
-                        }, 0)) / (1 * 10 ** lock.decimals) * (token.amount.toNumber() / (1 * 10 ** token.decimals))) / (season.points.toNumber() / (1 * 10 ** lock.decimals)))}
+                        }, 0)) / (1 * 10 ** account.config.decimals) * (token.amount.toNumber() / (1 * 10 ** token.decimals))) / (season.points.toNumber() / (1 * 10 ** account.config.decimals)))}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -253,7 +248,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
                       aria-label="Loading Spinner"
                       data-testid="loader"
                     />
-                  ) : <>Register To {lock.name}</>}
+                  ) : <>Register To {account.config.name}</>}
                 </button>
               </div>
             )}

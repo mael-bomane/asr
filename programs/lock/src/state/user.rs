@@ -79,8 +79,6 @@ impl User {
                         // y = 100%
                         // x = z
                         // z = x*100/y
-                        let now = Clock::get().unwrap().unix_timestamp;
-                        let remaining = deposit.deactivation_start.unwrap() + THREE_MONTH_IN_SECONDS - now; 
                         deposit.amount.checked_mul(100).unwrap().div_ceil(deposit.expires_at as u64)
                     } else {
                         0u64

@@ -1,3 +1,4 @@
+import { LockEcosystemDisplay } from "@/components/LockEcosystemDisplay";
 import { getSEOTags } from "@/lib/seo";
 import Image from "next/image";
 
@@ -5,13 +6,13 @@ export async function generateMetadata() {
 
   // @ts-ignore
   return getSEOTags({
-    title: "Create ASR Lock",
-    description: "Create ASR Lock",
-    canonicalUrlRelative: `/lock/create`,
+    title: "ASR Ecosystem",
+    description: "ASR Ecosystem",
+    canonicalUrlRelative: `/lock`,
     extraTags: {
       openGraph: {
-        title: "Create Lock",
-        description: "Create ASR Lock",
+        title: "ASR Ecosystem",
+        description: "ASR Ecosystem",
         url: `/lock/create`,
         images: [
           {
@@ -32,10 +33,10 @@ export default async function LockPage() {
   return (
     <main className="my-6 md:my-10 w-full flex flex-col items-center">
       <h1 className="text-3xl md:text-3xl font-extrabold flex text-center">
-        Ecosystem Opportunities
-        <Image src={"/hacker.gif"} width={40} height={40} alt="adhd cat dev" className="ml-4 rounded-full" unoptimized />
+        ASR Ecosystem
       </h1>
       <div className="overflow-x-auto w-full mx-auto mt-8">
+        <LockEcosystemDisplay />
       </div>
     </main>
   );

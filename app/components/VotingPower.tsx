@@ -20,11 +20,10 @@ import { Input } from "@/components/ui/input";
 
 
 import type { FC } from "react"
-import type { User, Lock, TokenInfo } from "@/types";
+import type { User, LockMap } from "@/types";
 import { cn } from "@/lib/utils";
 import { stakeIx } from "@/lib/program/stake";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { WalletModalButton } from "@solana/wallet-adapter-react-ui";
 import { unstakeIx } from "@/lib/program/unstake";
 import { stakeDeactivateIx } from "@/lib/program/deactivate";
 import { UNSTAKING_TIME } from "@/constants";
@@ -32,12 +31,13 @@ import { UNSTAKING_TIME } from "@/constants";
 type Props = {
   currentUser: User | null
   currentUserLoading: boolean
-  lock: Lock | null
+  lock: LockMap
   address: string
 }
 
-export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, address }) => {
-  const { publicKey, sendTransaction } = useWallet();
+export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: { account, publicKey }, address }) => {
+  const wallet = useWallet();
+  const { sendTransaction } = useWallet();
   const { connection } = useConnection();
   const [loading, setLoading] = useState<boolean>(false);
   const [isStake, setIsStake] = useState<boolean>(true);
@@ -52,19 +52,18 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
 
   const onClickRegister = useCallback(async () => {
     let signature: TransactionSignature = '';
-    if (publicKey) {
+    if (wallet.publicKey) {
       try {
         setLoading(true);
-        const mint = new PublicKey(lock.mint);
-        const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+        const signerAta = getAssociatedTokenAddressSync(account.config.mint, wallet.publicKey);
         console.log("signer ata : ", signerAta.toString());
 
-        const instruction = await registerIx(publicKey, new PublicKey(address));
+        const instruction = await registerIx(wallet.publicKey, publicKey);
 
         let latestBlockhash = await connection.getLatestBlockhash()
 
         const messageV0 = new TransactionMessage({
-          payerKey: publicKey,
+          payerKey: wallet.publicKey,
           recentBlockhash: latestBlockhash.blockhash,
           instructions: [instruction],
         }).compileToV0Message();
@@ -102,12 +101,11 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
 
   const onSubmit: SubmitHandler<Inputs> = async (inputs) => {
     let signature: TransactionSignature = '';
-    if (publicKey) {
+    if (wallet.publicKey) {
       if (isStake) {
         try {
           setLoading(true);
-          const mint = new PublicKey(lock.mint);
-          const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+          const signerAta = getAssociatedTokenAddressSync(account.config.mint, wallet.publicKey);
           console.log("signer ata : ", signerAta.toString());
           // amount: number,
           // decimals: PublicKey,
@@ -118,16 +116,16 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
           const instruction = await stakeIx(
             inputs.amount,
             userTokenAmount.decimals,
+            wallet.publicKey,
             publicKey,
-            new PublicKey(address),
-            mint,
+            account.config.mint,
             signerAta
           );
 
           let latestBlockhash = await connection.getLatestBlockhash()
 
           const messageV0 = new TransactionMessage({
-            payerKey: publicKey,
+            payerKey: wallet.publicKey,
             recentBlockhash: latestBlockhash.blockhash,
             instructions: [instruction],
           }).compileToV0Message();
@@ -154,14 +152,14 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
           // owner: PublicKey,
           // lock: PublicKey,
           const instruction = await stakeDeactivateIx(
+            wallet.publicKey,
             publicKey,
-            new PublicKey(address),
           );
 
           let latestBlockhash = await connection.getLatestBlockhash()
 
           const messageV0 = new TransactionMessage({
-            payerKey: publicKey,
+            payerKey: wallet.publicKey,
             recentBlockhash: latestBlockhash.blockhash,
             instructions: [instruction],
           }).compileToV0Message();
@@ -189,11 +187,10 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
 
   useEffect(() => {
     const fetchUserBalance = async () => {
-      const mint = new PublicKey(lock.mint);
-      const signerAta = getAssociatedTokenAddressSync(mint, publicKey);
+      const signerAta = getAssociatedTokenAddressSync(account.config.mint, wallet.publicKey);
       return await connection.getTokenAccountBalance(signerAta);
     }
-    if (lock && publicKey) {
+    if (account && wallet.publicKey) {
       fetchUserBalance().then(res => {
         console.log("user token balance", res);
         if (res) {
@@ -206,37 +203,38 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
 
       })
     }
-  }, [publicKey, lock])
+  }, [wallet.publicKey, account])
 
   return (
 
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className={`max-w-[500px] mx-auto w-full p-2 md:p-8 bg-primary text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
+      className={`max-w-[500px] grow mx-auto p-2 md:p-8 bg-primary text-base-content rounded-box flex flex-col items-center justify-center space-y-4`}
     >
       <CardTitle className="px-2 pb-4 self-start w-full">
         <div className="text-lg font-extrabold">Voting Power</div>
         <div className="mt-4 flex w-full items-center space-x-4">
           <IoDiamond className="w-6 h-6" /> <span className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500"> {currentUser ? (
             <>
-              {currentUser && currentUser.deposits.reduce((acc: any, obj: any) => {
+              {currentUser && currentUser.deposits.reduce((acc, obj) => {
                 if (!obj.deactivating) {
                   return acc + obj.amount.toNumber();
                 } else {
                   return acc
                 }
-              }, 0) / (1 * 10 ** lock.decimals)}
+              }, 0) / (1 * 10 ** account.config.decimals)}
             </>
           ) : (
             <>0</>
           )
-          }</span>
+          }
+          </span>
         </div>
         <p className="px-2 text-base-content text-xs text-center mt-4">Lock
-          <Link href={`https://explorer.solana.com/address/${lock.mint.toString()}?cluster=devnet`}
-            className="underline font-extrabold">{' '}{lock.symbol}{' '}</Link>
+          <Link href={`https://explorer.solana.com/address/${account.config.mint.toString()}?cluster=devnet`}
+            className="underline font-extrabold">{' '}{account.config.symbol}{' '}</Link>
           tokens to receive your voting power. <Link href="/docs" className="underline">Learn more</Link></p>
-        {publicKey && currentUser ? (
+        {wallet.publicKey && currentUser ? (
           <div
             className="w-full bg-base-100 p-4 flex flex-col mt-4 rounded-xl"
           >
@@ -272,20 +270,21 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                 </div>
               </div>
               <div className="text-xs flex flex-1 grow w-full justify-end space-x-2">
-                <div className="w-full flex items-center justify-center"><IoWallet className="w-4 h-4" /> <span className="uppercase">{`${isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (`${currentUser.deposits.reduce((acc: any, obj: any) => {
-                  if (!obj.deactivating) {
-                    return acc + obj.amount.toNumber();
-                  } else {
-                    return acc
-                  }
-                }, 0) / (1 * 10 ** lock.decimals)} Staked`)}`} {lock.symbol}</span></div>
+                <div className="w-full flex items-center justify-center"><IoWallet className="w-4 h-4" /> <span className="uppercase">{`${isStake ? (userTokenAmount ? new Intl.NumberFormat().format(userTokenAmount.uiAmount) : 0) :
+                  (`${new Intl.NumberFormat().format(currentUser.deposits.reduce((acc: any, obj: any) => {
+                    if (!obj.deactivating) {
+                      return acc + obj.amount.toNumber();
+                    } else {
+                      return acc
+                    }
+                  }, 0) / (1 * 10 ** account.config.decimals))} Staked`)}`} {account.config.symbol}</span></div>
                 <button
                   className="btn btn-xs"
                   onClick={(e) => {
                     e.preventDefault();
-                    setValue('amount', isStake ? (userTokenAmount ? (userTokenAmount.uiAmount / 2) : 0) : ((currentUser.deposits.reduce((acc: any, obj: any) => {
+                    setValue('amount', isStake ? (userTokenAmount ? (userTokenAmount.uiAmount / 2) : 0) : ((currentUser.deposits.reduce((acc, obj) => {
                       return acc + obj.amount.toNumber();
-                    }, 0) / 2) / (1 * 10 ** lock.decimals)))
+                    }, 0) / 2) / (1 * 10 ** account.config.decimals)))
                   }}
                 >
                   HALF
@@ -294,9 +293,9 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                   className="btn btn-xs"
                   onClick={(e) => {
                     e.preventDefault();
-                    setValue('amount', isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (currentUser.deposits.reduce((acc: any, obj: any) => {
+                    setValue('amount', isStake ? (userTokenAmount ? userTokenAmount.uiAmount : 0) : (currentUser.deposits.reduce((acc, obj) => {
                       return acc + obj.amount.toNumber();
-                    }, 0) / (1 * 10 ** lock.decimals)))
+                    }, 0) / (1 * 10 ** account.config.decimals)))
                   }}
                 >
                   MAX
@@ -306,7 +305,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
             <div className="w-full flex mt-4 justify-center items-center">
               <button className="btn btn-sm text-xs">
                 <Image src={logo} width={30} height={30} alt="mono token" className="rounded-full" />
-                {isUnStake ? 'Staked ' : ''} {lock.symbol}
+                {isUnStake ? 'Staked ' : ''} {account.config.symbol}
               </button>
               <Input
                 type="number"
@@ -317,13 +316,17 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
             </div>
           </div>
         ) : (
-          <div className="w-full bg-[#121212] p-8 flex flex-col mt-4 rounded-xl text-sm text-center">
-            {publicKey ? "Register To Locker" : "Connect Your Wallet"}
-          </div>
+          <>
+            <button className={cn("w-full btn btn-lg mx-auto")} disabled={!wallet.publicKey}
+              onClick={onClickRegister}
+            >
+              {wallet.publicKey ? "Register To Locker" : "Connect Your Wallet"}
+            </button>
+          </>
         )}
       </CardTitle>
       <CardDescription className="w-full p-2">
-        {publicKey && currentUser && (
+        {wallet.publicKey && currentUser && (
           <>
             {currentUser ? (
               <button
@@ -339,11 +342,13 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                 </span>
               </button>
             ) : (
-              <button className={cn("w-full btn btn-lg mx-auto")} disabled={!publicKey}
-                onClick={onClickRegister}
-              >
-                {publicKey ? "Register To Locker" : "Connect Your Wallet"}
-              </button>
+              <>
+                <button className={cn("w-full btn btn-lg mx-auto")} disabled={!wallet.publicKey}
+                  onClick={onClickRegister}
+                >
+                  {wallet.publicKey ? "Register To Locker" : "Connect Your Wallet"}
+                </button>
+              </>
             )}
           </>
         )}
@@ -355,9 +360,8 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock, 
                 <div className="w-full bg-base-100 p-2 rounded-xl" key={index}>
                   <div className="w-full flex items-between">
                     <div className="w-full flex items-between">
-                      {deposit.amount.toNumber() / (1 * 10 ** lock.decimals)}
+                      {deposit.amount.toNumber() / (1 * 10 ** account.config.decimals)}
                     </div>
-                    {/* @ts-ignore */}
                     <div className="w-full">Claimable : {new Date((deposit.deactivationStart.toNumber() + UNSTAKING_TIME) * 1000).toDateString()}</div>
                   </div>
                 </div>

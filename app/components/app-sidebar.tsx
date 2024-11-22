@@ -22,7 +22,7 @@ import {
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
+import { LockSwitcher } from "@/components/lock-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -30,6 +30,8 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { Skeleton } from "./ui/skeleton"
+import { LockContext } from "./LockContextProvider"
 
 // This is sample data.
 const data = {
@@ -63,7 +65,7 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "See All",
+          title: "Ecosystem",
           url: "/lock",
         },
         {
@@ -106,10 +108,11 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { locks } = React.useContext(LockContext);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+        {locks ? <LockSwitcher locks={locks} /> : <Skeleton />}
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
