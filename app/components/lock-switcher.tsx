@@ -36,9 +36,8 @@ type Props = {
 }
 
 export const LockSwitcher: FC<Props> = ({ locks, userRegistrations }) => {
-  const { setCurrentLock, setAddress, userLocks } = React.useContext(LockContext)
+  const { currentLock, setCurrentLock, setAddress, userLocks } = React.useContext(LockContext)
   const { isMobile } = useSidebar()
-  const [activeLock, setActiveLock] = React.useState(locks[0])
 
   return (
     <SidebarMenu>
@@ -56,9 +55,11 @@ export const LockSwitcher: FC<Props> = ({ locks, userRegistrations }) => {
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {activeLock?.account?.config?.name || <Skeleton />}
+                  {currentLock?.account?.config?.name || <Skeleton />}
                 </span>
-                <span className="truncate text-xs">{activeLock?.account?.config?.mint?.toString() || <Skeleton />}</span>
+                <span className="truncate text-xs">
+                  {currentLock?.publicKey.toString() == MONOLITH_ID ? 'Core' : 'Community'}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -72,23 +73,7 @@ export const LockSwitcher: FC<Props> = ({ locks, userRegistrations }) => {
             <DropdownMenuLabel className="text-xs text-muted-foreground">
               Your Locks
             </DropdownMenuLabel>
-            <DropdownMenuItem
-              key={activeLock?.publicKey?.toString()}
-              className="gap-2 p-2"
-            >
-              <Link
-                className="w-full flex justify-start gap-2 items-center"
-                href="/lock"
-                onClick={() => setCurrentLock(activeLock)}
-              >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
-                  {/*<team.logo className="size-4 shrink-0" />*/}
-                </div>
-                {activeLock?.account.config.name || <Skeleton />}
-                <DropdownMenuShortcut>⌘{1}</DropdownMenuShortcut>
-              </Link>
-            </DropdownMenuItem>
-            {userLocks ? userLocks.map((lock, index) => (
+            {userLocks.map((lock, index) => (
               <DropdownMenuItem
                 key={index}
                 onClick={() => setAddress(lock.publicKey.toString())}
@@ -96,7 +81,7 @@ export const LockSwitcher: FC<Props> = ({ locks, userRegistrations }) => {
               >
                 <Link
                   className="w-full flex justify-start gap-2 items-center"
-                  href="/lock"
+                  href={`/lock/${lock.publicKey.toString() ?? ''}`}
                   onClick={() => setCurrentLock(lock)}
                 >
                   <div className="flex size-6 items-center justify-center rounded-sm border">
@@ -106,24 +91,7 @@ export const LockSwitcher: FC<Props> = ({ locks, userRegistrations }) => {
                   <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
                 </Link>
               </DropdownMenuItem>
-            )) : (
-              <DropdownMenuItem
-                onClick={() => setAddress(MONOLITH_ID)}
-                className="gap-2 p-2"
-              >
-                <Link
-                  className="w-full flex justify-start gap-2 items-center"
-                  href="/lock"
-                // onClick={() => setCurrentLock(lock)}
-                >
-                  <div className="flex size-6 items-center justify-center rounded-sm border">
-                    {/*<team.logo className="size-4 shrink-0" />*/}
-                  </div>
-                  MONOLITH
-                  <DropdownMenuShortcut>⌘{1}</DropdownMenuShortcut>
-                </Link>
-              </DropdownMenuItem>
-            )}
+            ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2">
               <Link href={`/lock/create`} className="w-full flex justify-start gap-2 items-center"

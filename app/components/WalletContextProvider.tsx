@@ -11,7 +11,7 @@ import {
 } from '@solana/wallet-adapter-react'
 import { type SolanaSignInInput } from '@solana/wallet-standard-features'
 import { verifySignIn } from '@solana/wallet-standard-util'
-import { FC, ReactNode, useCallback } from 'react'
+import { FC, ReactNode, useCallback, useState } from 'react'
 import dynamic from 'next/dynamic'
 
 export const ReactUIWalletModalProviderDynamic = dynamic(
@@ -26,6 +26,7 @@ export const WalletContextProvider: FC<{
   network: WalletAdapterNetwork
   wallets?: Adapter[]
 }> = ({ children, endpoint, network, wallets = [] }) => {
+
   const onError = useCallback((error: WalletError) => {
     console.error(error)
   }, [])

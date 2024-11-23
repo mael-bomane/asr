@@ -24,7 +24,7 @@ type Props = {
 export const LockDisplay: FC<Props> = ({ address }) => {
 
   const { publicKey } = useWallet();
-  const { currentUser, currentLock, users } = useContext(LockContext);
+  const { currentUser, currentLock, users, setAddress } = useContext(LockContext);
 
   const [season, setSeason] = useState<number>(0);
 
@@ -33,6 +33,12 @@ export const LockDisplay: FC<Props> = ({ address }) => {
   const [proposals, setProposals] = useState<Proposal[]>([]);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (address) {
+      setAddress(address);
+    }
+  }, [address])
 
 
 

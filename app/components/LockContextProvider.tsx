@@ -40,6 +40,8 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   const { publicKey, signMessage } = useWallet();
   const { connection } = useConnection();
 
+  const [solana, setSolana] = useState<boolean>(true);
+
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [locks, setLocks] = useState<LockMap[]>([]);
   const [currentLock, setCurrentLock] = useState<LockMap | null>(null);
@@ -88,13 +90,19 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
     const fetchLocks = async () => {
       return await program.account.lock.all()
     }
+    const getLock = (locks: LockMap[]): LockMap => {
+      return locks.filter(lock => lock.publicKey.toString() == MONOLITH_ID)[0];
+    }
     if (analytics) {
       fetchLocks()
         .then((response) => {
           if (response) {
             console.log('locks : ', response)
             setLocks(response);
-            // setCore()
+            setCore(getLock(response));
+            if (!currentLock) {
+              setCurrentLock(getLock(response));
+            }
           }
         })
         .catch((error) => console.log(error))
@@ -173,18 +181,20 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
       return locks.filter(lock => new Set(users.map(user => user.account.lock)).has(lock.publicKey));
     }
 
-    if (publicKey && locks) {
+    if (publicKey && locks && core) {
       fetchUserRegistrations()
         .then(response => {
           if (response) {
             console.log("current user registrations : ", response);
             setUserRegistrations(response);
-            setUserLocks(getUserLocks(response, locks));
+            setUserLocks(getUserLocks(response, locks).concat(core));
           }
         })
         .catch(err => console.log(err));
+    } else if (!publicKey && locks && core) {
+      setUserLocks([core]);
     }
-  }, [publicKey, locks]);
+  }, [publicKey, locks, core]);
 
   return (
     <LockContext.Provider value={value}>
