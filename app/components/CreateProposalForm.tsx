@@ -19,7 +19,7 @@ import { proposalNewIx } from "@/lib/program/proposalNew";
 import { program } from "@/constants/program";
 
 import { ellipsis } from "@/lib/utils";
-import { FaTrash } from "react-icons/fa";
+import { FaPlus, FaTrash } from "react-icons/fa";
 
 import type { FC } from "react";
 import type { ProposalChoice, Lock } from "@/types";
@@ -132,11 +132,11 @@ export const CreateProposalForm: FC = () => {
 
   return (
     <Form {...form}>
-      <form className="w-full grow mx-auto flex flex-col justify-center items-center p-8 md:p-10 bg-primary text-base-content"
+      <form className="w-full grow mx-auto flex flex-col p-8 md:p-10 bg-primary text-base-content"
         onSubmit={form.handleSubmit(onSubmit)}
       >
         <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">
-          Create Proposal
+          Proposal
         </h1>
         <div className="w-full flex flex-col items-center justify-center space-y-4 grow">
           <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
@@ -193,7 +193,7 @@ export const CreateProposalForm: FC = () => {
                   <FormLabel>Body</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Tell us a little bit about yourself"
+                      placeholder="Ex : Make the Button Blue"
                       className="resize-none"
                       {...field}
                     />
@@ -206,23 +206,22 @@ export const CreateProposalForm: FC = () => {
               )}
             />
             <div className="w-full flex flex-col items-center justify-center space-y-2">
-              <Label htmlFor="choices" className="self-start md:text-xl font-extrabold">choices : {form.formState.errors.title && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
-              <div
-                className="btn btn-xs btn-primary md:max-w-36 md:margin-x-auto text-base-100 self-start"
-                onClick={() => {
-                  console.log("choices : ", choices);
-                  setChoices([...choices, {
-                    id: choices.length,
-                    title: '',
-                    votingPower: new BN(0),
-                  }])
-                }}
-              >
-                Add Choice
-              </div>
+              <FormLabel className="w-full flex items-center space-x-2"><span>Choices</span>
+                <FaPlus
+                  className="cursor-pointer w-3 h-3"
+                  onClick={() => {
+                    console.log("choices : ", choices);
+                    setChoices([...choices, {
+                      id: choices.length,
+                      title: '',
+                      votingPower: new BN(0),
+                    }])
+                  }}
+                />
+              </FormLabel>
             </div>
             <div className="w-full flex flex-col mt-4 space-y-2">
-              {choices.map((choice, index) => (
+              {choices?.map((choice, index) => (
                 <div className="w-full flex justify-center space-x-2" key={index}>
                   <Input
                     type="text"
@@ -256,7 +255,7 @@ export const CreateProposalForm: FC = () => {
 
         </div>
 
-        <Button className="cursor-pointer mt-8" size="lg" type="submit">create</Button>
+        <Button className="cursor-pointer mt-8" size="lg" variant="secondary" type="submit">Start Proposal</Button>
       </form>
     </Form>
   );

@@ -108,11 +108,11 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { locks } = React.useContext(LockContext);
+  const { locks, userRegistrations } = React.useContext(LockContext);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        {locks ? <LockSwitcher locks={locks} /> : <Skeleton />}
+        {locks ? <LockSwitcher locks={locks} userRegistrations={userRegistrations} /> : <Skeleton />}
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

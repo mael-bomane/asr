@@ -24,11 +24,10 @@ type Props = {
 export const LockDisplay: FC<Props> = ({ address }) => {
 
   const { publicKey } = useWallet();
-  const { currentUser, currentLock } = useContext(LockContext);
+  const { currentUser, currentLock, users } = useContext(LockContext);
 
   const [season, setSeason] = useState<number>(0);
 
-  const [users, setUsers] = useState<User[]>([]);
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
 
   const [proposals, setProposals] = useState<Proposal[]>([]);

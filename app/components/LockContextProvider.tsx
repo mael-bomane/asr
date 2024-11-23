@@ -3,54 +3,65 @@
 import React, { createContext, useState, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { program } from '@/constants'
+import { MONOLITH_ID, program } from '@/constants'
 import { PublicKey } from '@solana/web3.js'
 
-import type { Analytics, Lock, LockMap, User } from '@/types'
+import type { Analytics, Lock, LockMap, User, UserMap } from '@/types'
 
 interface LockInterface {
   analytics: Analytics | null
-  locks: LockMap[] | null
+  locks: LockMap[]
   currentLock: LockMap | null
+  core: LockMap | null
   setCurrentLock: React.Dispatch<React.SetStateAction<LockMap | null>>
   address: string | null
   setAddress: React.Dispatch<React.SetStateAction<string | null>>
-  users: User[] | null
+  users: User[]
   currentUser: User | null
+  userRegistrations: UserMap[]
+  userLocks: LockMap[]
 }
 
 export const LockContext = createContext<LockInterface>({
   analytics: null,
-  locks: null,
+  locks: [],
   currentLock: null,
+  core: null,
   setCurrentLock: () => null,
   address: null,
   setAddress: () => null,
-  users: null,
+  users: [],
   currentUser: null,
+  userRegistrations: [],
+  userLocks: [],
 })
 
 export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   const { publicKey, signMessage } = useWallet();
   const { connection } = useConnection();
 
-  const [analytics, setAnalytics] = useState<Analytics | null>(null)
-  const [locks, setLocks] = useState<LockMap[] | null>(null)
-  const [currentLock, setCurrentLock] = useState<LockMap | null>(null)
-  const [address, setAddress] = useState<string | null>(null)
-  const [users, setUsers] = useState<User[] | null>(null)
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [userRegistrations, setUserRegistrations] = useState<User[] | null>(null)
+  const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [locks, setLocks] = useState<LockMap[]>([]);
+  const [currentLock, setCurrentLock] = useState<LockMap | null>(null);
+  const [core, setCore] = useState<LockMap | null>(null);
+  const [address, setAddress] = useState<string | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [userRegistrations, setUserRegistrations] = useState<UserMap[]>([]);
+  const [userLocks, setUserLocks] = useState<LockMap[]>([]);
 
   const value = {
     analytics,
     locks,
+    core,
     currentLock,
     setCurrentLock,
     address,
     setAddress,
     users,
-    currentUser
+    currentUser,
+    userRegistrations,
+    userLocks,
   }
 
   useEffect(() => {
@@ -83,6 +94,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
           if (response) {
             console.log('locks : ', response)
             setLocks(response);
+            // setCore()
           }
         })
         .catch((error) => console.log(error))
@@ -90,11 +102,11 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   }, [publicKey, analytics])
 
   useEffect(() => {
-    const fetchLocks = async () => {
+    const fetchLock = async () => {
       return await program.account.lock.fetch(new PublicKey(address))
     }
     if (address) {
-      fetchLocks()
+      fetchLock()
         .then((response) => {
           if (response) {
             console.log('locks : ', response)
@@ -103,7 +115,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch((error) => console.log(error))
     }
-  }, [publicKey, analytics])
+  }, [publicKey, analytics, address])
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -149,7 +161,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   }, [publicKey, currentLock]);
 
   useEffect(() => {
-    const fetchUserLocks = async () => {
+    const fetchUserRegistrations = async () => {
       return await program.account.user.all([{
         memcmp: {
           offset: 8,
@@ -157,21 +169,22 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
         },
       }]);
     }
-    if (publicKey) {
-      fetchUserLocks()
+    const getUserLocks = (users: UserMap[], locks: LockMap[]): LockMap[] => {
+      return locks.filter(lock => new Set(users.map(user => user.account.lock)).has(lock.publicKey));
+    }
+
+    if (publicKey && locks) {
+      fetchUserRegistrations()
         .then(response => {
           if (response) {
-            const registrationsMap = response.map(({ account, publicKey }) => {
-              const result = account
-              return result
-            });
-            console.log("current user registrations : ", registrationsMap);
-            setUserRegistrations(registrationsMap)
+            console.log("current user registrations : ", response);
+            setUserRegistrations(response);
+            setUserLocks(getUserLocks(response, locks));
           }
         })
         .catch(err => console.log(err));
     }
-  }, [publicKey]);
+  }, [publicKey, locks]);
 
   return (
     <LockContext.Provider value={value}>
