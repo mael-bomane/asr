@@ -9,9 +9,9 @@ import { usePathname } from 'next/navigation'
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 import config from "@/config";
 import logo from "@/app/icon.png";
-import { MonolithContext } from "./MonolithContextProvider";
 import { IoLogoDiscord, IoLogoGithub } from "react-icons/io5";
 import { FaXTwitter } from "react-icons/fa6";
+import { LockContext } from "./LockContextProvider";
 
 const links: {
   href: string;
@@ -37,7 +37,7 @@ const cta: JSX.Element = <WalletMultiButton />
 // The header is responsive, and on mobile, the links are hidden behind a burger button.
 const Header = () => {
   const searchParams = useSearchParams();
-  const { program, analytics, monoliths } = useContext(MonolithContext);
+  const { analytics, locks } = useContext(LockContext);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const pathname = usePathname()
   // setIsOpen(false) when the route changes (i.e: when the user clicks on a link on mobile)
