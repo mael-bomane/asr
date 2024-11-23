@@ -38,7 +38,7 @@ export const asrDepositIx = async (
     program.programId
   )[0];
 
-  return await program.methods.asrDeposit(amount, "MONO")
+  return await program.methods.asrDeposit(amount, symbol)
     .accountsStrict({
       creator,
       signerAta,
