@@ -17,28 +17,23 @@ export const BadgeProposalStatus: FC<Props> = ({ proposal, lock, isReady }) => {
       "badge-warning": !proposal.executed && isReady &&
         (proposal.choices.reduce((acc: any, obj: any) => {
           return acc + obj.votingPower.toNumber();
-        }, 0) / (1 * 10 ** lock.decimals)) > (
+        }, 0) / (1 * 10 ** lock.config.decimals)) > (
           //@ts-ignore
           lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
         ),
-      //@ts-ignore
       "badge-error": isReady &&
-        (proposal.choices.reduce((acc: any, obj: any) => {
+        (proposal.choices.reduce((acc, obj) => {
           return acc + obj.votingPower.toNumber();
-        }, 0) / (1 * 10 ** lock.decimals)) < (
-          //@ts-ignore
-          lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
+        }, 0) / (1 * 10 ** lock.config.decimals)) < (
+          lock.config.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.config.decimals)) / 100
         ),
-      //@ts-ignore
     })}>
-      {/*@ts-ignore*/}
       {isReady && !proposal.executed ? (
         <>
           {(proposal.choices.reduce((acc: any, obj: any) => {
             return acc + obj.votingPower.toNumber();
-          }, 0) / (1 * 10 ** lock.decimals)) > (
-              //@ts-ignore
-              lock.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.decimals)) / 100
+          }, 0) / (1 * 10 ** lock.config.decimals)) > (
+              lock.config.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.config.decimals)) / 100
             ) ? (
             <>Success</>
           ) : (
