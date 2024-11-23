@@ -32,7 +32,6 @@ export const unstakeIx = async (
     program.programId
   )[0];
 
-  //@ts-ignore
   return await program.methods.stakeClaim()
     .accountsStrict({
       owner,

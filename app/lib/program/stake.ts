@@ -4,8 +4,6 @@ import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token
 
 import { program } from "@/constants/program";
 
-
-
 export const stakeIx = async (
   amount: number,
   decimals: number,
@@ -37,7 +35,6 @@ export const stakeIx = async (
     program.programId
   )[0];
 
-  //@ts-ignore
   return await program.methods.stakeNew(new BN(amount * 1 * 10 ** decimals))
     .accountsStrict({
       owner,

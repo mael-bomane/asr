@@ -27,7 +27,6 @@ export const proposalVoteIx = async (
     program.programId
   )[0];
 
-  //@ts-ignore
   return await program.methods.voteNew(index, choice)
     .accountsStrict({
       owner,

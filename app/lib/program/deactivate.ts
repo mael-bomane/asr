@@ -18,7 +18,6 @@ export const stakeDeactivateIx = async (
     program.programId
   )[0];
 
-  //@ts-ignore
   return await program.methods.stakeDeactivate()
     .accountsStrict({
       owner,

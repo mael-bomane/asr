@@ -9,6 +9,7 @@ export const proposalNewIx = async (
   owner: PublicKey,
   lock: PublicKey,
   title: string,
+  content: string,
   choices: ProposalChoice[],
   id: BN
 ) => {
@@ -34,9 +35,7 @@ export const proposalNewIx = async (
     program.programId
   )[0];
 
-
-  // @ts-ignore
-  return await program.methods.proposalNew(title, choices)
+  return await program.methods.proposalNew(title, content, choices)
     .accountsStrict({
       owner,
       proposal,

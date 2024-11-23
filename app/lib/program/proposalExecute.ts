@@ -16,7 +16,6 @@ export const proposalExecuteIx = async (
     program.programId
   )[0];
 
-  // @ts-ignore
   return await program.methods.proposalExecute()
     .accountsStrict({
       owner,
