@@ -87,6 +87,7 @@ export const CreateProposalForm: FC = () => {
           wallet.publicKey,
           lockPubkey,
           data.title,
+          data.content,
           choices,
           new BN(currentLock.account.polls.toNumber() + 1),
         );
