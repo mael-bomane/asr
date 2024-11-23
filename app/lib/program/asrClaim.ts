@@ -38,12 +38,17 @@ export const asrClaimIx = async (
     [Buffer.from("user"), lock.toBytes(), owner.toBytes()],
     program.programId
   )[0];
+  const userVault = PublicKey.findProgramAddressSync(
+    // seeds = [b"vault", lock.key().as_ref(), owner.key().as_ref()]
+    [Buffer.from("vault"), lock.toBytes(), owner.toBytes()],
+    program.programId
+  )[0];
 
-  // @ts-ignore
   return await program.methods.asrClaim()
     .accountsStrict({
       owner,
       user,
+      userVault,
       auth,
       lock,
       signerAta,
