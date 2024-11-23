@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
+import React from "react";
 import { useContext, useState } from "react";
 import type { LockMap } from "@/types";
 import { LockContext } from "../LockContextProvider";
@@ -50,7 +51,7 @@ export const HoverEffect = ({
           </AnimatePresence>
           <Card>
             <CardTitle>{lock.account.config.name}</CardTitle>
-            <CardDescription>{}</CardDescription>
+            <CardDescription><></></CardDescription>
           </Card>
         </Link>
       ))}
