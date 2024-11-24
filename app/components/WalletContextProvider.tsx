@@ -9,8 +9,8 @@ import {
   ConnectionProvider,
   WalletProvider,
 } from '@solana/wallet-adapter-react'
-import { type SolanaSignInInput } from '@solana/wallet-standard-features'
-import { verifySignIn } from '@solana/wallet-standard-util'
+// import { type SolanaSignInInput } from '@solana/wallet-standard-features'
+// import { verifySignIn } from '@solana/wallet-standard-util'
 import { FC, ReactNode, useCallback, useState } from 'react'
 import dynamic from 'next/dynamic'
 

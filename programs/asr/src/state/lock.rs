@@ -38,6 +38,7 @@ pub struct Config {
     pub permissionless: bool,
     pub decimals: u8,
     pub config: u8, // 0 = asr, 1 = ve
+    pub season_duration: i64,
     pub voting_period: i64,
     pub lock_duration: i64, // only for ve
     pub threshold: u8,      // 51% to 100%

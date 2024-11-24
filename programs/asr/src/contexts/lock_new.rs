@@ -8,7 +8,7 @@ use crate::{Config, Deposit, Lock, Season, User};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(config: u8, permissionless: bool, voting_period: i64, lock_duration: i64, threshold: u8, quorum: u8, amount: u64, name: String, symbol: String)]
+#[instruction(config: u8, permissionless: bool, season_duration: i64, voting_period: i64, lock_duration: i64, threshold: u8, quorum: u8, amount: u64, name: String, symbol: String)]
 pub struct LockNew<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
@@ -69,6 +69,7 @@ impl<'info> LockNew<'info> {
         bumps: &LockNewBumps,
         config: u8,
         permissionless: bool,
+        season_duration: i64,
         voting_period: i64,
         lock_duration: i64,
         threshold: u8,
@@ -121,6 +122,7 @@ impl<'info> LockNew<'info> {
             permissionless,
             mint: self.mint.key(),
             decimals: self.mint.decimals,
+            season_duration,
             voting_period,
             lock_duration,
             threshold,

@@ -49,9 +49,15 @@ impl<'info> ProposalNew<'info> {
         choices: Vec<Choice>,
     ) -> Result<()> {
         if title.len() > MAX_TITLE_LENGTH {
-            return err!(ErrorCode::PollTitleTooLong);
+            return err!(ErrorCode::ProposalTitleTooLong);
         } else if title.len() == 0 {
-            return err!(ErrorCode::PollTitleEmpty);
+            return err!(ErrorCode::ProposalTitleEmpty);
+        }
+
+        if content.len() > MAX_CONTENT_LENGTH {
+            return err!(ErrorCode::ProposalContentTooLong);
+        } else if title.len() == 0 {
+            return err!(ErrorCode::ProposalContentEmpty);
         }
 
         let user = &mut self.user;

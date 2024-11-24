@@ -37,10 +37,9 @@ import { useContext } from "react";
 import { LockContext } from "./LockContextProvider";
 
 export function NavUser() {
-  const { solana, setSolana } = useContext(LockContext);
+  const { solana, setSolana, endpoint } = useContext(LockContext);
   const { isMobile } = useSidebar()
   const wallet = useWallet()
-  const { connection } = useConnection()
   const modal = useWalletModal()
 
   const BlockiesAvatar = () => {
@@ -50,6 +49,7 @@ export function NavUser() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
+        <span className="truncate font-semibold text-xs">{endpoint}</span>
         <DropdownMenu>
           {wallet.publicKey ? (
             <DropdownMenuTrigger asChild>
@@ -61,7 +61,6 @@ export function NavUser() {
                   <BlockiesAvatar />
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{connection.rpcEndpoint}</span>
                   <span className="truncate font-semibold">{solana ? 'Solana' : 'SOON'} Network</span>
                   <span className="truncate text-xs">{ellipsis(wallet.publicKey?.toString()) ?? 'Connect Wallet'}</span>
                 </div>
@@ -109,7 +108,7 @@ export function NavUser() {
             <DropdownMenuGroup>
               <DropdownMenuItem onClick={() => {
                 setSolana(!solana)
-                wallet.disconnect()
+                // wallet.disconnect()
               }}>
                 <Plug />
                 Switch Network

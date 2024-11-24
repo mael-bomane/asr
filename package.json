@@ -1,14 +1,12 @@
 {
-  "name": "@monolith-xyz/monorepo",
+  "name": "@asr/monorepo",
   "private": true,
   "workspaces": [
     "app",
-    "sdk"
   ],
   "license": "ISC",
   "scripts": {
-    "dev": "yarn workspace @monolith-xyz/app dev",
-    "sdk": "yarn workspace @monolith-xyz/sdk solita",
+    "dev": "yarn workspace @asr/app dev",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
   },

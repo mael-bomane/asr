@@ -8,10 +8,10 @@ mod state;
 use contexts::*;
 use state::*;
 
-declare_id!("ASRB7cGR7e3RQEWPg3PqgCBTFgCmZvjmXsgfzsxo4zTr");
+declare_id!("ASRfYyksXtyLrLsXtEwCAjMXb7jUDcd7YPRSE1a1ECH2");
 
 #[program]
-pub mod lock {
+pub mod asr {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
@@ -22,6 +22,7 @@ pub mod lock {
         ctx: Context<LockNew>,
         config: u8,
         permissionless: bool,
+        season_duration: i64,
         voting_period: i64,
         lock_duration: i64,
         threshold: u8,
@@ -34,6 +35,7 @@ pub mod lock {
             &ctx.bumps,
             config,
             permissionless,
+            season_duration,
             voting_period,
             lock_duration,
             threshold,

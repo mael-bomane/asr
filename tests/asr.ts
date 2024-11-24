@@ -15,7 +15,7 @@ import {
   mintTo,
   TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
-import { Lock } from "../target/types/lock";
+import { Asr } from "../target/types/asr";
 import { BN } from "bn.js";
 import * as assert from "assert";
 import { SYSTEM_PROGRAM_ID } from "@coral-xyz/anchor/dist/cjs/native/system";
@@ -27,7 +27,7 @@ describe("lock", () => {
   anchor.setProvider(anchor.AnchorProvider.env());
   const provider = anchor.AnchorProvider.env()
   anchor.setProvider(provider)
-  const program = anchor.workspace.Lock as Program<Lock>;
+  const program = anchor.workspace.Asr as Program<Asr>;
 
   //@ts-ignore
   const connection: Connection = anchor.getProvider().connection;

@@ -10,14 +10,14 @@ pub enum ErrorCode {
     SymbolEmpty,
     #[msg("Symbol Too Long, 10 Characters Max.")]
     SymbolTooLong,
-    #[msg("Poll Title Empty.")]
-    PollTitleEmpty,
-    #[msg("Poll Title Too Long, 50 Characters Max.")]
-    PollTitleTooLong,
-    #[msg("Poll Content Empty.")]
-    PollContentEmpty,
-    #[msg("Poll Content Too Long, 280 Characters Max.")]
-    PollContentTooLong,
+    #[msg("Proposal Title Empty.")]
+    ProposalTitleEmpty,
+    #[msg("Proposal Title Too Long, 50 Characters Max.")]
+    ProposalTitleTooLong,
+    #[msg("Proposal Content Empty.")]
+    ProposalContentEmpty,
+    #[msg("Proposal Content Too Long, 280 Characters Max.")]
+    ProposalContentTooLong,
     #[msg("Voting Period Out Of Bounds : Min 1 Day, Max 1 Week")]
     VotingPeriodOutOfBounds,
     #[msg("Lock Duration Out Of Bounds : Min 1 Month, Max 5 Years")]

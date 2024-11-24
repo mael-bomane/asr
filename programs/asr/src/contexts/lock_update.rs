@@ -1,5 +1,4 @@
 use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::metadata::MetadataAccount;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
 use crate::{constants::*, errors::ErrorCode, state::Analytics};
@@ -11,6 +10,7 @@ use anchor_lang::prelude::*;
 #[instruction(
     config: u8,
     permissionless: Option<bool>,
+    season_duration: Option<i64>,
     voting_period: Option<i64>,
     lock_duration: Option<i64>,
     threshold: Option<u8>, 
@@ -84,6 +84,7 @@ impl<'info> LockUpdate<'info> {
         bumps: &LockUpdateBumps,
         config: u8,
         permissionless: Option<bool>,
+        season_duration: Option<i64>,
         voting_period: Option<i64>,
         lock_duration: Option<i64>,
         threshold: Option<u8>, 
@@ -108,7 +109,16 @@ impl<'info> LockUpdate<'info> {
             },
             None => ()
         }
-
+        match season_duration {
+            Some(value) => {
+                // require!(
+                //     value >= ONE_DAY_IN_SECONDS && value <= ONE_WEEK_IN_SECONDS,
+                //     ErrorCode::VotingPeriodOutOfBounds
+                // );
+                new.season_duration = value;
+            },
+            None => ()
+        }
         match voting_period {
             Some(value) => {
                 require!(

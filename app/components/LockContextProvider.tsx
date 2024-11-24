@@ -4,7 +4,7 @@ import React, { createContext, useState, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { MONOLITH_ID, program } from '@/constants'
-import { PublicKey } from '@solana/web3.js'
+import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js'
 import { IDL } from "@/constants/idl";
 import idl from "@/constants/idl/lock.json";
 
@@ -13,6 +13,7 @@ import { Program } from '@coral-xyz/anchor'
 
 interface LockInterface {
   program: Program<IDL> | null
+  endpoint: string
   analytics: Analytics | null
   locks: LockMap[]
   currentLock: LockMap | null
@@ -30,6 +31,7 @@ interface LockInterface {
 
 export const LockContext = createContext<LockInterface>({
   program: null,
+  endpoint: clusterApiUrl('devnet'),
   analytics: null,
   locks: [],
   currentLock: null,
@@ -48,9 +50,10 @@ export const LockContext = createContext<LockInterface>({
 export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   const { publicKey, signMessage } = useWallet();
   const { connection } = useConnection();
-  const program = new Program(idl as IDL, { connection });
 
   const [solana, setSolana] = useState<boolean>(true);
+  const [program, setProgram] = useState<Program<IDL> | null>(null);
+  const [endpoint, setEndpoint] = useState<string>("");
 
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [locks, setLocks] = useState<LockMap[]>([]);
@@ -64,6 +67,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
 
   const value = {
     program,
+    endpoint,
     analytics,
     locks,
     core,
@@ -80,7 +84,25 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   }
 
   useEffect(() => {
-    if (!analytics) {
+    if (solana) {
+      setEndpoint(clusterApiUrl('devnet'));
+    } else if (!solana) {
+      setEndpoint("https://rpc.testnet.soo.network/rpc");
+    }
+  }, [solana]);
+
+  useEffect(() => {
+    if (endpoint) {
+      console.log("endpoint : ", endpoint);
+      setProgram(new Program(idl as IDL, {
+        connection: new Connection(endpoint)
+      }))
+    }
+  }, [endpoint]);
+
+
+  useEffect(() => {
+    if (!analytics && program) {
       const pda = PublicKey.findProgramAddressSync(
         [Buffer.from('analytics')],
         program.programId
@@ -97,7 +119,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
           console.log(error)
         })
     }
-  }, [])
+  }, [program])
 
   useEffect(() => {
     const fetchLocks = async () => {
@@ -106,7 +128,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
     const getLock = (locks: LockMap[]): LockMap => {
       return locks.filter(lock => lock.publicKey.toString() == MONOLITH_ID)[0];
     }
-    if (analytics) {
+    if (analytics && program) {
       fetchLocks()
         .then((response) => {
           if (response) {
@@ -120,13 +142,13 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch((error) => console.log(error))
     }
-  }, [publicKey, analytics])
+  }, [publicKey, analytics, program])
 
   useEffect(() => {
     const fetchLock = async () => {
       return await program.account.lock.fetch(new PublicKey(address))
     }
-    if (address) {
+    if (address && program) {
       fetchLock()
         .then((response) => {
           if (response) {
@@ -136,13 +158,13 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch((error) => console.log(error))
     }
-  }, [publicKey, analytics, address])
+  }, [publicKey, analytics, address, program])
 
   useEffect(() => {
     const fetchUsers = async () => {
       return await program.account.user.all();
     }
-    if (currentLock) {
+    if (currentLock && program) {
       fetchUsers()
         .then(response => {
           if (response) {
@@ -157,7 +179,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch(err => console.log(err));
     }
-  }, [currentLock]);
+  }, [currentLock, program]);
 
 
   useEffect(() => {
@@ -169,7 +191,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
       )[0]
       return await program.account.user.fetch(user);
     }
-    if (publicKey && currentLock) {
+    if (publicKey && currentLock && program) {
       fetchUser()
         .then(response => {
           if (response) {
@@ -179,7 +201,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch(err => console.log(err));
     }
-  }, [publicKey, currentLock]);
+  }, [publicKey, currentLock, program]);
 
   useEffect(() => {
     const fetchUserRegistrations = async () => {
@@ -194,7 +216,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
       return locks.filter(lock => new Set(users.map(user => user.account.lock)).has(lock.publicKey));
     }
 
-    if (publicKey && locks && core) {
+    if (publicKey && locks && core && program) {
       fetchUserRegistrations()
         .then(response => {
           if (response) {
@@ -207,7 +229,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
     } else if (!publicKey && locks && core) {
       setUserLocks([core]);
     }
-  }, [publicKey, locks, core]);
+  }, [publicKey, locks, core, program]);
 
   return (
     <LockContext.Provider value={value}>
