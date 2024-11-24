@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useContext, useEffect, useState } from "react"
 
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
@@ -27,6 +27,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { unstakeIx } from "@/lib/program/unstake";
 import { stakeDeactivateIx } from "@/lib/program/deactivate";
 import { UNSTAKING_TIME } from "@/constants";
+import { LockContext } from "./LockContextProvider";
 
 type Props = {
   currentUser: User | null
@@ -39,6 +40,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: 
   const wallet = useWallet();
   const { sendTransaction } = useWallet();
   const { connection } = useConnection();
+  const { program } = useContext(LockContext);
   const [loading, setLoading] = useState<boolean>(false);
   const [isStake, setIsStake] = useState<boolean>(true);
   const [isUnStake, setIsUnStake] = useState<boolean>(false);
@@ -58,7 +60,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: 
         const signerAta = getAssociatedTokenAddressSync(account.config.mint, wallet.publicKey);
         console.log("signer ata : ", signerAta.toString());
 
-        const instruction = await registerIx(wallet.publicKey, publicKey);
+        const instruction = await registerIx(program, wallet.publicKey, publicKey);
 
         let latestBlockhash = await connection.getLatestBlockhash()
 
@@ -114,6 +116,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: 
           // mint: PublicKey,
           // signerAta: PublicKey,
           const instruction = await stakeIx(
+            program,
             inputs.amount,
             userTokenAmount.decimals,
             wallet.publicKey,
@@ -152,6 +155,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: 
           // owner: PublicKey,
           // lock: PublicKey,
           const instruction = await stakeDeactivateIx(
+            program,
             wallet.publicKey,
             publicKey,
           );

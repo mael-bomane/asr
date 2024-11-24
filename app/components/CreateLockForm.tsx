@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, getMint, TOKEN_PROGRAM_ID } from "@solana/spl-token";
@@ -18,8 +18,10 @@ import { useRouter } from "next/navigation";
 import { lockNewIx } from "@/lib/program/lockNew";
 import { program } from "@/constants";
 import { WalletConnectButton } from "@solana/wallet-adapter-react-ui";
+import { LockContext } from "./LockContextProvider";
 
 export const CreateLockForm: FC = () => {
+  const { program } = useContext(LockContext);
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
   const router = useRouter();
@@ -79,6 +81,7 @@ export const CreateLockForm: FC = () => {
         // name: string
 
         const instruction = await lockNewIx(
+          program,
           publicKey,
           mint,
           signerAta,

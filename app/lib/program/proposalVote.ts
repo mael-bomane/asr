@@ -1,10 +1,10 @@
 
-import { BN } from "@coral-xyz/anchor";
+import { IDL } from "@/constants";
+import { BN, Program } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 
-import { program } from "@/constants/program";
-
 export const proposalVoteIx = async (
+  program: Program<IDL>,
   owner: PublicKey,
   lock: PublicKey,
   proposal: PublicKey,

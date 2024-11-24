@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
 import { program } from "@/constants";
@@ -36,6 +36,7 @@ import { Progress } from "./ui/progress";
 import { FaCheck } from "react-icons/fa6";
 import { proposalExecuteIx } from "@/lib/program/proposalExecute";
 import { BadgeProposalStatus } from "./BadgeProposalStatus";
+import { LockContext } from "./LockContextProvider";
 
 type Props = {
   address: string
@@ -45,6 +46,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
+  const { program } = useContext(LockContext);
 
   const formSchema = z.object({
     choice: z.string().min(0).max(255),
@@ -69,7 +71,6 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   useEffect(() => {
     const fetchProposal = async () => {
-      //@ts-ignore
       return await program.account.proposal.fetch(new PublicKey(address));
     }
     if (address) {
@@ -86,7 +87,6 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   useEffect(() => {
     if (proposal) {
-      // @ts-ignore
       if ((proposal.endsAt.toNumber() * 1000) < new Date().getTime()) {
         setIsReady(true)
       }
@@ -119,7 +119,6 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
         [Buffer.from("user"), proposal.lock.toBytes(), publicKey.toBytes()],
         program.programId
       )[0];
-      //@ts-ignore
       return await program.account.user.fetch(user);
     }
     if (lock) {
@@ -151,6 +150,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
       // index: BN,
       // choice: number,
       const instruction = await proposalVoteIx(
+        program,
         publicKey,
         proposal.lock,
         new PublicKey(address),
@@ -183,7 +183,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
     let signature: TransactionSignature = '';
     if (publicKey) {
       try {
-        const instruction = await proposalExecuteIx(publicKey, proposal.lock, new PublicKey(address));
+        const instruction = await proposalExecuteIx(program, publicKey, proposal.lock, new PublicKey(address));
         let latestBlockhash = await connection.getLatestBlockhash()
 
         const messageV0 = new TransactionMessage({

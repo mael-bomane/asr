@@ -1,8 +1,9 @@
+import { IDL } from "@/constants";
+import { Program } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 
-import { program } from "@/constants/program";
-
 export const proposalExecuteIx = async (
+  program: Program<IDL>,
   owner: PublicKey,
   lock: PublicKey,
   proposal: PublicKey,

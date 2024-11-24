@@ -1,8 +1,9 @@
 import { PublicKey, SystemProgram } from "@solana/web3.js";
-
-import { program } from "@/constants/program";
+import { Program } from "@coral-xyz/anchor";
+import { IDL } from "@/constants";
 
 export const registerIx = async (
+  program: Program<IDL>,
   owner: PublicKey,
   lock: PublicKey,
 ) => {

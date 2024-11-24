@@ -16,7 +16,6 @@ import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 
 import { proposalNewIx } from "@/lib/program/proposalNew";
-import { program } from "@/constants/program";
 
 import { ellipsis } from "@/lib/utils";
 import { FaPlus, FaTrash } from "react-icons/fa";
@@ -32,7 +31,7 @@ export const CreateProposalForm: FC = () => {
   const wallet = useWallet();
   const { sendTransaction } = useWallet();
   const { connection } = useConnection();
-  const { locks, currentLock, setCurrentLock, currentUser } = useContext(LockContext);
+  const { program, locks, currentLock, setCurrentLock, currentUser } = useContext(LockContext);
   const router = useRouter();
   const searchParams = useSearchParams()
   const address = searchParams.get('address');
@@ -84,6 +83,7 @@ export const CreateProposalForm: FC = () => {
         // id: BN
 
         const instruction = await proposalNewIx(
+          program,
           wallet.publicKey,
           lockPubkey,
           data.title,

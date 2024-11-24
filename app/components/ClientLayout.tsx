@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useContext, useMemo } from "react";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "@/components/ui/sonner";
 import { Tooltip } from "react-tooltip";
@@ -14,9 +14,10 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 
 import { WalletContextProvider } from './WalletContextProvider'
-import { LockContextProvider } from "./LockContextProvider";
+import { LockContext, LockContextProvider } from "./LockContextProvider";
 
 export const ClientLayout = ({ children }: { children: ReactNode }) => {
+  const { solana } = useContext(LockContext);
   const cluster =
     (process.env.NEXT_PUBLIC_SOLANA_NETWORK as 'devnet' | 'mainnet-beta') ||
     'devnet'
@@ -27,9 +28,9 @@ export const ClientLayout = ({ children }: { children: ReactNode }) => {
         : WalletAdapterNetwork.Devnet,
     [cluster]
   )
-  const endpoint =
-    process.env.NEXT_PUBLIC_SOLANA_ENDPOINT || clusterApiUrl(network)
-  const wallets = useMemo(() => [new PhantomWalletAdapter()], [network])
+  const endpoint = solana ? clusterApiUrl(network) : "https://rpc.testnet.soo.network/rpc";
+
+  const wallets = useMemo(() => [solana ? new PhantomWalletAdapter() : null], [network])
 
   return (
     <>

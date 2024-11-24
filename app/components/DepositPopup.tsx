@@ -1,5 +1,5 @@
 import * as React from "react"
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { SubmitHandler, useForm } from "react-hook-form"
 import { toast } from "react-hot-toast";
 import { PublicKey, TransactionSignature, TransactionMessage, VersionedTransaction } from "@solana/web3.js"
@@ -14,6 +14,7 @@ import { asrDepositIx } from "@/lib/program/asrDeposit";
 
 import type { FC } from "react";
 import { BN } from "bn.js";
+import { LockContext } from "./LockContextProvider";
 
 type Props = {
   isOpen: boolean
@@ -23,6 +24,7 @@ type Props = {
 export const DepositPopup: FC<Props> = ({ isOpen, setIsOpen }) => {
   const { publicKey, sendTransaction } = useWallet();
   const { connection } = useConnection();
+  const { program } = useContext(LockContext);
 
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -61,6 +63,7 @@ export const DepositPopup: FC<Props> = ({ isOpen, setIsOpen }) => {
         // signerAta: PublicKey,
         // amount: BN,
         const instruction = await asrDepositIx(
+          program,
           publicKey,
           mint,
           inputs.symbol,

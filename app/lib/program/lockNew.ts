@@ -1,10 +1,10 @@
-import { BN } from "@coral-xyz/anchor";
+import { BN, Program } from "@coral-xyz/anchor";
 import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
-
-import { program } from "@/constants/program";
+import { IDL } from "@/constants";
 
 export const lockNewIx = async (
+  program: Program<IDL>,
   signer: PublicKey,
   mint: PublicKey,
   signerAta: PublicKey,

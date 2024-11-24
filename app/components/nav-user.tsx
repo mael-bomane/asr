@@ -1,12 +1,11 @@
 "use client"
 
 import {
-  BadgeCheck,
   Bell,
   ChevronsUpDown,
+  Plug,
   CreditCard,
   LogOut,
-  Sparkles,
 } from "lucide-react"
 
 import {
@@ -31,21 +30,17 @@ import {
 } from "@/components/ui/sidebar";
 
 import Blockies from 'react-blockies';
-import { useWallet } from "@solana/wallet-adapter-react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { ellipsis } from "@/lib/utils";
+import { useContext } from "react";
+import { LockContext } from "./LockContextProvider";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
+export function NavUser() {
+  const { solana, setSolana } = useContext(LockContext);
   const { isMobile } = useSidebar()
   const wallet = useWallet()
+  const { connection } = useConnection()
   const modal = useWalletModal()
 
   const BlockiesAvatar = () => {
@@ -62,11 +57,12 @@ export function NavUser({
                 size="lg"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <Avatar className="h-8 w-8 rounded-lg">
+                <Avatar className="h-8 w-8 rounded-full">
                   <BlockiesAvatar />
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">gm, anon ☕</span>
+                  <span className="truncate font-semibold">{connection.rpcEndpoint}</span>
+                  <span className="truncate font-semibold">{solana ? 'Solana' : 'SOON'} Network</span>
                   <span className="truncate text-xs">{ellipsis(wallet.publicKey?.toString()) ?? 'Connect Wallet'}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
@@ -80,11 +76,11 @@ export function NavUser({
                 modal.setVisible(true)
               }}
             >
-              <Avatar className="h-8 w-8 rounded-lg">
+              <Avatar className="h-8 w-8 rounded-full">
                 <BlockiesAvatar />
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">gm, anon ☕</span>
+                <span className="truncate font-semibold">{solana ? 'Solana' : 'SOON'} Network</span>
                 <span className="truncate text-xs">{ellipsis(wallet.publicKey?.toString()) ?? 'Connect Wallet'}</span>
               </div>
             </SidebarMenuButton>
@@ -97,14 +93,13 @@ export function NavUser({
             sideOffset={4}
           >
             {wallet.publicKey && (
-
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="h-8 w-8 rounded-lg">
+                  <Avatar className="h-8 w-8 rounded-full">
                     <BlockiesAvatar />
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">gm, anon ☕</span>
+                    <span className="truncate font-semibold">{solana ? 'Solana' : 'SOON'} Network</span>
                     <span className="truncate text-xs">{ellipsis(wallet.publicKey?.toString()) ?? 'Connect Wallet'}</span>
                   </div>
                 </div>
@@ -112,8 +107,11 @@ export function NavUser({
             )}
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
+              <DropdownMenuItem onClick={() => {
+                setSolana(!solana)
+                wallet.disconnect()
+              }}>
+                <Plug />
                 Switch Network
               </DropdownMenuItem>
             </DropdownMenuGroup>

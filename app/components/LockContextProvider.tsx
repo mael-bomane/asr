@@ -5,10 +5,14 @@ import type { ReactNode } from 'react'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { MONOLITH_ID, program } from '@/constants'
 import { PublicKey } from '@solana/web3.js'
+import { IDL } from "@/constants/idl";
+import idl from "@/constants/idl/lock.json";
 
 import type { Analytics, Lock, LockMap, User, UserMap } from '@/types'
+import { Program } from '@coral-xyz/anchor'
 
 interface LockInterface {
+  program: Program<IDL> | null
   analytics: Analytics | null
   locks: LockMap[]
   currentLock: LockMap | null
@@ -20,9 +24,12 @@ interface LockInterface {
   currentUser: User | null
   userRegistrations: UserMap[]
   userLocks: LockMap[]
+  solana: boolean
+  setSolana: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 export const LockContext = createContext<LockInterface>({
+  program: null,
   analytics: null,
   locks: [],
   currentLock: null,
@@ -34,11 +41,14 @@ export const LockContext = createContext<LockInterface>({
   currentUser: null,
   userRegistrations: [],
   userLocks: [],
+  solana: true,
+  setSolana: () => null,
 })
 
 export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   const { publicKey, signMessage } = useWallet();
   const { connection } = useConnection();
+  const program = new Program(idl as IDL, { connection });
 
   const [solana, setSolana] = useState<boolean>(true);
 
@@ -53,6 +63,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   const [userLocks, setUserLocks] = useState<LockMap[]>([]);
 
   const value = {
+    program,
     analytics,
     locks,
     core,
@@ -64,6 +75,8 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
     currentUser,
     userRegistrations,
     userLocks,
+    solana,
+    setSolana
   }
 
   useEffect(() => {
