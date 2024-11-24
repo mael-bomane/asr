@@ -82,12 +82,14 @@ impl<'info> ASRClaim<'info> {
         
         let current_season = lock.seasons[lock.seasons.len() - 1].clone();
 
+        let season_duration = lock.config.season_duration;
+
         if now > current_season.season_end {
             lock.seasons.push(Season {
                 season: current_season.season + 1,
                 points: 0,
                 season_start: now,
-                season_end: now + THREE_MONTH_IN_SECONDS,
+                season_end: now + season_duration,
                 asr: vec![],
             });
         }

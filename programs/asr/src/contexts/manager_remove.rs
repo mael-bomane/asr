@@ -99,7 +99,7 @@ impl<'info> ManagerRemove<'info> {
                 title: "Abstain".to_string(),
             },
         ];
-        proposal.proposal_type = 3;
+        proposal.proposal_type = 4;
         proposal.manager = Some(user.owner);
         proposal.bump = bumps.proposal;
 

@@ -138,7 +138,7 @@ impl<'info> LockNew<'info> {
             season: 0,
             points: 0,
             season_start,
-            season_end: Clock::get()?.unix_timestamp + THREE_MONTH_IN_SECONDS,
+            season_end: Clock::get()?.unix_timestamp + season_duration,
             asr: Vec::new(),
         });
         lock.total_deposits = 0;

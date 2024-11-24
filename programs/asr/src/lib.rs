@@ -50,6 +50,7 @@ pub mod asr {
         ctx: Context<LockUpdate>,
         config: u8,
         permissionless: Option<bool>,
+        season_duration: Option<i64>,
         voting_period: Option<i64>,
         lock_duration: Option<i64>,
         threshold: Option<u8>,
@@ -62,6 +63,7 @@ pub mod asr {
             &ctx.bumps,
             config,
             permissionless,
+            season_duration,
             voting_period,
             lock_duration,
             threshold,
@@ -96,14 +98,23 @@ pub mod asr {
         ctx.accounts.stake_claim()
     }
 
-    pub fn proposal_new(
-        ctx: Context<ProposalNew>,
+    pub fn proposal_standard(
+        ctx: Context<ProposalStandard>,
+        title: String,
+        content: String,
+    ) -> Result<()> {
+        ctx.accounts.proposal_standard(&ctx.bumps, title, content)?;
+        ctx.accounts.update_analytics()
+    }
+
+    pub fn proposal_option(
+        ctx: Context<ProposalOption>,
         title: String,
         content: String,
         choices: Vec<Choice>,
     ) -> Result<()> {
         ctx.accounts
-            .proposal_new(&ctx.bumps, title, content, choices)?;
+            .proposal_option(&ctx.bumps, title, content, choices)?;
         ctx.accounts.update_analytics()
     }
 

@@ -50,6 +50,8 @@ impl Proposal {
         let mut highest = 0u64;
         let mut total_power = 0u64;
 
+        // if self.proposal_type == (4 || 5) {}
+
         for choice in &self.choices {
             if choice.voting_power > highest {
                 highest = choice.voting_power;

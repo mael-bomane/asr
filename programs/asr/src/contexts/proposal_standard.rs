@@ -5,8 +5,8 @@ use crate::{
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(title: String, content: String, choices: Vec<Choice>)]
-pub struct ProposalNew<'info> {
+#[instruction(title: String, content: String)]
+pub struct ProposalStandard<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
     #[account(
@@ -26,7 +26,7 @@ pub struct ProposalNew<'info> {
     #[account(
         init,
         payer = owner,
-        space = Proposal::LEN + choices.len() * Choice::LEN,
+        space = Proposal::LEN + 3 * Choice::LEN,
         seeds = [b"proposal", lock.key().as_ref(), (lock.polls + 1).to_le_bytes().as_ref()],
         bump
     )]
@@ -40,13 +40,12 @@ pub struct ProposalNew<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> ProposalNew<'info> {
-    pub fn proposal_new(
+impl<'info> ProposalStandard<'info> {
+    pub fn proposal_standard(
         &mut self,
-        bumps: &ProposalNewBumps,
+        bumps: &ProposalStandardBumps,
         title: String,
         content: String,
-        choices: Vec<Choice>,
     ) -> Result<()> {
         if title.len() > MAX_TITLE_LENGTH {
             return err!(ErrorCode::ProposalTitleTooLong);
@@ -80,7 +79,23 @@ impl<'info> ProposalNew<'info> {
         proposal.title = title;
         proposal.content = content;
         proposal.result = None;
-        proposal.choices = choices;
+        proposal.choices = vec![
+            Choice {
+                id: 0,
+                title: "For".to_owned(),
+                voting_power: 0,
+            },
+            Choice {
+                id: 1,
+                title: "Against".to_owned(),
+                voting_power: 0,
+            },
+            Choice {
+                id: 2,
+                title: "Abstain".to_owned(),
+                voting_power: 0,
+            },
+        ];
         proposal.proposal_type = 1;
         proposal.bump = bumps.proposal;
 

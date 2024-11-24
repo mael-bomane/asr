@@ -92,7 +92,7 @@ impl<'info> ProposalExecute<'info> {
                     }
                 }
             },
-            // add council member proposal
+            // add manager proposal
             2 => {
                 match is_approved {
                     true => {
@@ -114,7 +114,7 @@ impl<'info> ProposalExecute<'info> {
                     }
                 }
             },
-            // remove council member proposal
+            // remove manager proposal
             3 => {
                 match is_approved {
                     true => {
@@ -147,12 +147,13 @@ impl<'info> ProposalExecute<'info> {
 
         let now = Clock::get()?.unix_timestamp;
         if now > season.season_end {
+            let season_duration = lock.config.season_duration;
             lock.seasons.push(Season {
                 season: season.season + 1,
                 points: 0,
                 asr: Vec::new(),
                 season_start: now,
-                season_end: now + THREE_MONTH_IN_SECONDS
+                season_end: now + season_duration 
             })
         }
 

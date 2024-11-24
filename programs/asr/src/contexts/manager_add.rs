@@ -105,7 +105,7 @@ impl<'info> ManagerAdd<'info> {
                 title: "Abstain".to_string(),
             },
         ];
-        proposal.proposal_type = 2;
+        proposal.proposal_type = 3;
         proposal.manager = Some(user.owner);
         proposal.bump = bumps.proposal;
 
