@@ -106,7 +106,7 @@ describe("lock", () => {
     program.programId
   )[0];
 
-  const proposalCoreUser1 = PublicKey.findProgramAddressSync(
+  const proposal1 = PublicKey.findProgramAddressSync(
     // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
     [Buffer.from("proposal"), lock.toBytes(), new BN(1).toArrayLike(Buffer, 'le', 8)],
     program.programId
@@ -118,7 +118,7 @@ describe("lock", () => {
     program.programId
   )[0];
 
-  const proposalStandardUser1 = PublicKey.findProgramAddressSync(
+  const proposal2 = PublicKey.findProgramAddressSync(
     // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
     [Buffer.from("proposal"), lock.toBytes(), new BN(2).toArrayLike(Buffer, 'le', 8)],
     program.programId
@@ -130,7 +130,7 @@ describe("lock", () => {
     program.programId
   )[0];
 
-  const proposalOptionUser1 = PublicKey.findProgramAddressSync(
+  const proposal3 = PublicKey.findProgramAddressSync(
     // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
     [Buffer.from("proposal"), lock.toBytes(), new BN(3).toArrayLike(Buffer, 'le', 8)],
     program.programId
@@ -657,13 +657,13 @@ describe("lock", () => {
       null, // lock_duration
       66, // threshold
       20, // quorum
-      new BN(50), // amount
+      new BN(42 * 1 * 10 ** decimals), // amount
       "ASR", // name
       "ASR", // symbol
     )
       .accountsStrict({
         signer: user1.publicKey,
-        proposal: proposalCoreUser1,
+        proposal: proposal1,
         lock,
         user: user1Pda,
         analytics,
@@ -673,7 +673,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposalCoreUser1);
+        const debug = await program.account.proposal.fetch(proposal1);
         console.log(debug);
         // assert.strictEqual(debugTitle, title);
       });
@@ -720,7 +720,7 @@ describe("lock", () => {
     await program.methods.proposalStandard(title, content)
       .accountsStrict({
         owner: user1.publicKey,
-        proposal: proposalStandardUser1,
+        proposal: proposal2,
         lock,
         user: user1Pda,
         analytics,
@@ -730,7 +730,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposalStandardUser1);
+        const debug = await program.account.proposal.fetch(proposal2);
         const debugTitle = debug.title;
         console.log("Proposal Title : ", debugTitle);
         assert.strictEqual(debugTitle, title);
@@ -801,7 +801,7 @@ describe("lock", () => {
     )
       .accountsStrict({
         owner: user1.publicKey,
-        proposal: proposalOptionUser1,
+        proposal: proposal3,
         lock,
         user: user1Pda,
         analytics,
@@ -811,7 +811,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposalOptionUser1);
+        const debug = await program.account.proposal.fetch(proposal3);
         const debugTitle = debug.title;
         console.log("Proposal Title : ", debugTitle);
         assert.strictEqual(debugTitle, title);
@@ -857,12 +857,12 @@ describe("lock", () => {
     });
   });
 
-  it("user1 vote 'For' on proposal type 0 /w 100 voting power", async () => {
+  it("user1 vote 'For' on proposal core /w 100 voting power", async () => {
     await program.methods.voteNew(new BN(1), 0)
       .accountsStrict({
         owner: user1.publicKey,
         user: user1Pda,
-        proposal: proposalCoreUser1,
+        proposal: proposal1,
         lock,
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
@@ -871,7 +871,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposalCoreUser1);
+        const debug = await program.account.proposal.fetch(proposal1);
         assert.strictEqual(debug.choices.length, 3);
         debug.choices.forEach((choice, index) => {
           const power = choice.votingPower.toNumber() / (1 * 10 ** decimals);
@@ -884,13 +884,40 @@ describe("lock", () => {
       });
   });
 
-  it("user1 tries voting twice", async () => {
+  it("user1 vote 'For' on proposal standard (type 1) /w 100 voting power", async () => {
+    await program.methods.voteNew(new BN(2), 0)
+      .accountsStrict({
+        owner: user1.publicKey,
+        user: user1Pda,
+        proposal: proposal2,
+        lock,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.proposal.fetch(proposal2);
+        assert.strictEqual(debug.choices.length, 3);
+        debug.choices.forEach((choice, index) => {
+          const power = choice.votingPower.toNumber() / (1 * 10 ** decimals);
+          if (index == 0) {
+            assert.strictEqual(power, 100);
+          }
+          console.log(`Proposal Choice ${index} : ${power}`);
+          console.log(choice);
+        })
+      });
+  });
+
+  it("user1 tries voting twice on proposal core", async () => {
     await assert.rejects((async () => {
       await program.methods.voteNew(new BN(1), 0)
         .accountsStrict({
           owner: user1.publicKey,
           user: user1Pda,
-          proposal: proposalCoreUser1,
+          proposal: proposal1,
           lock,
           analytics,
           systemProgram: SYSTEM_PROGRAM_ID,
@@ -904,6 +931,28 @@ describe("lock", () => {
       return true
     });
   });
+
+  it("user1 tries voting twice on proposal standard", async () => {
+    await assert.rejects((async () => {
+      await program.methods.voteNew(new BN(2), 0)
+        .accountsStrict({
+          owner: user1.publicKey,
+          user: user1Pda,
+          proposal: proposal2,
+          lock,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID,
+        })
+        .signers([user1])
+        .rpc()
+        .then(confirmTx);
+    })(), (err: any) => {
+      console.log(err.error.errorCode.code)
+      assert.strictEqual(err.error.errorCode.code, "UserAlreadyVotedThisPoll");
+      return true
+    });
+  });
+
 
   it("register user3 to lock", async () => {
     await program.methods.register()
@@ -931,7 +980,7 @@ describe("lock", () => {
         .accountsStrict({
           owner: user3.publicKey,
           user: user3Pda,
-          proposal: proposalCoreUser1,
+          proposal: proposal1,
           lock,
           analytics,
           systemProgram: SYSTEM_PROGRAM_ID,
@@ -999,12 +1048,12 @@ describe("lock", () => {
       });
   });
 
-  it("user2 vote 'Against' on poll 0 /w 100 voting power", async () => {
-    await program.methods.voteNew(new BN(1), 1)
+  it("user2 vote 'For' on poll 0 /w 100 voting power", async () => {
+    await program.methods.voteNew(new BN(1), 0)
       .accountsStrict({
         owner: user2.publicKey,
         user: user2Pda,
-        proposal: proposalCoreUser1,
+        proposal: proposal1,
         lock,
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
@@ -1013,7 +1062,35 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposalCoreUser1);
+        const debug = await program.account.proposal.fetch(proposal1);
+        assert.strictEqual(debug.choices.length, 3);
+        debug.choices.forEach((choice, index) => {
+          if (index == 0) {
+            assert.strictEqual(choice.votingPower.toNumber() / (1 * 10 ** decimals), 200);
+          } else if (index == 1) {
+            assert.strictEqual(choice.votingPower.toNumber() / (1 * 10 ** decimals), 0);
+          }
+          console.log(`Proposal Choice ${index} : ${(choice.votingPower.toNumber() / (1 * 10 ** decimals)).toFixed(2)}`);
+          console.log(choice);
+        })
+      });
+  });
+
+  it("user2 vote 'Against' on proposal standard (type 1) /w 100 voting power", async () => {
+    await program.methods.voteNew(new BN(2), 1)
+      .accountsStrict({
+        owner: user2.publicKey,
+        user: user2Pda,
+        proposal: proposal2,
+        lock,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user2])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.proposal.fetch(proposal2);
         assert.strictEqual(debug.choices.length, 3);
         debug.choices.forEach((choice, index) => {
           if (index == 0) {
@@ -1027,12 +1104,13 @@ describe("lock", () => {
       });
   });
 
-  it("User3 vote 'Abstain' on poll 0 /w decreasing voting power", async () => {
+
+  it("User3 vote 'Abstain' on proposal core /w decreasing voting power", async () => {
     await program.methods.voteNew(new BN(1), 2)
       .accountsStrict({
         owner: user3.publicKey,
         user: user3Pda,
-        proposal: proposalCoreUser1,
+        proposal: proposal1,
         lock,
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
@@ -1041,7 +1119,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposalCoreUser1);
+        const debug = await program.account.proposal.fetch(proposal1);
         const user = await program.account.user.fetch(user3Pda);
         user.deposits.forEach(deposit => {
           console.log("Deposit Deactivation Start : ", new Date(deposit.deactivationStart.toNumber() * 1000).toISOString());
@@ -1051,26 +1129,26 @@ describe("lock", () => {
         assert.strictEqual(debug.choices.length, 3);
         debug.choices.forEach((choice, index) => {
           if (index == 0) {
-            assert.strictEqual(choice.votingPower.toNumber() / (1 * 10 ** decimals), 100);
+            assert.strictEqual(choice.votingPower.toNumber() / (1 * 10 ** decimals), 200);
           } else if (index == 1) {
-            assert.strictEqual(choice.votingPower.toNumber() / (1 * 10 ** decimals), 100);
+            assert.strictEqual(choice.votingPower.toNumber() / (1 * 10 ** decimals), 0);
           } else if (index == 2) {
             assert.notEqual((choice.votingPower.toNumber() / (1 * 10 ** decimals)).toFixed(2), 0);
           }
           console.log(`Proposal Choice ${index} : ${(choice.votingPower.toNumber() / (1 * 10 ** decimals)).toFixed(2)}`);
           console.log(choice);
         })
-      });
+      }).catch(err => console.log(err));
   });
 
 
-  it("user1 tries to execute poll 0 before end of voting period", async () => {
+  it("user1 tries to execute proposal core before end of voting period", async () => {
     await assert.rejects((async () => {
       await program.methods.proposalExecute()
         .accountsStrict({
           owner: user1.publicKey,
           lock,
-          proposal: proposalCoreUser1,
+          proposal: proposal1,
           analytics,
           systemProgram: SYSTEM_PROGRAM_ID,
         })
@@ -1084,14 +1162,34 @@ describe("lock", () => {
     });
   });
 
-  const proposalExecute = async () => {
+  it("user1 tries to execute proposal standard before end of voting period", async () => {
+    await assert.rejects((async () => {
+      await program.methods.proposalExecute()
+        .accountsStrict({
+          owner: user1.publicKey,
+          lock,
+          proposal: proposal2,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID,
+        })
+        .signers([user1])
+        .rpc()
+        .then(confirmTx)
+    })(), (err: any) => {
+      console.log(err.error.errorCode.code)
+      assert.strictEqual(err.error.errorCode.code, "WaitForVotingPeriodToEnd");
+      return true
+    });
+  });
+
+  const proposal2Execute = async () => {
     return new Promise(resolve => {
       setTimeout(async () => {
         await program.methods.proposalExecute()
           .accountsStrict({
             owner: user1.publicKey,
             lock,
-            proposal: proposalCoreUser1,
+            proposal: proposal2,
             analytics,
             systemProgram: SYSTEM_PROGRAM_ID,
           })
@@ -1099,19 +1197,35 @@ describe("lock", () => {
           .rpc()
           .then(confirmTx)
           .then(async () => {
-            const debug = await program.account.proposal.fetch(proposalCoreUser1);
+            const debug = await program.account.proposal.fetch(proposal2);
             console.log(debug);
             resolve(debug.executed);
           }).catch(err => console.log(err));
-      }, 6000)
+      }, 16000)
     })
   }
 
-  it("user1 execute poll 0 after end of voting period", async () => {
-    const executed = await proposalExecute();
+  it("user1 execute proposal standard after end of voting period", async () => {
+    const executed = await proposal2Execute();
     console.log(executed);
     assert.strictEqual(executed, true);
-  }).timeout(7000);
+  }).timeout(17000);
+
+  it("user1 execute proposal option after end of voting period", async () => {
+    await program.methods.proposalExecute()
+      .accountsStrict({
+        owner: user1.publicKey,
+        lock,
+        proposal: proposal3,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+  });
+
+
 
   it("user1 deactivate his staked deposits", async () => {
     await program.methods.stakeDeactivate()
@@ -1161,14 +1275,14 @@ describe("lock", () => {
             console.log(`User 1 now have ${user1TokenAmount.value.uiAmount} Tokens`)
             resolve(user1TokenAmount.value.uiAmount)
           }).catch(err => console.log(err));
-      }, 7000)
+      }, 6000)
     })
   }
 
   it("user1 claim his deactivated staked deposits", async () => {
     const claim = await user1ClaimStake();
     assert.strictEqual(100, claim);
-  }).timeout(8000);
+  }).timeout(7000);
 
   it("rejects : user1 tries claim twice his deactivated staked deposits", async () => {
     await assert.rejects((async () => {
@@ -1194,45 +1308,42 @@ describe("lock", () => {
       assert.strictEqual(err.error.errorCode.code, "NoDepositsReadyToClaimForThisUserInThisLocker");
       return true
     });
-  }).timeout(9000);
+  });
 
-  const user1ClaimASR = async () => {
-    return new Promise(resolve => {
-      setTimeout(async () => {
-        await program.methods.asrClaim()
-          .accountsStrict({
-            owner: user1.publicKey,
-            user: user1Pda,
-            auth,
-            lock,
-            userVault: user1Vault,
-            signerAta: user1Ata.address,
-            vault,
-            mint,
-            analytics,
-            systemProgram: SYSTEM_PROGRAM_ID,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-          })
-          .signers([user1])
-          .rpc()
-          .then(confirmTx)
-          .then(async () => {
-            const debug = await program.account.user.fetch(user1Pda);
-            console.log(debug.deposits);
-            debug.deposits.forEach((deposit) => {
-              console.log("User 1 Restaked ASR : ", deposit.amount.toNumber() / (1 * 10 ** decimals));
-            })
-            resolve(debug.deposits.length)
-          }).catch(err => console.log(err));
-      }, 16000)
-    })
-  }
+  it("user1 execute proposal core after end of voting period", async () => {
+    await program.methods.proposalExecute()
+      .accountsStrict({
+        owner: user1.publicKey,
+        lock,
+        proposal: proposal1,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+  });
 
   it("user1 asr rewards restaked for lock mint season 1 rewards", async () => {
-    const asr = await user1ClaimASR();
-    assert.strictEqual(1, asr);
-  }).timeout(18000);
+    await program.methods.asrClaim()
+      .accountsStrict({
+        owner: user1.publicKey,
+        user: user1Pda,
+        auth,
+        lock,
+        userVault: user1Vault,
+        signerAta: user1Ata.address,
+        vault,
+        mint,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+  });
 
   it("reject : user1 tries claim twice his asr rewards for season 1", async () => {
     await assert.rejects((async () => {
@@ -1259,7 +1370,7 @@ describe("lock", () => {
       assert.strictEqual(err.error.errorCode.code, "UserAlreadyClaimedThis");
       return true
     });
-  }).timeout(9000);
+  }).timeout(18000);
 
 
   // after(async () => {

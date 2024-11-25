@@ -163,10 +163,11 @@ impl<'info> ProposalExecute<'info> {
         season.points += total_power;
 
         let now = Clock::get()?.unix_timestamp;
-        if now > season.season_end {
+        if now > lock.seasons[lock.seasons.len() - 1].season_end {
+            let season_number = lock.seasons[lock.seasons.len() - 1].season;
             let season_duration = lock.config.season_duration;
             lock.seasons.push(Season {
-                season: season.season + 1,
+                season: season_number + 1,
                 points: 0,
                 asr: Vec::new(),
                 season_start: now,
