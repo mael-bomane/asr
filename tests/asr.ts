@@ -325,7 +325,7 @@ describe("lock", () => {
   it("create voting escrow locker, lock time 1 year, min poll threshold 51% , min. tokens to start poll 100", async () => {
     if (rpc == "https://api.devnet.solana.com") {
       console.log("running on devnet");
-      await program.methods.lockNew(0, true, day, new BN(0), 51, 25, min, "Monolith", "MONO")
+      await program.methods.lockNew(0, true, day, day, new BN(0), 51, 25, min, "Monolith", "MONO")
         .accountsStrict({
           signer: wallet.publicKey,
           auth,
@@ -351,7 +351,7 @@ describe("lock", () => {
       // await program.methods.lockerNew(1, day, new BN(86400 * 7 * 52), 51, min, "SOON")
       // active staking rewards
       // await program.methods.lockNew(0, day, new BN(0), 51, 25, min, "SOON")
-      await program.methods.lockNew(0, true, day, new BN(0), 51, 25, min, "Monolith", "MONO")
+      await program.methods.lockNew(0, true, new BN(15), new BN(86400), new BN(0), 51, 25, min, "Monolith", "MONO")
         .accountsStrict({
           signer: user1.publicKey,
           auth,

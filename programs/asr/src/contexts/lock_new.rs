@@ -91,7 +91,7 @@ impl<'info> LockNew<'info> {
         }
 
         require!(
-            voting_period >= ONE_DAY_IN_SECONDS && voting_period <= ONE_WEEK_IN_SECONDS,
+            voting_period >= HALF_DAY_IN_SECONDS && voting_period <= ONE_WEEK_IN_SECONDS,
             ErrorCode::VotingPeriodOutOfBounds
         );
 
@@ -147,7 +147,7 @@ impl<'info> LockNew<'info> {
         lock.created_at = Clock::get()?.unix_timestamp;
         lock.lock_bump = bumps.lock;
         lock.vault_bump = bumps.vault;
-        lock.polls = 0;
+        lock.proposals = 0;
 
         Ok(())
     }

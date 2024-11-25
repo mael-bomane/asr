@@ -7,7 +7,8 @@ pub struct Lock {
     pub creator: Pubkey,
     pub config: Config,
     pub total_deposits: u64,
-    pub polls: u64,
+    pub users: u64,
+    pub proposals: u64,
     pub votes: u64,
     pub approved: u64,
     pub rejected: u64,
@@ -22,7 +23,7 @@ impl Lock {
     pub const LEN: usize = DISCRIMINATOR_LENGTH
         + PUBLIC_KEY_LENGTH // creator 
         + Config::LEN
-        + 8 * 5 // amount, approved, rejected, min 
+        + 8 * 6 // amount, approved, rejected, min 
         + TIMESTAMP_LENGTH * 2
         + BUMP_LENGTH * 2 // bumps
         + VECTOR_LENGTH_PREFIX;

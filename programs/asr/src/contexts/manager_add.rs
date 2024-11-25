@@ -28,7 +28,7 @@ pub struct ManagerAdd<'info> {
         init,
         payer = signer,
         space = Proposal::LEN + 3 * Choice::LEN,
-        seeds = [b"proposal", lock.key().as_ref(), (lock.polls + 1).to_le_bytes().as_ref()],
+        seeds = [b"proposal", lock.key().as_ref(), (lock.proposals + 1).to_le_bytes().as_ref()],
         bump
     )]
     pub proposal: Box<Account<'info, Proposal>>,
@@ -80,7 +80,7 @@ impl<'info> ManagerAdd<'info> {
         let proposal = &mut self.proposal;
         proposal.summoner = self.signer.key();
         proposal.lock = lock.key();
-        proposal.id = lock.polls + 1;
+        proposal.id = lock.proposals + 1;
         let now = Clock::get()?.unix_timestamp;
         proposal.created_at = now;
         proposal.ends_at = now + lock.config.voting_period;

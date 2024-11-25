@@ -6,7 +6,8 @@ use crate::constants::*;
 pub struct Analytics {
     pub vault: Pubkey,
     pub locks: u64,
-    pub polls: u64,
+    pub users: u64,
+    pub proposals: u64,
     pub votes: u64,
     pub approved: u64,
     pub rejected: u64,
@@ -18,5 +19,5 @@ pub struct Analytics {
 
 impl Analytics {
     pub const LEN: usize =
-        DISCRIMINATOR_LENGTH + PUBLIC_KEY_LENGTH + 8 * 6 + TIMESTAMP_LENGTH + BUMP_LENGTH * 2;
+        DISCRIMINATOR_LENGTH + PUBLIC_KEY_LENGTH + 8 * 7 + TIMESTAMP_LENGTH + BUMP_LENGTH * 2;
 }

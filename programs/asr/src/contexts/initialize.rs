@@ -37,7 +37,8 @@ impl<'info> Initialize<'info> {
         // pub state_bump: u8,
         // pub members_list: Vec<Member>,
 
-        analytics.polls = 0;
+        analytics.users = 0;
+        analytics.proposals = 0;
         analytics.approved = 0;
         analytics.rejected = 0;
         analytics.created_at = Clock::get()?.unix_timestamp;

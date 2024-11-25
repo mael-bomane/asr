@@ -27,7 +27,7 @@ pub struct ProposalStandard<'info> {
         init,
         payer = owner,
         space = Proposal::LEN + 3 * Choice::LEN,
-        seeds = [b"proposal", lock.key().as_ref(), (lock.polls + 1).to_le_bytes().as_ref()],
+        seeds = [b"proposal", lock.key().as_ref(), (lock.proposals + 1).to_le_bytes().as_ref()],
         bump
     )]
     pub proposal: Box<Account<'info, Proposal>>,
@@ -70,7 +70,7 @@ impl<'info> ProposalStandard<'info> {
 
         proposal.summoner = self.owner.key();
         proposal.lock = lock.key();
-        proposal.id = lock.polls + 1;
+        proposal.id = lock.proposals + 1;
         let now = Clock::get()?.unix_timestamp;
         proposal.created_at = now;
         proposal.ends_at = now + lock.config.voting_period;
@@ -104,9 +104,9 @@ impl<'info> ProposalStandard<'info> {
 
     pub fn update_analytics(&mut self) -> Result<()> {
         let analytics = &mut self.analytics;
-        analytics.polls += 1;
+        analytics.proposals += 1;
         let lock = &mut self.lock;
-        lock.polls += 1;
+        lock.proposals += 1;
         Ok(())
     }
 }

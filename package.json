@@ -1,9 +1,7 @@
 {
   "name": "@asr/monorepo",
   "private": true,
-  "workspaces": [
-    "app",
-  ],
+  "workspaces": ["app"],
   "license": "ISC",
   "scripts": {
     "dev": "yarn workspace @asr/app dev",

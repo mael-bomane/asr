@@ -47,4 +47,12 @@ impl<'info> Register<'info> {
 
         Ok(())
     }
+
+    pub fn update_analytics(&mut self) -> Result<()> {
+        let analytics = &mut self.analytics;
+        analytics.users += 1;
+        let lock = &mut self.lock;
+        lock.users += 1;
+        Ok(())
+    }
 }
