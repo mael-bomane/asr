@@ -1,8 +1,6 @@
 "use client"
 
-import Image from "next/image";
-import Link from "next/link";
-import React from "react";
+import React, { useContext } from "react";
 
 import { useCallback, useEffect, useState, CSSProperties } from "react"
 
@@ -15,25 +13,19 @@ import { toast } from "react-hot-toast";
 import { registerIx } from "@/lib/program/register";
 
 import RingLoader from "react-spinners/RingLoader";
-import { IoDiamond, IoWallet } from "react-icons/io5";
-import logo from "@/app/icon.png";
 
 import { CardDescription, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 
 
 import type { FC } from "react"
 import type { User, LockMap } from "@/types";
 import { cn } from "@/lib/utils";
-import { stakeIx } from "@/lib/program/stake";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { stakeDeactivateIx } from "@/lib/program/deactivate";
-import { UNSTAKING_TIME } from "@/constants";
 import { FaCheck, FaGift } from "react-icons/fa";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { HeaderTableRow, Table, TableBody, TableCaption, TableCell, TableFooter, TableHead, TableHeader, TableRow } from "./ui/table";
+import { HeaderTableRow, Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { asrClaimIx } from "@/lib/program/asrClaim";
 import { BN } from "bn.js";
+import { LockContext } from "./LockContextProvider";
 
 type Props = {
   currentUser: User | null
@@ -46,6 +38,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
   const wallet = useWallet();
   const { sendTransaction } = useWallet();
   const { connection } = useConnection();
+  const { program } = useContext(LockContext);
 
   type UserTokenAmount = {
     value: string
@@ -63,7 +56,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
         const signerAta = getAssociatedTokenAddressSync(account.config.mint, wallet.publicKey);
         console.log("signer ata : ", signerAta.toString());
 
-        const instruction = await registerIx(wallet.publicKey, publicKey);
+        const instruction = await registerIx(program, wallet.publicKey, publicKey);
 
         let latestBlockhash = await connection.getLatestBlockhash()
 
@@ -100,7 +93,7 @@ export const ASRClaim: FC<Props> = ({ currentUser, currentUserLoading, setCurren
         const signerAta = getAssociatedTokenAddressSync(mint, wallet.publicKey);
         console.log("signer ata : ", signerAta.toString());
 
-        const instruction = await asrClaimIx(wallet.publicKey, publicKey, mint, signerAta, new BN(0));
+        const instruction = await asrClaimIx(program, wallet.publicKey, publicKey, mint, signerAta, new BN(0));
 
         let latestBlockhash = await connection.getLatestBlockhash()
 
