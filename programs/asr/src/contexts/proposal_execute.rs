@@ -50,7 +50,7 @@ impl<'info> ProposalExecute<'info> {
         let proposal = &mut self.proposal;
         let analytics = &mut self.analytics;
         
-        let (result, is_approved, total_power) = proposal.result(&lock);
+        let (result, is_approved, total_power, status) = proposal.result(&lock);
         
         match proposal.proposal_type {
             // lock settings proposal
@@ -60,7 +60,7 @@ impl<'info> ProposalExecute<'info> {
                         lock.approved += 1;
                         analytics.approved += 1;
                         proposal.executed = true;
-                        proposal.status = Status::Approved;
+                        proposal.status = status;
                         match result {
                             Some(r) => {
                                 proposal.result = Some(r.clone());
@@ -75,7 +75,7 @@ impl<'info> ProposalExecute<'info> {
                         lock.rejected += 1;
                         analytics.rejected += 1;
                         proposal.executed = true;
-                        proposal.status = Status::Rejected;
+                        proposal.status = status;
                         proposal.result = None;
                     }
                 }
@@ -87,14 +87,14 @@ impl<'info> ProposalExecute<'info> {
                         lock.approved += 1;
                         analytics.approved += 1;
                         proposal.executed = true;
-                        proposal.status = Status::Approved;
+                        proposal.status = status;
                         proposal.result = result;
                     },
                     false => {
                         lock.rejected += 1;
                         analytics.rejected += 1;
                         proposal.executed = true;
-                        proposal.status = Status::Rejected;
+                        proposal.status = status;
                         proposal.result = None;
                     }
                 }
@@ -106,7 +106,7 @@ impl<'info> ProposalExecute<'info> {
                         lock.approved += 1;
                         analytics.approved += 1;
                         proposal.executed = true;
-                        proposal.status = Status::Approved;
+                        proposal.status = status;
                         match result {
                             Some(r) => {
                                 proposal.result = Some(r.clone());
@@ -121,7 +121,7 @@ impl<'info> ProposalExecute<'info> {
                         lock.rejected += 1;
                         analytics.rejected += 1;
                         proposal.executed = true;
-                        proposal.status = Status::Rejected;
+                        proposal.status = status;
                         proposal.result = None;
                     }
                 }
@@ -133,7 +133,7 @@ impl<'info> ProposalExecute<'info> {
                         lock.approved += 1;
                         analytics.approved += 1;
                         proposal.executed = true;
-                        proposal.status = Status::Approved;
+                        proposal.status = status;
                         match result {
                             Some(r) => {
                                 proposal.result = Some(r.clone());
@@ -149,7 +149,7 @@ impl<'info> ProposalExecute<'info> {
                         lock.rejected += 1;
                         analytics.rejected += 1;
                         proposal.executed = true;
-                        proposal.status = Status::Rejected;
+                        proposal.status = status;
                         proposal.result = None;
                     }
                 }

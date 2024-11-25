@@ -46,7 +46,7 @@ impl Proposal {
         + MAX_CONTENT_LENGTH
         + VECTOR_LENGTH_PREFIX;
 
-    pub fn result(&self, lock: &Lock) -> (Option<Choice>, bool, u64) {
+    pub fn result(&self, lock: &Lock) -> (Option<Choice>, bool, u64, Status) {
         let mut highest = 0u64;
         let mut total_power = 0u64;
 
@@ -77,12 +77,12 @@ impl Proposal {
         if total_power >= min {
             // If there is more than one choice with the highest voting power, it's a tie
             if highest_voting_choices.len() > 1 {
-                (None, true, total_power)
+                (None, true, total_power, Status::Tie)
             } else {
-                (Some(result), true, total_power)
+                (Some(result), true, total_power, Status::Approved)
             }
         } else {
-            (None, false, total_power)
+            (None, false, total_power, Status::Rejected)
         }
     }
 }
@@ -91,6 +91,7 @@ impl Proposal {
 pub enum Status {
     Approved,
     Rejected,
+    Tie,
     Voting,
 }
 

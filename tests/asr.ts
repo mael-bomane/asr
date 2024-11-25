@@ -357,7 +357,7 @@ describe("lock", () => {
   it("create asr lock", async () => {
     if (rpc == "https://api.devnet.solana.com") {
       console.log("running on devnet");
-      await program.methods.lockNew(0, true, day, new BN(43200), new BN(0), 51, 25, min, "Monolith", "MONO")
+      await program.methods.lockNew(0, true, day, new BN(43200), new BN(86400), 51, 25, min, "Monolith", "MONO")
         .accountsStrict({
           signer: wallet.publicKey,
           auth,
@@ -1081,7 +1081,6 @@ describe("lock", () => {
       console.log(err.error.errorCode.code)
       assert.strictEqual(err.error.errorCode.code, "WaitForVotingPeriodToEnd");
       return true
-
     });
   });
 
