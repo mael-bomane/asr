@@ -1,5 +1,5 @@
 use crate::{
-    constants::THREE_MONTH_IN_SECONDS, errors::ErrorCode, state::{Analytics, Lock, Proposal, Status}, Season, ASR
+    errors::ErrorCode, state::{Analytics, Lock, Proposal, Status, Season, ASR}
 };
 
 use anchor_lang::prelude::*;
@@ -21,7 +21,9 @@ pub struct ProposalExecute<'info> {
         realloc::payer = owner,
         seeds = [b"lock", lock.creator.as_ref(), lock.config.mint.as_ref()],
         bump = lock.lock_bump, 
-        constraint = if !lock.config.permissionless { lock.config.managers.iter().any(|i| i == &owner.key())} else { true }
+        constraint = if !lock.config.permissionless { 
+            lock.config.managers.iter().any(|i| i == &owner.key())
+        } else { true } @ ErrorCode::UnauthorizedManagersOnly
     )]
     pub lock: Box<Account<'info, Lock>>,
     #[account(

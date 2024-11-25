@@ -52,4 +52,6 @@ pub enum ErrorCode {
     InstructionUnavailableForThisLock,
     #[msg("User Already Claimed This")]
     UserAlreadyClaimedThis,
+    #[msg("Unauthorized Managers Only")]
+    UnauthorizedManagersOnly,
 }

@@ -34,6 +34,9 @@ pub struct VoteNew<'info> {
         seeds = [b"proposal", lock.key().as_ref(), proposal.id.to_le_bytes().as_ref()],
         bump = proposal.bump,
         constraint = proposal.id == index,
+        constraint = if proposal.proposal_type == (3 | 4) {
+            lock.config.managers.iter().any(|i| i == &owner.key())
+        } else { true } @ ErrorCode::UnauthorizedManagersOnly,
     )]
     pub proposal: Box<Account<'info, Proposal>>,
     #[account(

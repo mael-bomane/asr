@@ -1,8 +1,7 @@
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
-use crate::{constants::*, errors::ErrorCode, state::Analytics};
-use crate::{Choice, Deposit, Lock, Proposal, Season, Status, User};
+use crate::{constants::*, errors::ErrorCode, state::{Analytics, Lock, Proposal, Status, User, Choice}};
 
 use anchor_lang::prelude::*;
 
@@ -32,7 +31,9 @@ pub struct LockUpdate<'info> {
         mut,
         seeds = [b"lock", lock.creator.key().as_ref(), lock.config.mint.key().as_ref()],
         bump = lock.lock_bump,
-        constraint = if !lock.config.permissionless { lock.config.managers.iter().any(|i| i == &signer.key())} else { true }
+        constraint = if !lock.config.permissionless {
+            lock.config.managers.iter().any(|i| i == &signer.key())
+        } else { true } @ ErrorCode::UnauthorizedManagersOnly
     )]
     pub lock: Box<Account<'info, Lock>>,
     #[account(
@@ -122,7 +123,7 @@ impl<'info> LockUpdate<'info> {
         match voting_period {
             Some(value) => {
                 require!(
-                    value >= ONE_DAY_IN_SECONDS && value <= ONE_WEEK_IN_SECONDS,
+                    value >= HALF_DAY_IN_SECONDS && value <= ONE_WEEK_IN_SECONDS,
                     ErrorCode::VotingPeriodOutOfBounds
                 );
                 new.voting_period = value;

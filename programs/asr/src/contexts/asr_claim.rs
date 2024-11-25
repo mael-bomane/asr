@@ -1,8 +1,7 @@
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
-use crate::{errors::ErrorCode, Analytics, Claim, Lock, User, constants::*};
-use crate::{Deposit, Season, Vote};
+use crate::{errors::ErrorCode, state::{Analytics, Claim, Lock, User, Deposit, Season, Vote}};
 
 use anchor_lang::prelude::*;
 

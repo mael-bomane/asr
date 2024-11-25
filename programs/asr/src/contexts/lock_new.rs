@@ -89,6 +89,10 @@ impl<'info> LockNew<'info> {
         } else if name.len() == 0 {
             return err!(ErrorCode::SymbolEmpty);
         }
+        require!(
+            season_duration > 0 && season_duration <= ONE_WEEK_IN_SECONDS,
+            ErrorCode::VotingPeriodOutOfBounds
+        );
 
         require!(
             voting_period >= HALF_DAY_IN_SECONDS && voting_period <= ONE_WEEK_IN_SECONDS,

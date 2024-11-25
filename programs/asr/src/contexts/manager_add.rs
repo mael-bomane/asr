@@ -21,7 +21,7 @@ pub struct ManagerAdd<'info> {
         mut,
         seeds = [b"lock", lock.creator.key().as_ref(), lock.config.mint.key().as_ref()],
         bump = lock.lock_bump,
-        constraint = !lock.config.permissionless && lock.config.managers.iter().any(|i| i == &signer.key())
+        constraint = !lock.config.permissionless && lock.config.managers.iter().any(|i| i == &signer.key()) @ ErrorCode::UnauthorizedManagersOnly
     )]
     pub lock: Box<Account<'info, Lock>>,
     #[account(

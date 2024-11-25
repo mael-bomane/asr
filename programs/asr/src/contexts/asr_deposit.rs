@@ -2,8 +2,7 @@ use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
 
 use anchor_spl::metadata::MetadataAccount;
-use crate::constants::THREE_MONTH_IN_SECONDS;
-use crate::{Analytics, Lock, Season, ASR};
+use crate::{errors::ErrorCode, state::{Analytics, Lock, Season, ASR}};
 
 use anchor_lang::prelude::*;
 
@@ -20,7 +19,6 @@ pub struct ASRDeposit<'info> {
     pub auth: UncheckedAccount<'info>,
     #[account(
         mut,
-        has_one = creator,
         realloc = Lock::LEN 
         + (if Clock::get()?.unix_timestamp > lock.seasons[lock.seasons.len() - 1].season_end {
             (lock.seasons.len() + 1) * Season::LEN
@@ -34,9 +32,11 @@ pub struct ASRDeposit<'info> {
         }),
         realloc::zero = false,
         realloc::payer = creator,
-        seeds = [b"lock", creator.key().as_ref(), mint.key().as_ref()],
+        seeds = [b"lock", lock.creator.key().as_ref(), lock.config.mint.key().as_ref()],
         bump = lock.lock_bump,
-        constraint = if !lock.config.permissionless { lock.config.managers.iter().any(|i| i == &creator.key())} else { true }
+        constraint = if !lock.config.permissionless {
+            lock.config.managers.iter().any(|i| i == &creator.key())
+        } else { true } @ ErrorCode::UnauthorizedManagersOnly
     )]
     pub lock: Box<Account<'info, Lock>>,
     #[account(
@@ -78,11 +78,12 @@ impl<'info> ASRDeposit<'info> {
 
         // create new season if current season ended
         if now > season.season_end {
+            let season_duration = lock.config.season_duration;
             lock.seasons.push(Season {
                 season: season.season + 1,
                 points: 0,
                 season_start: now,
-                season_end: now + THREE_MONTH_IN_SECONDS,
+                season_end: now + season_duration,
                 asr: vec![ASR {
                     mint: self.mint.key(),
                     decimals: self.mint.decimals,
