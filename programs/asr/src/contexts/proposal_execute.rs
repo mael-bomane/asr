@@ -50,10 +50,10 @@ impl<'info> ProposalExecute<'info> {
         let proposal = &mut self.proposal;
         let analytics = &mut self.analytics;
         
-        let (result, is_approved, total_power, status) = proposal.result(&lock);
+        let (result, is_approved, status) = proposal.result(&lock);
         
         match proposal.proposal_type {
-            // lock settings proposal
+            // proposal core 
             0 => {
                 match is_approved {
                     true => {
@@ -80,8 +80,32 @@ impl<'info> ProposalExecute<'info> {
                     }
                 }
             },
-            // standard proposal
+            // proposal standard
             1 => {
+                match is_approved {
+                    true => {
+                        lock.approved += 1;
+                        analytics.approved += 1;
+                        proposal.executed = true;
+                        proposal.status = status;
+                        match result {
+                            Some(r) => {
+                                proposal.result = Some(r.clone());
+                            },
+                            None => proposal.result = None,
+                        }
+                    },
+                    false => {
+                        lock.rejected += 1;
+                        analytics.rejected += 1;
+                        proposal.executed = true;
+                        proposal.status = status;
+                        proposal.result = None;
+                    }
+                }
+            },
+            // proposal option 
+            2 => {
                 match is_approved {
                     true => {
                         lock.approved += 1;
@@ -99,8 +123,9 @@ impl<'info> ProposalExecute<'info> {
                     }
                 }
             },
+
             // add manager proposal
-            2 => {
+            3 => {
                 match is_approved {
                     true => {
                         lock.approved += 1;
@@ -111,7 +136,7 @@ impl<'info> ProposalExecute<'info> {
                             Some(r) => {
                                 proposal.result = Some(r.clone());
                                 if r.id == 0 {
-                            lock.config.managers.push(proposal.manager.clone().unwrap())
+                                    lock.config.managers.push(proposal.manager.clone().unwrap())
                                 }
                             },
                             None => proposal.result = None,
@@ -127,7 +152,7 @@ impl<'info> ProposalExecute<'info> {
                 }
             },
             // remove manager proposal
-            3 => {
+            4 => {
                 match is_approved {
                     true => {
                         lock.approved += 1;
@@ -159,9 +184,6 @@ impl<'info> ProposalExecute<'info> {
             }
         }
         
-        let mut season = lock.seasons.clone().into_iter().find(|season| season.season == proposal.season).unwrap();
-        season.points += total_power;
-
         let now = Clock::get()?.unix_timestamp;
         if now > lock.seasons[lock.seasons.len() - 1].season_end {
             let season_number = lock.seasons[lock.seasons.len() - 1].season;
@@ -174,8 +196,6 @@ impl<'info> ProposalExecute<'info> {
                 season_end: now + season_duration 
             })
         }
-
-        let _ = std::mem::replace(&mut lock.seasons[season.season as usize], season);
 
         Ok(())
     }

@@ -62,13 +62,10 @@ impl User {
                     } else {
                         let now = Clock::get().unwrap().unix_timestamp;
                         if now >= (deposit.deactivation_start.unwrap() + lock.config.lock_duration) {
-                            // Deposit has fully expired, no longer contributes
                             0u64
                         } else {
-                            // Deposit is deactivating but not expired yet, apply linear decay
                             let time_passed = now - deposit.deactivation_start.unwrap();
                             let decay_factor = time_passed as f64 / lock.config.lock_duration as f64;
-                            // Calculate decayed voting power
                             let decayed_voting_power = (deposit.amount as f64 * (1.0 - decay_factor)).round() as u64;
                             decayed_voting_power
                         }

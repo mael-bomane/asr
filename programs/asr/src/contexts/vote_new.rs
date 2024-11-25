@@ -92,7 +92,20 @@ impl<'info> VoteNew<'info> {
                 title,
             },
         );
+        
+        let mut season = lock.seasons.clone().into_iter().find(|season| season.season == proposal.season).unwrap();
+        match proposal.proposal_type {
+            // add points for proposal core, standard & option
+            0..=2 => {
+                season.points += voting_power;
+            },
+            // don't add points for managers add/remove or unimplemented proposal type
+            _ => {
+                ()
+            }
+        }
 
+        let _ = std::mem::replace(&mut lock.seasons[season.season as usize], season);
         
         Ok(())
     }

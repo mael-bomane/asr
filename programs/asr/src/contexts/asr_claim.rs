@@ -107,12 +107,13 @@ impl<'info> ASRClaim<'info> {
 
         let user_season_points = user.user_season_points(season.season);
 
-        let user_ratio = user_season_points
-            .checked_mul(100)
+        // season.points = total_tokens
+        // user_season_points = amount
+        // amount = season_points / total_tokens
+        let amount = user_season_points
+            .checked_mul(total_tokens)
             .unwrap()
             .div_ceil(season.points);
-
-        let amount = user_ratio.checked_mul(total_tokens).unwrap().div_ceil(100);
 
         // if asr claim is locker mint, we transfer tokens to user vault + create a deposit
         if self.mint.key() == lock.config.mint {

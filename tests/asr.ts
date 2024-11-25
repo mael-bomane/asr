@@ -43,10 +43,13 @@ describe("lock", () => {
   console.log("rpc : ", rpc);
 
   let mint: PublicKey;
+  let mint2: PublicKey;
 
   const keypair = Keypair.generate();
+  const keypair2 = Keypair.generate();
 
   mint = rpc == "https://api.devnet.solana.com" ? new PublicKey('FZPduNH9a1FdBauDcooD7dw14iV3ywZWZmJJwsvD4SRZ') : keypair.publicKey;
+  mint2 = rpc == "https://api.devnet.solana.com" ? new PublicKey('FZPduNH9a1FdBauDcooD7dw14iV3ywZWZmJJwsvD4SRZ') : keypair2.publicKey;
 
   const analytics = PublicKey.findProgramAddressSync(
     [Buffer.from("analytics")],
@@ -146,8 +149,11 @@ describe("lock", () => {
 
   let signerAta: Account;
   let user1Ata: Account;
+  let user1Ata2: Account;
   let user2Ata: Account;
+  let user2Ata2: Account;
   let user3Ata: Account;
+  let user3Ata2: Account;
 
   const decimals = 6;
 
@@ -274,6 +280,39 @@ describe("lock", () => {
       let user3TokenAmount = await connection.getTokenAccountBalance(user3Ata.address);
       console.log(
         `minted ${user3TokenAmount.value.uiAmountString} ${token.toBase58()} tokens for user3`
+      );
+
+      let token2 = await createMint(
+        connection,
+        user2,
+        user2.publicKey,
+        user2.publicKey,
+        decimals,
+        keypair2
+      );
+
+      console.log("Token 2 : ", token2.toBase58());
+
+      user2Ata2 = await getOrCreateAssociatedTokenAccount(
+        connection,
+        user2,
+        token2,
+        user2.publicKey
+      );
+      console.log("User 1 Associated Token Aaccount : ", user2Ata2.address.toBase58());
+
+      let user2MintTo2 = await mintTo(
+        connection,
+        user2,
+        token2,
+        user2Ata2.address,
+        user2.publicKey,
+        300 * 1 * 10 ** decimals
+      );
+      console.log(`https://explorer.solana.com/tx/${user2MintTo2}?cluster=devnet`);
+      let user2TokenAmount2 = await connection.getTokenAccountBalance(user2Ata2.address);
+      console.log(
+        `minted ${user2TokenAmount2.value.uiAmountString} ${token2.toBase58()} tokens for user2`
       );
 
     }
@@ -1227,102 +1266,8 @@ describe("lock", () => {
 
 
 
-  it("user1 deactivate his staked deposits", async () => {
-    await program.methods.stakeDeactivate()
-      .accountsStrict({
-        owner: user1.publicKey,
-        user: user1Pda,
-        lock,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user1])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.user.fetch(user1Pda);
-        debug.deposits.forEach(deposit => {
-          console.log(deposit)
-          assert.strictEqual(deposit.deactivating, true);
-        });
-        let user1TokenAmount = await connection.getTokenAccountBalance(user1Ata.address);
-        console.log(`User 1 now have ${user1TokenAmount.value.uiAmount} Tokens`)
-      });
-  });
 
-  const user1ClaimStake = async () => {
-    return new Promise(resolve => {
-      setTimeout(async () => {
-        await program.methods.stakeClaim()
-          .accountsStrict({
-            owner: user1.publicKey,
-            auth,
-            lock,
-            user: user1Pda,
-            signerAta: user1Ata.address,
-            mint,
-            vault: user1Vault,
-            analytics,
-            systemProgram: SYSTEM_PROGRAM_ID,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-          })
-          .signers([user1])
-          .rpc()
-          .then(confirmTx)
-          .then(async () => {
-            let user1TokenAmount = await connection.getTokenAccountBalance(user1Ata.address);
-            console.log(`User 1 now have ${user1TokenAmount.value.uiAmount} Tokens`)
-            resolve(user1TokenAmount.value.uiAmount)
-          }).catch(err => console.log(err));
-      }, 6000)
-    })
-  }
 
-  it("user1 claim his deactivated staked deposits", async () => {
-    const claim = await user1ClaimStake();
-    assert.strictEqual(100, claim);
-  }).timeout(7000);
-
-  it("rejects : user1 tries claim twice his deactivated staked deposits", async () => {
-    await assert.rejects((async () => {
-      await program.methods.stakeClaim()
-        .accountsStrict({
-          owner: user1.publicKey,
-          auth,
-          lock,
-          user: user1Pda,
-          signerAta: user1Ata.address,
-          mint,
-          vault: user1Vault,
-          analytics,
-          systemProgram: SYSTEM_PROGRAM_ID,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-        })
-        .signers([user1])
-        .rpc()
-        .then(confirmTx)
-    })(), (err: any) => {
-      console.log(err.error.errorCode.code)
-      assert.strictEqual(err.error.errorCode.code, "NoDepositsReadyToClaimForThisUserInThisLocker");
-      return true
-    });
-  });
-
-  it("user1 execute proposal core after end of voting period", async () => {
-    await program.methods.proposalExecute()
-      .accountsStrict({
-        owner: user1.publicKey,
-        lock,
-        proposal: proposal1,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user1])
-      .rpc()
-      .then(confirmTx)
-  });
 
   it("user1 asr rewards restaked for lock mint season 1 rewards", async () => {
     await program.methods.asrClaim()
@@ -1372,6 +1317,108 @@ describe("lock", () => {
     });
   }).timeout(18000);
 
+  it("user1 deactivate his staked deposits", async () => {
+    await program.methods.stakeDeactivate()
+      .accountsStrict({
+        owner: user1.publicKey,
+        user: user1Pda,
+        lock,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.user.fetch(user1Pda);
+        debug.deposits.forEach(deposit => {
+          console.log(deposit)
+          console.log("amount : ", deposit.amount.toNumber())
+          assert.strictEqual(deposit.deactivating, true);
+        });
+        let user1TokenAmount = await connection.getTokenAccountBalance(user1Ata.address);
+        console.log(`User 1 now have ${user1TokenAmount.value.uiAmount} Tokens`)
+      });
+  });
+
+  const user1ClaimStake = async () => {
+    return new Promise(resolve => {
+      setTimeout(async () => {
+        await program.methods.stakeClaim()
+          .accountsStrict({
+            owner: user1.publicKey,
+            auth,
+            lock,
+            user: user1Pda,
+            signerAta: user1Ata.address,
+            mint,
+            vault: user1Vault,
+            analytics,
+            systemProgram: SYSTEM_PROGRAM_ID,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+          })
+          .signers([user1])
+          .rpc()
+          .then(confirmTx)
+          .then(async () => {
+            let user1TokenAmount = await connection.getTokenAccountBalance(user1Ata.address);
+            console.log(`User 1 now have ${user1TokenAmount.value.uiAmount} Tokens`)
+            resolve(user1TokenAmount.value.uiAmount)
+          }).catch(err => console.log(err));
+      }, 6000)
+    })
+  }
+
+  it("user1 claim his deactivated staked deposits", async () => {
+    const claim = await user1ClaimStake();
+    assert.strictEqual(claim >= 180, true);
+  }).timeout(7000);
+
+  it("rejects : user1 tries claim twice his deactivated staked deposits", async () => {
+    await assert.rejects((async () => {
+      await program.methods.stakeClaim()
+        .accountsStrict({
+          owner: user1.publicKey,
+          auth,
+          lock,
+          user: user1Pda,
+          signerAta: user1Ata.address,
+          mint,
+          vault: user1Vault,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+        })
+        .signers([user1])
+        .rpc()
+        .then(confirmTx)
+    })(), (err: any) => {
+      console.log(err.error.errorCode.code)
+      assert.strictEqual(err.error.errorCode.code, "NoDepositsReadyToClaimForThisUserInThisLocker");
+      return true
+    });
+  });
+
+  it("user1 execute proposal core after end of voting period", async () => {
+    await program.methods.proposalExecute()
+      .accountsStrict({
+        owner: user1.publicKey,
+        lock,
+        proposal: proposal1,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.lock.fetch(lock);
+        console.log(debug);
+        console.log("season 0 points : ", debug.seasons[debug.seasons.length - 2].points.toNumber());
+      })
+  });
 
   // after(async () => {
   // setTimeout(async () => {

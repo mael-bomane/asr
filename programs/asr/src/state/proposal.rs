@@ -46,22 +46,29 @@ impl Proposal {
         + MAX_CONTENT_LENGTH
         + VECTOR_LENGTH_PREFIX;
 
-    pub fn result(&self, lock: &Lock) -> (Option<Choice>, bool, u64, Status) {
+    pub fn result(&self, lock: &Lock) -> (Option<Choice>, bool, Status) {
         let mut highest = 0u64;
-        let mut total_power = 0u64;
+        let total_power: u64 = self.choices.clone().iter().map(|c| c.voting_power).sum();
 
         for choice in &self.choices {
             if choice.voting_power > highest {
                 highest = choice.voting_power;
             }
-            total_power += choice.voting_power;
         }
 
         let quorum = lock.config.quorum as u64;
-        let min = quorum
-            .checked_mul(lock.total_deposits)
-            .unwrap()
-            .div_ceil(100);
+
+        let min = if self.proposal_type >= 0 && self.proposal_type <= 2 {
+            quorum
+                .checked_mul(lock.total_deposits)
+                .unwrap()
+                .div_ceil(100)
+        } else {
+            quorum
+                .checked_mul(lock.total_deposits)
+                .unwrap()
+                .div_ceil(100)
+        };
 
         // Find all choices with the highest voting power
         let highest_voting_choices: Vec<&Choice> = self
@@ -77,12 +84,12 @@ impl Proposal {
         if total_power >= min {
             // If there is more than one choice with the highest voting power, it's a tie
             if highest_voting_choices.len() > 1 {
-                (None, true, total_power, Status::Tie)
+                (None, true, Status::Tie)
             } else {
-                (Some(result), true, total_power, Status::Approved)
+                (Some(result), true, Status::Approved)
             }
         } else {
-            (None, false, total_power, Status::Rejected)
+            (None, false, Status::Rejected)
         }
     }
 }
