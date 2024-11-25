@@ -51,6 +51,7 @@ impl User {
     }
 
     pub fn voting_power(&self, lock: &Lock) -> u64 {
+        let now = Clock::get().unwrap().unix_timestamp;
         // active staking rewards (asr) math
         if lock.config.config == 0 {
             self.deposits
@@ -59,14 +60,18 @@ impl User {
                     if !deposit.deactivating {
                         deposit.amount
                     } else {
-                        // deactivation_start = deposit.amount (100%)
-                        // expires_at = 0
-                        // remaining = expires_at - now
-                        // x = x*100/y
                         let now = Clock::get().unwrap().unix_timestamp;
-                        let delta = (deposit.deactivation_start.unwrap() + THREE_MONTH_IN_SECONDS) - (deposit.deactivation_start.unwrap() + THREE_MONTH_IN_SECONDS - now);
-                        let remaining = delta.checked_mul(deposit.amount as i64).unwrap() as u64;
-                        remaining.div_ceil(deposit.deactivation_start.unwrap() as u64 + THREE_MONTH_IN_SECONDS as u64) as u64
+                        if now >= (deposit.deactivation_start.unwrap() + lock.config.lock_duration) {
+                            // Deposit has fully expired, no longer contributes
+                            0u64
+                        } else {
+                            // Deposit is deactivating but not expired yet, apply linear decay
+                            let time_passed = now - deposit.deactivation_start.unwrap();
+                            let decay_factor = time_passed as f64 / lock.config.lock_duration as f64;
+                            // Calculate decayed voting power
+                            let decayed_voting_power = (deposit.amount as f64 * (1.0 - decay_factor)).round() as u64;
+                            decayed_voting_power
+                        }
                     }
                 })
                 .sum()
@@ -76,10 +81,10 @@ impl User {
                 .iter()
                 .map(|deposit| {
                     if !deposit.deactivating {
-                        // y = 100%
-                        // x = z
-                        // z = x*100/y
-                        deposit.amount.checked_mul(100).unwrap().div_ceil(deposit.expires_at as u64)
+                        let time_left = deposit.expires_at - now;
+                        let total_time = deposit.expires_at - deposit.created_at;
+                        let voting_power = deposit.amount.checked_mul(time_left as u64).unwrap().div_ceil(total_time as u64);
+                        voting_power
                     } else {
                         0u64
                     }

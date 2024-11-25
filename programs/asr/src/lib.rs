@@ -46,8 +46,8 @@ pub mod asr {
         )
     }
 
-    pub fn lock_update(
-        ctx: Context<LockUpdate>,
+    pub fn proposal_core(
+        ctx: Context<ProposalCore>,
         config: u8,
         permissionless: Option<bool>,
         season_duration: Option<i64>,
@@ -59,7 +59,7 @@ pub mod asr {
         name: Option<String>,
         symbol: Option<String>,
     ) -> Result<()> {
-        ctx.accounts.lock_update(
+        ctx.accounts.proposal_core(
             &ctx.bumps,
             config,
             permissionless,
@@ -71,7 +71,8 @@ pub mod asr {
             amount,
             name,
             symbol,
-        )
+        )?;
+        ctx.accounts.update_analytics()
     }
 
     pub fn register(ctx: Context<Register>) -> Result<()> {

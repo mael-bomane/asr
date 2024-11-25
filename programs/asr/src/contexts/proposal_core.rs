@@ -1,6 +1,3 @@
-use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
-
 use crate::{constants::*, errors::ErrorCode, state::{Analytics, Lock, Proposal, Status, User, Choice}};
 
 use anchor_lang::prelude::*;
@@ -18,15 +15,9 @@ use anchor_lang::prelude::*;
     name: Option<String>, 
     symbol: Option<String>
 )]
-pub struct LockUpdate<'info> {
+pub struct ProposalCore<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
-    #[account(
-        seeds = [b"auth", analytics.key().as_ref()],
-        bump = analytics.auth_bump
-    )]
-    /// CHECK: This is safe, account doesn't exists nor holds data
-    pub auth: UncheckedAccount<'info>,
     #[account(
         mut,
         seeds = [b"lock", lock.creator.key().as_ref(), lock.config.mint.key().as_ref()],
@@ -50,39 +41,21 @@ pub struct LockUpdate<'info> {
          bump = user.bump
      )]
      pub user: Box<Account<'info, User>>,
-    #[account(
-        mut,
-        associated_token::mint = mint,
-        associated_token::authority = signer,
-    )]
-    pub signer_ata: Box<Account<'info, TokenAccount>>,
-    pub mint: Box<Account<'info, Mint>>,
     //#[account(constraint = metadata.mint.key() == mint.key())]
     //pub metadata: Box<Account<'info, MetadataAccount>>,
-    #[account(
-        init,
-        payer = signer,
-        seeds = [b"vault", lock.key().as_ref(), mint.key().as_ref()],
-        token::mint = mint,
-        token::authority = auth,
-        bump
-    )]
-    pub vault: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
         seeds = [b"analytics"],
         bump = analytics.state_bump
     )]
     pub analytics: Box<Account<'info, Analytics>>,
-    pub token_program: Program<'info, Token>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> LockUpdate<'info> {
-    pub fn lock_update(
+impl<'info> ProposalCore<'info> {
+    pub fn proposal_core(
         &mut self,
-        bumps: &LockUpdateBumps,
+        bumps: &ProposalCoreBumps,
         config: u8,
         permissionless: Option<bool>,
         season_duration: Option<i64>,
@@ -134,7 +107,7 @@ impl<'info> LockUpdate<'info> {
         match lock_duration {
             Some(value) => {
                 if lock.config.config == 0 {
-                    require!(value == 0, ErrorCode::InvalidLockDuration);
+                    require!(value >= 0 && value <= THREE_MONTH_IN_SECONDS, ErrorCode::InvalidLockDuration);
                 } else if lock.config.config == 1 {
                     require!(
                         value >= ONE_MONTH_IN_SECONDS && value <= ONE_YEAR_IN_SECONDS,
@@ -233,7 +206,10 @@ impl<'info> LockUpdate<'info> {
 
     pub fn update_analytics(&mut self) -> Result<()> {
         let analytics = &mut self.analytics;
-        analytics.locks += 1;
+        analytics.proposals += 1;
+        let lock = &mut self.lock;
+        lock.proposals += 1;
         Ok(())
     }
+
 }

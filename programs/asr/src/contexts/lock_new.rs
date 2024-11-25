@@ -100,7 +100,10 @@ impl<'info> LockNew<'info> {
         );
 
         if config == 0 {
-            require!(lock_duration == 0, ErrorCode::InvalidLockDuration);
+            require!(
+                lock_duration >= 0 && lock_duration <= THREE_MONTH_IN_SECONDS,
+                ErrorCode::InvalidLockDuration
+            );
         } else if config == 1 {
             require!(
                 lock_duration >= ONE_MONTH_IN_SECONDS && voting_period <= ONE_YEAR_IN_SECONDS,
