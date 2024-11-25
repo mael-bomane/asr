@@ -50,35 +50,37 @@ impl Proposal {
         let mut highest = 0u64;
         let mut total_power = 0u64;
 
-        // if self.proposal_type == (4 || 5) {}
-
         for choice in &self.choices {
             if choice.voting_power > highest {
                 highest = choice.voting_power;
             }
-            total_power += choice.voting_power
+            total_power += choice.voting_power;
         }
 
         let quorum = lock.config.quorum as u64;
-        // ensure we pass the quorum
         let min = quorum
             .checked_mul(lock.total_deposits)
             .unwrap()
             .div_ceil(100);
-        // let min = lock.quorum.checked_mul(lock.total_deposits).unwrap().div_ceil(100);
 
-        // get result choice with the most voting power
-        let result = self
+        // Find all choices with the highest voting power
+        let highest_voting_choices: Vec<&Choice> = self
             .choices
             .iter()
-            .find(|r| r.voting_power == highest)
-            .unwrap()
-            .clone();
+            .filter(|r| r.voting_power == highest)
+            .collect();
 
-        // quorum pass
+        // Get result choice with the most voting power
+        let result = highest_voting_choices[0].clone();
+
+        // Check if quorum is met
         if total_power >= min {
-            (Some(result), true, total_power)
-        // quorum doesn't pass
+            // If there is more than one choice with the highest voting power, it's a tie
+            if highest_voting_choices.len() > 1 {
+                (None, true, total_power)
+            } else {
+                (Some(result), true, total_power)
+            }
         } else {
             (None, false, total_power)
         }

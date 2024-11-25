@@ -77,7 +77,7 @@ impl<'info> StakeClaim<'info> {
             .into_iter()
             .filter(|deposit| {
                 time > (if lock.config.config == 0 {
-                    Some(deposit.deactivation_start).unwrap().unwrap() + ONE_MONTH_IN_SECONDS
+                    Some(deposit.deactivation_start).unwrap().unwrap() + lock.config.lock_duration
                 } else {
                     deposit.expires_at
                 })
@@ -98,7 +98,7 @@ impl<'info> StakeClaim<'info> {
             .into_iter()
             .filter(|deposit| {
                 time < (if lock.config.config == 0 {
-                    Some(deposit.deactivation_start).unwrap().unwrap() + ONE_MONTH_IN_SECONDS
+                    Some(deposit.deactivation_start).unwrap().unwrap() + lock.config.lock_duration
                 } else {
                     deposit.expires_at
                 })

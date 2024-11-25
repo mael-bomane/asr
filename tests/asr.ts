@@ -379,15 +379,21 @@ describe("lock", () => {
         });
     } else {
       console.log("running on localnet");
-      // voting escrow
-      // await program.methods.lockerNew(1, day, new BN(86400 * 7 * 52), 51, min, "SOON")
-      // active staking rewards
-      // await program.methods.lockNew(0, day, new BN(0), 51, 25, min, "SOON")
-      await program.methods.lockNew(0, false, new BN(15), new BN(5), new BN(5), 51, 25, min, "Monolith", "MONO")
+      await program.methods.lockNew(
+        0, //config
+        false, //permissionless
+        new BN(15), //season_duration
+        new BN(5), // voting_period
+        new BN(5), // lock_duration
+        51, //approval_threshold
+        25, //quorum
+        min, // amount
+        "Monolith", //name 
+        "MONO" // symbol
+      )
         .accountsStrict({
           signer: user1.publicKey,
           auth,
-          //user: user1Pda,
           lock,
           signerAta: user1Ata.address,
           vault,
@@ -1058,203 +1064,204 @@ describe("lock", () => {
   });
 
 
-  // it("user1 tries to execute poll 0 before end of voting period", async () => {
-  //   await assert.rejects((async () => {
-  //     await program.methods.proposalExecute()
-  //       .accountsStrict({
-  //         owner: user1.publicKey,
-  //         lock,
-  //         proposal,
-  //         analytics,
-  //         systemProgram: SYSTEM_PROGRAM_ID,
-  //       })
-  //       .signers([user1])
-  //       .rpc()
-  //       .then(confirmTx)
-  //   })(), (err: any) => {
-  //     console.log(err.error.errorCode.code)
-  //     assert.strictEqual(err.error.errorCode.code, "WaitForVotingPeriodToEnd");
-  //     return true
+  it("user1 tries to execute poll 0 before end of voting period", async () => {
+    await assert.rejects((async () => {
+      await program.methods.proposalExecute()
+        .accountsStrict({
+          owner: user1.publicKey,
+          lock,
+          proposal: proposalCoreUser1,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID,
+        })
+        .signers([user1])
+        .rpc()
+        .then(confirmTx)
+    })(), (err: any) => {
+      console.log(err.error.errorCode.code)
+      assert.strictEqual(err.error.errorCode.code, "WaitForVotingPeriodToEnd");
+      return true
 
-  //   });
-  // });
+    });
+  });
 
-  // const proposalExecute = async () => {
-  //   return new Promise(resolve => {
-  //     setTimeout(async () => {
-  //       await program.methods.proposalExecute()
-  //         .accountsStrict({
-  //           owner: user1.publicKey,
-  //           lock,
-  //           proposal,
-  //           analytics,
-  //           systemProgram: SYSTEM_PROGRAM_ID,
-  //         })
-  //         .signers([user1])
-  //         .rpc()
-  //         .then(confirmTx)
-  //         .then(async () => {
-  //           const debug = await program.account.proposal.fetch(proposal);
-  //           resolve(debug.executed);
-  //         })
-  //     }, 5000)
-  //   })
-  // }
+  const proposalExecute = async () => {
+    return new Promise(resolve => {
+      setTimeout(async () => {
+        await program.methods.proposalExecute()
+          .accountsStrict({
+            owner: user1.publicKey,
+            lock,
+            proposal: proposalCoreUser1,
+            analytics,
+            systemProgram: SYSTEM_PROGRAM_ID,
+          })
+          .signers([user1])
+          .rpc()
+          .then(confirmTx)
+          .then(async () => {
+            const debug = await program.account.proposal.fetch(proposalCoreUser1);
+            console.log(debug);
+            resolve(debug.executed);
+          }).catch(err => console.log(err));
+      }, 6000)
+    })
+  }
 
-  // it("user1 execute poll 0 after end of voting period", async () => {
-  //   const executed = await proposalExecute();
-  //   console.log(executed);
-  //   assert.strictEqual(executed, true);
-  // }).timeout(7000);
+  it("user1 execute poll 0 after end of voting period", async () => {
+    const executed = await proposalExecute();
+    console.log(executed);
+    assert.strictEqual(executed, true);
+  }).timeout(7000);
 
-  // it("user1 deactivate his staked deposits", async () => {
-  //   await program.methods.stakeDeactivate()
-  //     .accountsStrict({
-  //       owner: user1.publicKey,
-  //       user: user1Pda,
-  //       lock,
-  //       analytics,
-  //       systemProgram: SYSTEM_PROGRAM_ID,
-  //     })
-  //     .signers([user1])
-  //     .rpc()
-  //     .then(confirmTx)
-  //     .then(async () => {
-  //       const debug = await program.account.user.fetch(user1Pda);
-  //       debug.deposits.forEach(deposit => {
-  //         console.log(deposit)
-  //         assert.strictEqual(deposit.deactivating, true);
-  //       });
-  //       let user1TokenAmount = await connection.getTokenAccountBalance(user1Ata.address);
-  //       console.log(`User 1 now have ${user1TokenAmount.value.uiAmount} Tokens`)
-  //     });
-  // });
+  it("user1 deactivate his staked deposits", async () => {
+    await program.methods.stakeDeactivate()
+      .accountsStrict({
+        owner: user1.publicKey,
+        user: user1Pda,
+        lock,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.user.fetch(user1Pda);
+        debug.deposits.forEach(deposit => {
+          console.log(deposit)
+          assert.strictEqual(deposit.deactivating, true);
+        });
+        let user1TokenAmount = await connection.getTokenAccountBalance(user1Ata.address);
+        console.log(`User 1 now have ${user1TokenAmount.value.uiAmount} Tokens`)
+      });
+  });
 
-  // const user1ClaimStake = async () => {
-  //   return new Promise(resolve => {
-  //     setTimeout(async () => {
-  //       await program.methods.stakeClaim()
-  //         .accountsStrict({
-  //           owner: user1.publicKey,
-  //           auth,
-  //           lock,
-  //           user: user1Pda,
-  //           signerAta: user1Ata.address,
-  //           mint,
-  //           vault: user1Vault,
-  //           analytics,
-  //           systemProgram: SYSTEM_PROGRAM_ID,
-  //           tokenProgram: TOKEN_PROGRAM_ID,
-  //           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-  //         })
-  //         .signers([user1])
-  //         .rpc()
-  //         .then(confirmTx)
-  //         .then(async () => {
-  //           let user1TokenAmount = await connection.getTokenAccountBalance(user1Ata.address);
-  //           console.log(`User 1 now have ${user1TokenAmount.value.uiAmount} Tokens`)
-  //           resolve(user1TokenAmount.value.uiAmount)
-  //         });
-  //     }, 7000)
-  //   })
-  // }
+  const user1ClaimStake = async () => {
+    return new Promise(resolve => {
+      setTimeout(async () => {
+        await program.methods.stakeClaim()
+          .accountsStrict({
+            owner: user1.publicKey,
+            auth,
+            lock,
+            user: user1Pda,
+            signerAta: user1Ata.address,
+            mint,
+            vault: user1Vault,
+            analytics,
+            systemProgram: SYSTEM_PROGRAM_ID,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+          })
+          .signers([user1])
+          .rpc()
+          .then(confirmTx)
+          .then(async () => {
+            let user1TokenAmount = await connection.getTokenAccountBalance(user1Ata.address);
+            console.log(`User 1 now have ${user1TokenAmount.value.uiAmount} Tokens`)
+            resolve(user1TokenAmount.value.uiAmount)
+          }).catch(err => console.log(err));
+      }, 7000)
+    })
+  }
 
-  // it("user1 claim his deactivated staked deposits", async () => {
-  //   const claim = await user1ClaimStake();
-  //   assert.strictEqual(100, claim);
-  // }).timeout(8000);
+  it("user1 claim his deactivated staked deposits", async () => {
+    const claim = await user1ClaimStake();
+    assert.strictEqual(100, claim);
+  }).timeout(8000);
 
-  // it("rejects : user1 tries claim twice his deactivated staked deposits", async () => {
-  //   await assert.rejects((async () => {
-  //     await program.methods.stakeClaim()
-  //       .accountsStrict({
-  //         owner: user1.publicKey,
-  //         auth,
-  //         lock,
-  //         user: user1Pda,
-  //         signerAta: user1Ata.address,
-  //         mint,
-  //         vault: user1Vault,
-  //         analytics,
-  //         systemProgram: SYSTEM_PROGRAM_ID,
-  //         tokenProgram: TOKEN_PROGRAM_ID,
-  //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-  //       })
-  //       .signers([user1])
-  //       .rpc()
-  //       .then(confirmTx)
-  //   })(), (err: any) => {
-  //     console.log(err.error.errorCode.code)
-  //     assert.strictEqual(err.error.errorCode.code, "NoDepositsReadyToClaimForThisUserInThisLocker");
-  //     return true
-  //   });
-  // }).timeout(9000);
+  it("rejects : user1 tries claim twice his deactivated staked deposits", async () => {
+    await assert.rejects((async () => {
+      await program.methods.stakeClaim()
+        .accountsStrict({
+          owner: user1.publicKey,
+          auth,
+          lock,
+          user: user1Pda,
+          signerAta: user1Ata.address,
+          mint,
+          vault: user1Vault,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+        })
+        .signers([user1])
+        .rpc()
+        .then(confirmTx)
+    })(), (err: any) => {
+      console.log(err.error.errorCode.code)
+      assert.strictEqual(err.error.errorCode.code, "NoDepositsReadyToClaimForThisUserInThisLocker");
+      return true
+    });
+  }).timeout(9000);
 
-  // const user1ClaimASR = async () => {
-  //   return new Promise(resolve => {
-  //     setTimeout(async () => {
-  //       await program.methods.asrClaim()
-  //         .accountsStrict({
-  //           owner: user1.publicKey,
-  //           user: user1Pda,
-  //           auth,
-  //           lock,
-  //           userVault: user1Vault,
-  //           signerAta: user1Ata.address,
-  //           vault,
-  //           mint,
-  //           analytics,
-  //           systemProgram: SYSTEM_PROGRAM_ID,
-  //           tokenProgram: TOKEN_PROGRAM_ID,
-  //           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-  //         })
-  //         .signers([user1])
-  //         .rpc()
-  //         .then(confirmTx)
-  //         .then(async () => {
-  //           const debug = await program.account.user.fetch(user1Pda);
-  //           console.log(debug.deposits);
-  //           debug.deposits.forEach((deposit) => {
-  //             console.log("User 1 Restaked ASR : ", deposit.amount.toNumber() / (1 * 10 ** decimals));
-  //           })
-  //           resolve(debug.deposits.length)
-  //         }).catch(err => console.log(err));
-  //     }, 16000)
-  //   })
-  // }
+  const user1ClaimASR = async () => {
+    return new Promise(resolve => {
+      setTimeout(async () => {
+        await program.methods.asrClaim()
+          .accountsStrict({
+            owner: user1.publicKey,
+            user: user1Pda,
+            auth,
+            lock,
+            userVault: user1Vault,
+            signerAta: user1Ata.address,
+            vault,
+            mint,
+            analytics,
+            systemProgram: SYSTEM_PROGRAM_ID,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+          })
+          .signers([user1])
+          .rpc()
+          .then(confirmTx)
+          .then(async () => {
+            const debug = await program.account.user.fetch(user1Pda);
+            console.log(debug.deposits);
+            debug.deposits.forEach((deposit) => {
+              console.log("User 1 Restaked ASR : ", deposit.amount.toNumber() / (1 * 10 ** decimals));
+            })
+            resolve(debug.deposits.length)
+          }).catch(err => console.log(err));
+      }, 16000)
+    })
+  }
 
-  // it("user1 asr rewards restaked for lock mint season 1 rewards", async () => {
-  //   const asr = await user1ClaimASR();
-  //   assert.strictEqual(1, asr);
-  // }).timeout(18000);
+  it("user1 asr rewards restaked for lock mint season 1 rewards", async () => {
+    const asr = await user1ClaimASR();
+    assert.strictEqual(1, asr);
+  }).timeout(18000);
 
-  // it("reject : user1 tries claim twice his asr rewards for season 1", async () => {
-  //   setTimeout(async () => {
-  //     try {
-  //       await program.methods.asrClaim()
-  //         .accountsStrict({
-  //           owner: user1.publicKey,
-  //           user: user1Pda,
-  //           auth,
-  //           lock,
-  //           userVault: user1Vault,
-  //           signerAta: user1Ata.address,
-  //           vault,
-  //           mint,
-  //           analytics,
-  //           systemProgram: SYSTEM_PROGRAM_ID,
-  //           tokenProgram: TOKEN_PROGRAM_ID,
-  //           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
-  //         })
-  //         .signers([user1])
-  //         .rpc()
-  //         .then(confirmTx)
-  //     } catch (error) {
-  //       console.log(error.error.errorCode.code)
-  //       assert.strictEqual("UserAlreadyClaimedThis", error.error.errorCode.code)
-  //     }
-  //   }, 20000);
-  // }).timeout(21000);
+  it("reject : user1 tries claim twice his asr rewards for season 1", async () => {
+    await assert.rejects((async () => {
+      await program.methods.asrClaim()
+        .accountsStrict({
+          owner: user1.publicKey,
+          user: user1Pda,
+          auth,
+          lock,
+          userVault: user1Vault,
+          signerAta: user1Ata.address,
+          vault,
+          mint,
+          analytics,
+          systemProgram: SYSTEM_PROGRAM_ID,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+        })
+        .signers([user1])
+        .rpc()
+        .then(confirmTx)
+    })(), (err: any) => {
+      console.log(err.error.errorCode.code)
+      assert.strictEqual(err.error.errorCode.code, "UserAlreadyClaimedThis");
+      return true
+    });
+  }).timeout(9000);
+
 
   // after(async () => {
   // setTimeout(async () => {

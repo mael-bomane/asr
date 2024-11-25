@@ -61,9 +61,14 @@ impl<'info> ProposalExecute<'info> {
                         analytics.approved += 1;
                         proposal.executed = true;
                         proposal.status = Status::Approved;
-                        proposal.result = result.clone();
-                        if result.clone().unwrap().id == 0 {
-                            lock.config = proposal.config.clone().unwrap()
+                        match result {
+                            Some(r) => {
+                                proposal.result = Some(r.clone());
+                                if r.id == 0 {
+                                    lock.config = proposal.config.clone().unwrap()
+                                }
+                            },
+                            None => proposal.result = None,
                         }
                     },
                     false => {
@@ -102,9 +107,14 @@ impl<'info> ProposalExecute<'info> {
                         analytics.approved += 1;
                         proposal.executed = true;
                         proposal.status = Status::Approved;
-                        proposal.result = result.clone();
-                        if result.clone().unwrap().id == 0 {
+                        match result {
+                            Some(r) => {
+                                proposal.result = Some(r.clone());
+                                if r.id == 0 {
                             lock.config.managers.push(proposal.manager.clone().unwrap())
+                                }
+                            },
+                            None => proposal.result = None,
                         }
                     },
                     false => {
@@ -124,10 +134,15 @@ impl<'info> ProposalExecute<'info> {
                         analytics.approved += 1;
                         proposal.executed = true;
                         proposal.status = Status::Approved;
-                        proposal.result = result.clone();
-                        if result.clone().unwrap().id == 0 {
-                            let index = lock.config.managers.iter().position(|x| *x == proposal.manager.clone().unwrap()).unwrap();
-                            lock.config.managers.remove(index);
+                        match result {
+                            Some(r) => {
+                                proposal.result = Some(r.clone());
+                                if r.id == 0 {
+                                    let index = lock.config.managers.iter().position(|x| *x == proposal.manager.clone().unwrap()).unwrap();
+                                    lock.config.managers.remove(index);
+                                }
+                            },
+                            None => proposal.result = None,
                         }
                     },
                     false => {
