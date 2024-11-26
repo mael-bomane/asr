@@ -95,7 +95,7 @@ impl<'info> LockNew<'info> {
         );
 
         require!(
-            voting_period >= HALF_DAY_IN_SECONDS && voting_period <= ONE_WEEK_IN_SECONDS,
+            voting_period >= 3600 && voting_period <= ONE_WEEK_IN_SECONDS,
             ErrorCode::VotingPeriodOutOfBounds
         );
 

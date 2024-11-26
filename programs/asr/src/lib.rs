@@ -8,7 +8,7 @@ mod state;
 use contexts::*;
 use state::*;
 
-declare_id!("ASRfYyksXtyLrLsXtEwCAjMXb7jUDcd7YPRSE1a1ECH2");
+declare_id!("ASRwFhKHjzF96q6BAvWcjCQQT8WpBU9XTkWDKe5ttmUX");
 
 #[program]
 pub mod asr {

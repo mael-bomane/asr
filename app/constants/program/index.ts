@@ -3,7 +3,7 @@ import idl from "@/constants/idl/lock.json";
 import { Program } from "@coral-xyz/anchor";
 import { clusterApiUrl, Connection } from "@solana/web3.js";
 
-export const PROGRAM_ID = 'ASRB7cGR7e3RQEWPg3PqgCBTFgCmZvjmXsgfzsxo4zTr'
+export const PROGRAM_ID = 'ASRwFhKHjzF96q6BAvWcjCQQT8WpBU9XTkWDKe5ttmUX'
 export const MONOLITH_ID = 'ASUsodUSAzzwNvCtRquTtS3ZAVU8NUaxUhEYRWNPjH27'
 export const UNSTAKING_TIME = 86400 * 3;
 
