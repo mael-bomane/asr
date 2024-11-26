@@ -16,7 +16,7 @@ pub struct Proposal {
     pub ends_at: i64,
     pub executed: bool,
     pub bump: u8,
-    pub proposal_type: u8, // 0 = lock settings, 2 = standard
+    pub proposal_type: u8, // 0 core, 1 standard, 2 option, 3 manager add, 4 manager remove
     pub status: Status,
     pub result: Option<Choice>,
     pub config: Option<Config>,
@@ -58,17 +58,10 @@ impl Proposal {
 
         let quorum = lock.config.quorum as u64;
 
-        let min = if self.proposal_type >= 0 && self.proposal_type <= 2 {
-            quorum
-                .checked_mul(lock.total_deposits)
-                .unwrap()
-                .div_ceil(100)
-        } else {
-            quorum
-                .checked_mul(lock.total_deposits)
-                .unwrap()
-                .div_ceil(100)
-        };
+        let min = quorum
+            .checked_mul(lock.total_deposits)
+            .unwrap()
+            .div_ceil(100);
 
         // Find all choices with the highest voting power
         let highest_voting_choices: Vec<&Choice> = self
@@ -80,16 +73,31 @@ impl Proposal {
         // Get result choice with the most voting power
         let result = highest_voting_choices[0].clone();
 
-        // Check if quorum is met
-        if total_power >= min {
-            // If there is more than one choice with the highest voting power, it's a tie
-            if highest_voting_choices.len() > 1 {
-                (None, true, Status::Tie)
-            } else {
-                (Some(result), true, Status::Approved)
+        match self.proposal_type {
+            // for non-managers proposals
+            0..=2 => {
+                // Check if quorum is met
+                if total_power >= min {
+                    // If there is more than one choice with the highest voting power, it's a tie
+                    if highest_voting_choices.len() > 1 {
+                        (None, true, Status::Tie)
+                    } else {
+                        (Some(result), true, Status::Approved)
+                    }
+                } else {
+                    (None, false, Status::Rejected)
+                }
             }
-        } else {
-            (None, false, Status::Rejected)
+            // manager add & remove, we don't check quorum
+            3..=4 => {
+                // If there is more than one choice with the highest voting power, it's a tie
+                if highest_voting_choices.len() > 1 {
+                    (None, true, Status::Tie)
+                } else {
+                    (Some(result), true, Status::Approved)
+                }
+            }
+            _ => (None, false, Status::Rejected),
         }
     }
 }

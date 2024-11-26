@@ -103,9 +103,15 @@ describe("lock", () => {
     program.programId
   )[0];
 
-  const vault = PublicKey.findProgramAddressSync(
+  const vault1 = PublicKey.findProgramAddressSync(
     // seeds = [b"vault", creator.key().as_ref(), mint.key().as_ref()]
     [Buffer.from("vault"), lock.toBytes(), mint.toBytes()],
+    program.programId
+  )[0];
+
+  const vault2 = PublicKey.findProgramAddressSync(
+    // seeds = [b"vault", creator.key().as_ref(), mint.key().as_ref()]
+    [Buffer.from("vault"), lock.toBytes(), mint2.toBytes()],
     program.programId
   )[0];
 
@@ -127,13 +133,13 @@ describe("lock", () => {
     program.programId
   )[0];
 
-  const proposalStandardUser2 = PublicKey.findProgramAddressSync(
+  const proposal3 = PublicKey.findProgramAddressSync(
     // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
     [Buffer.from("proposal"), lock.toBytes(), new BN(3).toArrayLike(Buffer, 'le', 8)],
     program.programId
   )[0];
 
-  const proposal3 = PublicKey.findProgramAddressSync(
+  const proposalStandardUser2 = PublicKey.findProgramAddressSync(
     // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
     [Buffer.from("proposal"), lock.toBytes(), new BN(3).toArrayLike(Buffer, 'le', 8)],
     program.programId
@@ -293,6 +299,26 @@ describe("lock", () => {
 
       console.log("Token 2 : ", token2.toBase58());
 
+      user1Ata2 = await getOrCreateAssociatedTokenAccount(
+        connection,
+        user2,
+        token2,
+        user1.publicKey
+      );
+      console.log("User 1 Associated Token Aaccount 2 : ", user1Ata2.address.toBase58());
+      let user1MintTo2 = await mintTo(
+        connection,
+        user2,
+        token2,
+        user1Ata2.address,
+        user2.publicKey,
+        100 * 1 * 10 ** decimals
+      );
+      console.log(`https://explorer.solana.com/tx/${user1MintTo2}?cluster=devnet`);
+      let user1TokenAmount2 = await connection.getTokenAccountBalance(user1Ata2.address);
+      console.log(
+        `minted ${user1TokenAmount2.value.uiAmountString} ${token2.toBase58()} tokens for user2`
+      );
       user2Ata2 = await getOrCreateAssociatedTokenAccount(
         connection,
         user2,
@@ -402,7 +428,7 @@ describe("lock", () => {
           auth,
           lock,
           signerAta: signerAta.address,
-          vault,
+          vault: vault1,
           mint,
           analytics,
           systemProgram: SYSTEM_PROGRAM_ID,
@@ -435,7 +461,7 @@ describe("lock", () => {
           auth,
           lock,
           signerAta: user1Ata.address,
-          vault,
+          vault: vault1,
           mint,
           analytics,
           systemProgram: SYSTEM_PROGRAM_ID,
@@ -514,7 +540,7 @@ describe("lock", () => {
         signerAta: user1Ata.address,
         mint,
         lock,
-        vault,
+        vault: vault1,
         auth,
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
@@ -541,7 +567,7 @@ describe("lock", () => {
         signerAta: user1Ata.address,
         mint,
         lock,
-        vault,
+        vault: vault1,
         auth,
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
@@ -563,6 +589,41 @@ describe("lock", () => {
       });
   });
 
+  it("user1 deposit another asr token", async () => {
+    await program.methods.asrDeposit(min, "SOON")
+      .accountsStrict({
+        creator: user1.publicKey,
+        signerAta: user1Ata2.address,
+        mint: mint2,
+        lock,
+        vault: vault2,
+        auth,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.lock.fetch(lock);
+        debug.seasons.map(season => {
+          season.asr.map((r, i) => {
+            console.log(`ASR Reward : ${r.amount.toNumber() / (1 * 10 ** decimals)} ${r.mint.toString()}`);
+            if (i == 0) {
+              assert.strictEqual(r.symbol, "MONO");
+              assert.strictEqual(r.amount.toNumber() / (1 * 10 ** decimals), 200);
+            } else if (i == 1) {
+              assert.strictEqual(r.symbol, "SOON");
+              assert.strictEqual(r.amount.toNumber() / (1 * 10 ** decimals), 100);
+            }
+          })
+        });
+      });
+  });
+
+
   it("user2 try deposit ASR (spam) to permissioned lock", async () => {
     await assert.rejects((async () => {
       await program.methods.asrDeposit(new BN(50 * 10 ** 6), "MONO")
@@ -571,7 +632,7 @@ describe("lock", () => {
           signerAta: user2Ata.address,
           mint,
           lock,
-          vault,
+          vault: vault1,
           auth,
           analytics,
           systemProgram: SYSTEM_PROGRAM_ID,
@@ -1278,7 +1339,7 @@ describe("lock", () => {
         lock,
         userVault: user1Vault,
         signerAta: user1Ata.address,
-        vault,
+        vault: vault1,
         mint,
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
@@ -1300,7 +1361,7 @@ describe("lock", () => {
           lock,
           userVault: user1Vault,
           signerAta: user1Ata.address,
-          vault,
+          vault: vault1,
           mint,
           analytics,
           systemProgram: SYSTEM_PROGRAM_ID,
