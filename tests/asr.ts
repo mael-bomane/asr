@@ -115,43 +115,40 @@ describe("lock", () => {
     program.programId
   )[0];
 
+  // manager add
   const proposal1 = PublicKey.findProgramAddressSync(
     // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
     [Buffer.from("proposal"), lock.toBytes(), new BN(1).toArrayLike(Buffer, 'le', 8)],
     program.programId
   )[0];
 
-  const proposalCoreUser2 = PublicKey.findProgramAddressSync(
-    // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
-    [Buffer.from("proposal"), lock.toBytes(), new BN(2).toArrayLike(Buffer, 'le', 8)],
-    program.programId
-  )[0];
-
+  // manager remove
   const proposal2 = PublicKey.findProgramAddressSync(
     // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
     [Buffer.from("proposal"), lock.toBytes(), new BN(2).toArrayLike(Buffer, 'le', 8)],
     program.programId
   )[0];
 
+  // core
   const proposal3 = PublicKey.findProgramAddressSync(
     // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
     [Buffer.from("proposal"), lock.toBytes(), new BN(3).toArrayLike(Buffer, 'le', 8)],
     program.programId
   )[0];
 
-  const proposalStandardUser2 = PublicKey.findProgramAddressSync(
-    // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
-    [Buffer.from("proposal"), lock.toBytes(), new BN(3).toArrayLike(Buffer, 'le', 8)],
-    program.programId
-  )[0];
-
-  const proposalOptionUser2 = PublicKey.findProgramAddressSync(
+  // standard
+  const proposal4 = PublicKey.findProgramAddressSync(
     // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
     [Buffer.from("proposal"), lock.toBytes(), new BN(4).toArrayLike(Buffer, 'le', 8)],
     program.programId
   )[0];
 
-
+  // option
+  const proposal5 = PublicKey.findProgramAddressSync(
+    // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
+    [Buffer.from("proposal"), lock.toBytes(), new BN(5).toArrayLike(Buffer, 'le', 8)],
+    program.programId
+  )[0];
 
   let signerAta: Account;
   let user1Ata: Account;
@@ -532,7 +529,6 @@ describe("lock", () => {
   //   }
   // });
 
-
   it("user1 deposit asr tokens", async () => {
     await program.methods.asrDeposit(min, "MONO")
       .accountsStrict({
@@ -748,6 +744,124 @@ describe("lock", () => {
       });
   });
 
+  it("register user3 to lock", async () => {
+    await program.methods.register()
+      .accountsStrict({
+        owner: user3.publicKey,
+        user: user3Pda,
+        auth,
+        lock,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user3])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.user.fetch(user3Pda);
+        assert.strictEqual(debug.owner.toString(), user3.publicKey.toString());
+      });
+  });
+
+  it("user1 start proposal manager add (type 3)", async () => {
+    await program.methods.managerAdd()
+      .accountsStrict({
+        signer: user1.publicKey,
+        auth,
+        proposal: proposal1,
+        lock,
+        user: user3Pda,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.proposal.fetch(proposal1);
+        console.log(debug);
+        assert.strictEqual(debug.manager.toString(), user3.publicKey.toString());
+      });
+  });
+
+  it("user2 cannot start proposal manager add (type 3)", async () => {
+    await assert.rejects((async () => {
+      const dg = await program.account.lock.fetch(lock);
+      const proposal = PublicKey.findProgramAddressSync(
+        // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
+        [Buffer.from("proposal"), lock.toBytes(), new BN(dg.proposals.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
+        program.programId
+      )[0];
+      await program.methods.managerAdd(
+      ).accountsStrict({
+        signer: user2.publicKey,
+        auth,
+        proposal,
+        lock,
+        user: user3Pda,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+        .signers([user2])
+        .rpc()
+        .then(confirmTx);
+    })(), (err: any) => {
+      console.log(err.error.errorCode.code)
+      assert.strictEqual(err.error.errorCode.code, "UnauthorizedManagersOnly");
+      return true
+    });
+  });
+
+
+  it("user1 start proposal manager remove (type 4)", async () => {
+    await program.methods.managerRemove()
+      .accountsStrict({
+        signer: user1.publicKey,
+        auth,
+        proposal: proposal2,
+        lock,
+        user: user1Pda,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.proposal.fetch(proposal2);
+        console.log(debug);
+        assert.strictEqual(debug.manager.toString(), user1.publicKey.toString());
+      });
+  });
+
+  it("user2 cannot start proposal manager remove (type 4)", async () => {
+    await assert.rejects((async () => {
+      const dg = await program.account.lock.fetch(lock);
+      const proposal = PublicKey.findProgramAddressSync(
+        // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
+        [Buffer.from("proposal"), lock.toBytes(), new BN(dg.proposals.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
+        program.programId
+      )[0];
+      await program.methods.managerAdd(
+      ).accountsStrict({
+        signer: user2.publicKey,
+        auth,
+        proposal,
+        lock,
+        user: user1Pda,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+        .signers([user2])
+        .rpc()
+        .then(confirmTx);
+    })(), (err: any) => {
+      console.log(err.error.errorCode.code)
+      assert.strictEqual(err.error.errorCode.code, "UnauthorizedManagersOnly");
+      return true
+    });
+  });
+
   it("user1 start proposal core (type 0)", async () => {
     await program.methods.proposalCore(
       0,
@@ -763,7 +877,7 @@ describe("lock", () => {
     )
       .accountsStrict({
         signer: user1.publicKey,
-        proposal: proposal1,
+        proposal: proposal3,
         lock,
         user: user1Pda,
         analytics,
@@ -773,13 +887,19 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposal1);
+        const debug = await program.account.proposal.fetch(proposal3);
         console.log(debug);
         // assert.strictEqual(debugTitle, title);
       });
   });
 
   it("user2 cannot start proposal core (type 0)", async () => {
+    const dg = await program.account.lock.fetch(lock);
+    const proposal = PublicKey.findProgramAddressSync(
+      // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
+      [Buffer.from("proposal"), lock.toBytes(), new BN(dg.proposals.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
+      program.programId
+    )[0];
     await assert.rejects((async () => {
       await program.methods.proposalCore(
         0,
@@ -794,7 +914,7 @@ describe("lock", () => {
         null, // symbol
       ).accountsStrict({
         signer: user2.publicKey,
-        proposal: proposalCoreUser2,
+        proposal,
         lock,
         user: user2Pda,
         analytics,
@@ -820,7 +940,7 @@ describe("lock", () => {
     await program.methods.proposalStandard(title, content)
       .accountsStrict({
         owner: user1.publicKey,
-        proposal: proposal2,
+        proposal: proposal4,
         lock,
         user: user1Pda,
         analytics,
@@ -830,7 +950,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposal2);
+        const debug = await program.account.proposal.fetch(proposal4);
         const debugTitle = debug.title;
         console.log("Proposal Title : ", debugTitle);
         assert.strictEqual(debugTitle, title);
@@ -841,11 +961,17 @@ describe("lock", () => {
   });
 
   it("user2 cannot start proposal standard (type 1)", async () => {
+    const dg = await program.account.lock.fetch(lock);
+    const proposal = PublicKey.findProgramAddressSync(
+      // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
+      [Buffer.from("proposal"), lock.toBytes(), new BN(dg.proposals.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
+      program.programId
+    )[0];
     await assert.rejects((async () => {
       await program.methods.proposalStandard("rogue proposal", "this lock is permissioned",)
         .accountsStrict({
           owner: user2.publicKey,
-          proposal: proposalStandardUser2,
+          proposal,
           lock,
           user: user2Pda,
           analytics,
@@ -901,7 +1027,7 @@ describe("lock", () => {
     )
       .accountsStrict({
         owner: user1.publicKey,
-        proposal: proposal3,
+        proposal: proposal5,
         lock,
         user: user1Pda,
         analytics,
@@ -911,7 +1037,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposal3);
+        const debug = await program.account.proposal.fetch(proposal5);
         const debugTitle = debug.title;
         console.log("Proposal Title : ", debugTitle);
         assert.strictEqual(debugTitle, title);
@@ -922,6 +1048,12 @@ describe("lock", () => {
   });
 
   it("user2 cannot start proposal option (type 2)", async () => {
+    const dg = await program.account.lock.fetch(lock);
+    const proposal = PublicKey.findProgramAddressSync(
+      // seeds = [b"poll", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
+      [Buffer.from("proposal"), lock.toBytes(), new BN(dg.proposals.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
+      program.programId
+    )[0];
     await assert.rejects((async () => {
       await program.methods.proposalOption(
         "rogue proposal",
@@ -941,7 +1073,7 @@ describe("lock", () => {
       )
         .accountsStrict({
           owner: user2.publicKey,
-          proposal: proposalOptionUser2,
+          proposal,
           lock,
           user: user2Pda,
           analytics,
@@ -957,7 +1089,7 @@ describe("lock", () => {
     });
   });
 
-  it("user1 vote 'For' on proposal core /w 100 voting power", async () => {
+  it("user1 vote 'For' on proposal manager add /w 100 voting power", async () => {
     await program.methods.voteNew(new BN(1), 0)
       .accountsStrict({
         owner: user1.publicKey,
@@ -984,7 +1116,7 @@ describe("lock", () => {
       });
   });
 
-  it("user1 vote 'For' on proposal standard (type 1) /w 100 voting power", async () => {
+  it("user1 vote 'For' on proposal manager remove /w 100 voting power", async () => {
     await program.methods.voteNew(new BN(2), 0)
       .accountsStrict({
         owner: user1.publicKey,
@@ -998,7 +1130,61 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposal2);
+        const debug = await program.account.proposal.fetch(proposal1);
+        assert.strictEqual(debug.choices.length, 3);
+        debug.choices.forEach((choice, index) => {
+          const power = choice.votingPower.toNumber() / (1 * 10 ** decimals);
+          if (index == 0) {
+            assert.strictEqual(power, 100);
+          }
+          console.log(`Proposal Choice ${index} : ${power}`);
+          console.log(choice);
+        })
+      });
+  });
+
+  it("user1 vote 'For' on proposal core /w 100 voting power", async () => {
+    await program.methods.voteNew(new BN(3), 0)
+      .accountsStrict({
+        owner: user1.publicKey,
+        user: user1Pda,
+        proposal: proposal3,
+        lock,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.proposal.fetch(proposal3);
+        assert.strictEqual(debug.choices.length, 3);
+        debug.choices.forEach((choice, index) => {
+          const power = choice.votingPower.toNumber() / (1 * 10 ** decimals);
+          if (index == 0) {
+            assert.strictEqual(power, 100);
+          }
+          console.log(`Proposal Choice ${index} : ${power}`);
+          console.log(choice);
+        })
+      });
+  });
+
+  it("user1 vote 'For' on proposal standard (type 1) /w 100 voting power", async () => {
+    await program.methods.voteNew(new BN(4), 0)
+      .accountsStrict({
+        owner: user1.publicKey,
+        user: user1Pda,
+        proposal: proposal4,
+        lock,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.proposal.fetch(proposal4);
         assert.strictEqual(debug.choices.length, 3);
         debug.choices.forEach((choice, index) => {
           const power = choice.votingPower.toNumber() / (1 * 10 ** decimals);
@@ -1051,27 +1237,6 @@ describe("lock", () => {
       assert.strictEqual(err.error.errorCode.code, "UserAlreadyVotedThisPoll");
       return true
     });
-  });
-
-
-  it("register user3 to lock", async () => {
-    await program.methods.register()
-      .accountsStrict({
-        owner: user3.publicKey,
-        user: user3Pda,
-        auth,
-        lock,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user3])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.user.fetch(user3Pda);
-        assert.strictEqual(debug.owner.toString(), user3.publicKey.toString());
-      });
-
   });
 
   it("user3 tries to vote without voting power", async () => {
@@ -1148,12 +1313,12 @@ describe("lock", () => {
       });
   });
 
-  it("user2 vote 'For' on poll 0 /w 100 voting power", async () => {
-    await program.methods.voteNew(new BN(1), 0)
+  it("user2 vote 'For' on proposal core /w 100 voting power", async () => {
+    await program.methods.voteNew(new BN(3), 0)
       .accountsStrict({
         owner: user2.publicKey,
         user: user2Pda,
-        proposal: proposal1,
+        proposal: proposal3,
         lock,
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
@@ -1162,7 +1327,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposal1);
+        const debug = await program.account.proposal.fetch(proposal3);
         assert.strictEqual(debug.choices.length, 3);
         debug.choices.forEach((choice, index) => {
           if (index == 0) {
@@ -1177,11 +1342,11 @@ describe("lock", () => {
   });
 
   it("user2 vote 'Against' on proposal standard (type 1) /w 100 voting power", async () => {
-    await program.methods.voteNew(new BN(2), 1)
+    await program.methods.voteNew(new BN(4), 1)
       .accountsStrict({
         owner: user2.publicKey,
         user: user2Pda,
-        proposal: proposal2,
+        proposal: proposal4,
         lock,
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
@@ -1190,7 +1355,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposal2);
+        const debug = await program.account.proposal.fetch(proposal4);
         assert.strictEqual(debug.choices.length, 3);
         debug.choices.forEach((choice, index) => {
           if (index == 0) {
@@ -1206,11 +1371,11 @@ describe("lock", () => {
 
 
   it("User3 vote 'Abstain' on proposal core /w decreasing voting power", async () => {
-    await program.methods.voteNew(new BN(1), 2)
+    await program.methods.voteNew(new BN(3), 2)
       .accountsStrict({
         owner: user3.publicKey,
         user: user3Pda,
-        proposal: proposal1,
+        proposal: proposal3,
         lock,
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
@@ -1219,7 +1384,7 @@ describe("lock", () => {
       .rpc()
       .then(confirmTx)
       .then(async () => {
-        const debug = await program.account.proposal.fetch(proposal1);
+        const debug = await program.account.proposal.fetch(proposal3);
         const user = await program.account.user.fetch(user3Pda);
         user.deposits.forEach(deposit => {
           console.log("Deposit Deactivation Start : ", new Date(deposit.deactivationStart.toNumber() * 1000).toISOString());
@@ -1248,7 +1413,7 @@ describe("lock", () => {
         .accountsStrict({
           owner: user1.publicKey,
           lock,
-          proposal: proposal1,
+          proposal: proposal3,
           analytics,
           systemProgram: SYSTEM_PROGRAM_ID,
         })
@@ -1268,7 +1433,7 @@ describe("lock", () => {
         .accountsStrict({
           owner: user1.publicKey,
           lock,
-          proposal: proposal2,
+          proposal: proposal4,
           analytics,
           systemProgram: SYSTEM_PROGRAM_ID,
         })
@@ -1282,14 +1447,14 @@ describe("lock", () => {
     });
   });
 
-  const proposal2Execute = async () => {
+  const proposal1Execute = async () => {
     return new Promise(resolve => {
       setTimeout(async () => {
         await program.methods.proposalExecute()
           .accountsStrict({
             owner: user1.publicKey,
             lock,
-            proposal: proposal2,
+            proposal: proposal1,
             analytics,
             systemProgram: SYSTEM_PROGRAM_ID,
           })
@@ -1297,7 +1462,7 @@ describe("lock", () => {
           .rpc()
           .then(confirmTx)
           .then(async () => {
-            const debug = await program.account.proposal.fetch(proposal2);
+            const debug = await program.account.proposal.fetch(proposal1);
             console.log(debug);
             resolve(debug.executed);
           }).catch(err => console.log(err));
@@ -1305,24 +1470,48 @@ describe("lock", () => {
     })
   }
 
-  it("user1 execute proposal standard after end of voting period", async () => {
-    const executed = await proposal2Execute();
+  it("user1 execute proposal manager add after end of voting period", async () => {
+    const executed = await proposal1Execute();
     console.log(executed);
     assert.strictEqual(executed, true);
   }).timeout(17000);
 
-  it("user1 execute proposal option after end of voting period", async () => {
+  it("user3 (manager) execute proposal manager remove", async () => {
     await program.methods.proposalExecute()
       .accountsStrict({
-        owner: user1.publicKey,
+        owner: user3.publicKey,
+        lock,
+        proposal: proposal2,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user2])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.proposal.fetch(proposal2);
+        console.log(debug);
+        assert.strictEqual(debug.executed, true);
+      }).catch(err => console.log(err));
+  });
+
+  it("user3 execute proposal core after end of voting period", async () => {
+    await program.methods.proposalExecute()
+      .accountsStrict({
+        owner: user3.publicKey,
         lock,
         proposal: proposal3,
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
       })
-      .signers([user1])
+      .signers([user3])
       .rpc()
       .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.proposal.fetch(proposal3);
+        console.log(debug);
+        assert.strictEqual(debug.executed, true);
+      }).catch(err => console.log(err));
   });
 
 

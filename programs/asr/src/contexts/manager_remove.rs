@@ -1,8 +1,7 @@
-use anchor_spl::associated_token::AssociatedToken;
-use anchor_spl::token::{transfer, Mint, Token, TokenAccount, Transfer};
-
-use crate::{constants::*, errors::ErrorCode, state::Analytics};
-use crate::{Choice, Deposit, Lock, Proposal, Season, Status, User};
+use crate::{
+    errors::ErrorCode,
+    state::{Analytics, Choice, Lock, Proposal, Status, User},
+};
 
 use anchor_lang::prelude::*;
 
@@ -37,32 +36,14 @@ pub struct ManagerRemove<'info> {
          bump = user.bump
      )]
     pub user: Box<Account<'info, User>>,
-    #[account(
-        mut,
-        associated_token::mint = mint,
-        associated_token::authority = signer,
-    )]
-    pub signer_ata: Box<Account<'info, TokenAccount>>,
-    pub mint: Box<Account<'info, Mint>>,
     //#[account(constraint = metadata.mint.key() == mint.key())]
     //pub metadata: Box<Account<'info, MetadataAccount>>,
-    #[account(
-        init,
-        payer = signer,
-        seeds = [b"vault", lock.key().as_ref(), mint.key().as_ref()],
-        token::mint = mint,
-        token::authority = auth,
-        bump
-    )]
-    pub vault: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
         seeds = [b"analytics"],
         bump = analytics.state_bump
     )]
     pub analytics: Box<Account<'info, Analytics>>,
-    pub token_program: Program<'info, Token>,
-    pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
 }
 
@@ -103,6 +84,14 @@ impl<'info> ManagerRemove<'info> {
         proposal.manager = Some(user.owner);
         proposal.bump = bumps.proposal;
 
+        Ok(())
+    }
+
+    pub fn update_analytics(&mut self) -> Result<()> {
+        let analytics = &mut self.analytics;
+        analytics.proposals += 1;
+        let lock = &mut self.lock;
+        lock.proposals += 1;
         Ok(())
     }
 }

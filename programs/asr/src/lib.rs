@@ -80,11 +80,13 @@ pub mod asr {
     }
 
     pub fn manager_add(ctx: Context<ManagerAdd>) -> Result<()> {
-        ctx.accounts.manager_add(&ctx.bumps)
+        ctx.accounts.manager_add(&ctx.bumps)?;
+        ctx.accounts.update_analytics()
     }
 
     pub fn manager_remove(ctx: Context<ManagerRemove>) -> Result<()> {
-        ctx.accounts.manager_remove(&ctx.bumps)
+        ctx.accounts.manager_remove(&ctx.bumps)?;
+        ctx.accounts.update_analytics()
     }
 
     pub fn stake_new(ctx: Context<StakeNew>, amount: u64) -> Result<()> {
