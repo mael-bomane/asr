@@ -1485,7 +1485,7 @@ describe("lock", () => {
         analytics,
         systemProgram: SYSTEM_PROGRAM_ID,
       })
-      .signers([user2])
+      .signers([user3])
       .rpc()
       .then(confirmTx)
       .then(async () => {
@@ -1514,12 +1514,25 @@ describe("lock", () => {
       }).catch(err => console.log(err));
   });
 
+  it("lock now permissionless, user2 execute proposal option", async () => {
+    await program.methods.proposalExecute()
+      .accountsStrict({
+        owner: user2.publicKey,
+        lock,
+        proposal: proposal4,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+      })
+      .signers([user2])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.proposal.fetch(proposal4);
+        console.log(debug);
+      })
+  });
 
-
-
-
-
-  it("user1 asr rewards restaked for lock mint season 1 rewards", async () => {
+  it("user1 asr restaked for lock mint season 1 rewards", async () => {
     await program.methods.asrClaim()
       .accountsStrict({
         owner: user1.publicKey,
@@ -1538,6 +1551,37 @@ describe("lock", () => {
       .signers([user1])
       .rpc()
       .then(confirmTx)
+      .then(async () => {
+        const debug = await program.account.lock.fetch(lock);
+        console.log(debug);
+      })
+  });
+
+  it("user1 asr season 1 distributed spot for other mints", async () => {
+    await program.methods.asrClaim()
+      .accountsStrict({
+        owner: user1.publicKey,
+        user: user1Pda,
+        auth,
+        lock,
+        userVault: user1Vault,
+        signerAta: user1Ata2.address,
+        vault: vault2,
+        mint: mint2,
+        analytics,
+        systemProgram: SYSTEM_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+      })
+      .signers([user1])
+      .rpc()
+      .then(confirmTx)
+      .then(async () => {
+        let user1TokenAmount1 = await connection.getTokenAccountBalance(user1Ata.address);
+        let user1TokenAmount2 = await connection.getTokenAccountBalance(user1Ata2.address);
+        console.log(`User 1 now have ${user1TokenAmount1.value.uiAmount} ${mint.toString()}`)
+        console.log(`User 1 now have ${user1TokenAmount2.value.uiAmount} ${mint.toString()}`)
+      });
   });
 
   it("reject : user1 tries claim twice his asr rewards for season 1", async () => {
@@ -1651,24 +1695,7 @@ describe("lock", () => {
     });
   });
 
-  it("user1 execute proposal core after end of voting period", async () => {
-    await program.methods.proposalExecute()
-      .accountsStrict({
-        owner: user1.publicKey,
-        lock,
-        proposal: proposal1,
-        analytics,
-        systemProgram: SYSTEM_PROGRAM_ID,
-      })
-      .signers([user1])
-      .rpc()
-      .then(confirmTx)
-      .then(async () => {
-        const debug = await program.account.lock.fetch(lock);
-        console.log(debug);
-        console.log("season 0 points : ", debug.seasons[debug.seasons.length - 2].points.toNumber());
-      })
-  });
+
 
   // after(async () => {
   // setTimeout(async () => {

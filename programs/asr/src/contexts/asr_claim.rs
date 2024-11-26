@@ -17,7 +17,7 @@ pub struct ASRClaim<'info> {
     pub auth: UncheckedAccount<'info>,
     #[account(
         mut,
-        seeds = [b"lock", lock.creator.as_ref(), mint.key().as_ref()],
+        seeds = [b"lock", lock.creator.as_ref(), lock.config.mint.key().as_ref()],
         bump = lock.lock_bump
     )]
     pub lock: Box<Account<'info, Lock>>,
@@ -37,13 +37,13 @@ pub struct ASRClaim<'info> {
         realloc::payer = owner,
         seeds = [b"user", lock.key().as_ref(), owner.key().as_ref()],
         bump = user.bump,
-        constraint = !user.claims.iter().any(|i| i.mint == mint.key() && i.season == lock.seasons.len() as u8 - 2) @ ErrorCode::UserAlreadyClaimedThis
+        constraint = !user.claims.iter().any(|i| (i.mint == mint.key()) && (i.season == lock.seasons.len() as u8 - 2)) @ ErrorCode::UserAlreadyClaimedThis
     )]
     pub user: Box<Account<'info, User>>,
     #[account(
         mut,
         seeds = [b"vault", lock.key().as_ref(), owner.key().as_ref()],
-        token::mint = mint,
+        token::mint = lock.config.mint,
         token::authority = auth,
         bump
     )]

@@ -70,6 +70,7 @@ impl<'info> VoteNew<'info> {
         let vote = Vote {
             season,
             proposal: index,
+            proposal_type: proposal.proposal_type,
             voting_power,
             choice: id,
             created_at: Clock::get()?.unix_timestamp,

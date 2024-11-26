@@ -42,7 +42,10 @@ impl User {
             .iter()
             .map(|vote| {
                 if vote.season == season {
-                    vote.voting_power
+                    match vote.proposal_type {
+                        0..=2 => vote.voting_power,
+                        _ => 0u64
+                    }
                 } else {
                     0u64
                 }
@@ -114,13 +117,14 @@ impl Deposit {
 pub struct Vote {
     pub season: u8,
     pub proposal: u64,
+    pub proposal_type: u8,
     pub voting_power: u64,
     pub choice: u8,
     pub created_at: i64,
 }
 
 impl Vote {
-    pub const LEN: usize = 1 * 2 // season, choice
+    pub const LEN: usize = 1 * 3 // season, choice
         + 8 * 2 // poll, voting_power 
         + TIMESTAMP_LENGTH;
 }
