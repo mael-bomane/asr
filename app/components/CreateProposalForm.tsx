@@ -244,7 +244,7 @@ export const CreateProposalForm: FC = () => {
                     )}
                     {field.value == "Option" && (
                       <>
-                        Proposal with up to 255 Options (please don't try..)
+                        Proposal with up to 255 Options (please don&apos;t try..)
                       </>
                     )}
                   </FormDescription>

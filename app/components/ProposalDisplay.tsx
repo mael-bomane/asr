@@ -66,6 +66,21 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
   const [isReady, setIsReady] = useState<boolean>(false);
   const [isExecuted, setIsExecuted] = useState<boolean>(false);
 
+  useEffect(() => {
+    const fetchProposal = async () => {
+      return await program.account.proposal.fetch(new PublicKey(address));
+    }
+    if (address) {
+      fetchProposal()
+        .then(async response => {
+          if (response) {
+            console.log('proposal : ', response)
+            setProposal(response);
+          }
+        })
+        .catch(err => console.log(err));
+    }
+  }, []);
 
   useEffect(() => {
     if (proposal) {
