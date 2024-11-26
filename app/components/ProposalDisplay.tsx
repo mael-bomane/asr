@@ -46,7 +46,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   const { connection } = useConnection();
   const { publicKey, sendTransaction } = useWallet();
-  const { program } = useContext(LockContext);
+  const { program, currentLock, currentUser } = useContext(LockContext);
 
   const formSchema = z.object({
     choice: z.string().min(0).max(255),
@@ -60,30 +60,12 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
   })
 
   const [proposal, setProposal] = useState<Proposal | null>(null);
-  const [lock, setLock] = useState<Lock | null>(null);
 
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isReady, setIsReady] = useState<boolean>(false);
   const [isExecuted, setIsExecuted] = useState<boolean>(false);
 
-  useEffect(() => {
-    const fetchProposal = async () => {
-      return await program.account.proposal.fetch(new PublicKey(address));
-    }
-    if (address) {
-      fetchProposal()
-        .then(async response => {
-          if (response) {
-            console.log('proposal : ', response)
-            setProposal(response);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-  }, []);
 
   useEffect(() => {
     if (proposal) {
@@ -93,51 +75,6 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
     }
   }, [proposal]);
 
-  useEffect(() => {
-    const fetchLock = async () => {
-      //@ts-ignore
-      return await program.account.lock.fetch(proposal.lock);
-    }
-    if (proposal) {
-      fetchLock()
-        .then(async response => {
-          if (response) {
-            console.log(response);
-            console.log('lock : ', response)
-            setLock(response);
-          }
-        })
-        .catch(err => console.log(err));
-
-    }
-  }, [proposal]);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const user = PublicKey.findProgramAddressSync(
-        // seeds = [b"user", lock.key().as_ref(), signer.key().as_ref()]
-        [Buffer.from("user"), proposal.lock.toBytes(), publicKey.toBytes()],
-        program.programId
-      )[0];
-      return await program.account.user.fetch(user);
-    }
-    if (lock) {
-      setCurrentUserLoading(true)
-      fetchUser()
-        .then(res => {
-          if (res) {
-            console.log("current user : ", res);
-            setCurrentUser(res);
-            setCurrentUserLoading(false);
-          }
-        })
-        .catch(err => {
-          console.log(err);
-          setCurrentUserLoading(false);
-        });
-    }
-
-  }, [lock, publicKey]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     let signature: TransactionSignature = '';
@@ -210,19 +147,19 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
   return (
     <section className="my-6 md:my-10 w-full max-w-7xl flex flex-col md:flex-row justify-center items-start md:p-4 text-base-content md:space-x-4">
       {
-        proposal && lock ? (
+        proposal && currentLock ? (
           <div className="w-full md:w-[66%] flex flex-col items-center justify-center space-y-4 ">
             <div className="w-full flex flex-col items-center justify-center bg-primary text-white rounded-box p-8">
               <div
                 className="font-extrabold self-start">
                 <Link href={`/lock/${proposal.lock.toString()}`} className="" target="_blank">
-                  {lock.config.name}
+                  {currentLock.account.config.name}
                 </Link> &gt; Proposal
               </div>
               <h1 className="text-3xl md:text-3xl font-extrabold flex">
                 {proposal.title}
               </h1>
-
+              <p className="mt-4">{proposal.content}</p>
             </div>
             {publicKey && (
               <form onSubmit={form.handleSubmit(onSubmit)}
@@ -233,7 +170,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                     <span className="flex justify-center items-center text-base-content space-x-2"><IoDiamond /><span>Voting Power : {' '}
                       {currentUser ? currentUser.deposits.reduce((acc: any, obj: any) => {
                         return acc + obj.amount.toNumber();
-                      }, 0) / (1 * 10 ** lock.config.decimals) : 0}</span></span>
+                      }, 0) / (1 * 10 ** currentLock.account.config.decimals) : 0}</span></span>
                   </div>
                   <div>
                     <FormField
@@ -260,7 +197,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   </div>
                   {currentUser && currentUser.deposits.reduce((acc: any, obj: any) => {
                     return acc + obj.amount.toNumber();
-                  }, 0) / (1 * 10 ** lock.config.decimals) == 0 || !currentUser && (
+                  }, 0) / (1 * 10 ** currentLock.account.config.decimals) == 0 || !currentUser && (
                     <div className="badge badge-warning badge-outline badge-lg rounded-box p-4 w-full mt-4">
                       Oops, you don’t have any voting power
                     </div>
@@ -268,7 +205,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   <button type="submit" className="btn w-full mt-4"
                     disabled={!publicKey || !currentUser || (currentUser.deposits.reduce((acc: any, obj: any) => {
                       return acc + obj.amount.toNumber();
-                    }, 0) / (1 * 10 ** lock.config.decimals) == 0) || currentUser.votes.filter((vote) => vote.proposal.toNumber() == proposal.id.toNumber()).length > 0}
+                    }, 0) / (1 * 10 ** currentLock.account.config.decimals) == 0) || currentUser.votes.filter((vote) => vote.proposal.toNumber() == proposal.id.toNumber()).length > 0}
                   >
                     {currentUser && currentUser.votes.filter((vote) => vote.proposal.toNumber() == proposal.id.toNumber()).length > 0 ?
                       (
@@ -288,7 +225,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
         ) : <>not found</>
       }
       <div className="w-full md:w-[33%] md:max-w-xl flex flex-col items-center justify-center mt-4 md:mt-0 space-y-4">
-        {proposal && lock ? (
+        {proposal && currentLock ? (
           <>
             <div className="w-full flex flex-col justify-center items-center bg-primary text-white rounded-box space-y-4 p-8">
               {proposal.executed ? (
@@ -298,7 +235,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                     return (
                       <div className="w-full flex justify-between" key={choice.id}>
                         <span>{choice.title}</span>
-                        <span>{choice.votingPower.toNumber() / (1 * 10 ** lock.config.decimals)}</span>
+                        <span>{choice.votingPower.toNumber() / (1 * 10 ** currentLock.account.config.decimals)}</span>
                       </div>
                     )
                   })}
@@ -311,12 +248,12 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                       <span className="text-base-content">Votes : </span>
                       <span>{proposal.choices.reduce((acc: any, obj: any) => {
                         return acc + obj.votingPower.toNumber();
-                      }, 0) / (1 * 10 ** lock.config.decimals)}
+                      }, 0) / (1 * 10 ** currentLock.account.config.decimals)}
                       </span>
                     </div>
                     <div className="w-full text-sm text-right">
                       <span className="text-base-content">Min threshold : </span>
-                      <span>{lock.config.quorum * (lock.totalDeposits.toNumber() / (1 * 10 ** lock.config.decimals)) / 100}
+                      <span>{currentLock.account.config.quorum * (currentLock.account.totalDeposits.toNumber() / (1 * 10 ** currentLock.account.config.decimals)) / 100}
                       </span>
                     </div>
                   </div>
@@ -331,7 +268,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 <FaWaveSquare className="text-base-content" />
                 <span className="flex space-x-4">
                   <span className="text-base-content">Status:</span>
-                  <BadgeProposalStatus proposal={proposal} lock={lock} isReady={isReady} />
+                  <BadgeProposalStatus proposal={proposal} lock={currentLock.account} isReady={isReady} />
                 </span>
               </div>
               <div className="w-full flex justify-start items-center space-x-1">
@@ -430,7 +367,6 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                 <button className="btn w-full mt-4" onClick={onClick}>
                   Execute
                 </button>
-
               }
             </div>
           </>

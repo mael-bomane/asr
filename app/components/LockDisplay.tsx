@@ -3,7 +3,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey } from "@solana/web3.js";
-import { program } from "@/constants";
 import { Lock, Proposal, User } from "@/types/state";
 import { Proposals } from "./Proposals";
 import { VotingPower } from "./VotingPower";
@@ -30,8 +29,6 @@ export const LockDisplay: FC<Props> = ({ address }) => {
 
   const [currentUserLoading, setCurrentUserLoading] = useState<boolean>(true);
 
-  const [proposals, setProposals] = useState<Proposal[]>([]);
-
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -39,41 +36,6 @@ export const LockDisplay: FC<Props> = ({ address }) => {
       setAddress(address);
     }
   }, [address])
-
-
-
-  useEffect(() => {
-    const fetchProposals = async () => {
-      //@ts-ignore
-      return await program.account.proposal.all([
-        {
-          memcmp: {
-            offset: 8 + 8,
-            bytes: currentLock.publicKey.toBase58(),
-          },
-        },
-      ]);
-    }
-    if (currentLock) {
-      fetchProposals()
-        .then(res => {
-          if (res) {
-            console.log("proposals : ", res);
-            console.log(res);
-            // @ts-ignore
-            // const proposalsMap = res.map(({ account, publicKey }) => {
-            //   const result = account
-            //   account.pubkey = publicKey
-            //   return result
-            // })
-            // console.log('monoliths : ', proposalsMap)
-            setProposals(res);
-          }
-        })
-        .catch(err => console.log(err));
-    }
-
-  }, [currentLock, publicKey]);
 
 
 
@@ -90,7 +52,7 @@ export const LockDisplay: FC<Props> = ({ address }) => {
             <RewardsList lock={currentLock} setIsOpen={setIsOpen} season={season} address={address} />
             <VotingPower currentUser={currentUser} currentUserLoading={currentUserLoading} lock={currentLock} address={address} />
           </div>
-          <Proposals proposals={proposals} lock={currentLock} address={address} users={users} currentUser={currentUser} />
+          <Proposals />
         </section>
       ) : <Skeleton />
       }

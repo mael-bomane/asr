@@ -9,31 +9,25 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import { Input } from "./ui/input";
 
-import type { FC } from "react"
-import type { Proposal, User, LockMap } from "@/types";
+import { FC, useContext } from "react"
+import type { Proposal, User, LockMap, ProposalMap } from "@/types";
 import { cn } from "@/lib/utils";
 import { BadgeProposalStatus } from "./BadgeProposalStatus";
 import { ProgressSegment, StackedProgress } from "./ui/stacked-progress";
+import { LockContext } from "./LockContextProvider";
 
-type Props = {
-  lock: LockMap
-  address: string | null
-  proposals: Proposal[]
-  users: User[]
-  currentUser: User | null
-}
-
-export const Proposals: FC<Props> = ({ lock: { account, publicKey }, address, proposals, users, currentUser }) => {
+export const Proposals: FC = () => {
+  const { currentUser, currentLock, users, setAddress, currentLockProposals } = useContext(LockContext);
   const router = useRouter();
   return (
     <div className="w-full bg-primary text-white space-y-4 p-4 rounded-box">
       <div className="px-6 w-full flex items-center justify-between">
         <h3 className="font-bold text-lg lg:text-xl flex justify-center items-center space-x-4">
           <span className="font-extrabold">Proposals</span>
-          {currentUser && (currentUser.deposits.reduce((acc: any, obj: any) => {
+          {currentUser && (currentUser.deposits.reduce((acc, obj) => {
             return acc + obj.amount.toNumber();
-          }, 0) / (1 * 10 ** account.config.decimals)) >= (account.config.amount.toNumber() / (1 * 10 ** account.config.decimals)) &&
-            <Link href={{ pathname: '/proposal/create', query: { address } }} className="button"><FaPlusCircle className="w-5 h-5" /></Link>
+          }, 0) / (1 * 10 ** currentLock.account.config.decimals)) >= (currentLock.account.config.amount.toNumber() / (1 * 10 ** currentLock.account.config.decimals)) &&
+            <Link href="/proposal" className="button"><FaPlusCircle className="w-5 h-5" /></Link>
           }
         </h3>
         <div className="flex justify-center items-center space-x-2">
@@ -42,7 +36,7 @@ export const Proposals: FC<Props> = ({ lock: { account, publicKey }, address, pr
         </div>
       </div>
       <Table className="overflow-x-scroll">
-        <TableCaption>{account.config.name} Proposals</TableCaption>
+        <TableCaption>{currentLock.account.config.name} Proposals</TableCaption>
         <TableHeader>
           <HeaderTableRow>
             <TableHead className="">Title</TableHead>
@@ -54,16 +48,16 @@ export const Proposals: FC<Props> = ({ lock: { account, publicKey }, address, pr
           </HeaderTableRow>
         </TableHeader>
         <TableBody>
-          {proposals.length > 0 && proposals.map((proposal, i) => {
-            const isReady = (proposal.endsAt.toNumber() * 1000) < new Date().getTime() ? true : false;
+          {currentLockProposals.map((proposal, i) => {
+            const isReady = (proposal.account.endsAt.toNumber() * 1000) < new Date().getTime() ? true : false;
 
             const segments: ProgressSegment[] = [];
 
             const colors = ['bg-info', 'bg-warning', 'bg-error'];
 
-            proposal.choices.forEach((choice: any, index: number) => {
+            proposal.account.choices.forEach((choice, index) => {
               segments.push({
-                value: choice.votingPower,
+                value: choice.votingPower.toNumber(),
                 color: colors[index]
               })
             })
@@ -71,15 +65,15 @@ export const Proposals: FC<Props> = ({ lock: { account, publicKey }, address, pr
             return (
               <TableRow key={i}
                 onClick={() => {
-                  router.push(`/proposal/${publicKey}`)
+                  router.push(`/proposal/${proposal.publicKey.toString()}`)
                 }}
                 className="cursor-pointer"
               >
                 <TableCell className="font-medium">
-                  <div>{proposal.title}</div>
+                  <div>{proposal.account.title}</div>
                 </TableCell>
                 <TableCell className="text-center">
-                  {currentUser && currentUser.votes.filter((vote) => vote.proposal.toNumber() == proposal.id.toNumber()).length > 0 ?
+                  {currentUser && currentUser.votes.filter((vote) => vote.proposal.toNumber() == proposal.account.id.toNumber()).length > 0 ?
                     (
                       <div className="text-center w-full flex justify-center items-center text-success"><FaCheck /></div>
                     ) : (
@@ -87,18 +81,18 @@ export const Proposals: FC<Props> = ({ lock: { account, publicKey }, address, pr
                     )}
                 </TableCell>
                 <TableCell className="text-center">
-                  <BadgeProposalStatus lock={account} proposal={proposal} isReady={isReady} />
+                  <BadgeProposalStatus lock={currentLock.account} proposal={proposal.account} isReady={isReady} />
                 </TableCell>
                 <TableCell>
                   <StackedProgress segments={segments} className="bg-base-100" />
                 </TableCell>
                 <TableCell className="text-left">
-                  <div>{new Date(proposal.createdAt.toNumber() * 1000).toDateString()}</div>
-                  <div>{new Date(proposal.createdAt.toNumber() * 1000).getHours()}:{(new Date(proposal.createdAt.toNumber() * 1000).getMinutes())}</div>
+                  <div>{new Date(proposal.account.createdAt.toNumber() * 1000).toDateString()}</div>
+                  <div>{new Date(proposal.account.createdAt.toNumber() * 1000).getHours()}:{(new Date(proposal.account.createdAt.toNumber() * 1000).getMinutes())}</div>
                 </TableCell>
                 <TableCell className="text-left">
-                  <div>{new Date(proposal.endsAt.toNumber() * 1000).toDateString()}</div>
-                  <div>{new Date(proposal.endsAt.toNumber() * 1000).getHours()}:{(new Date(proposal.endsAt.toNumber() * 1000).getMinutes())}</div>
+                  <div>{new Date(proposal.account.endsAt.toNumber() * 1000).toDateString()}</div>
+                  <div>{new Date(proposal.account.endsAt.toNumber() * 1000).getHours()}:{(new Date(proposal.account.endsAt.toNumber() * 1000).getMinutes())}</div>
                 </TableCell>
               </TableRow>
             )

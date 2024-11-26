@@ -52,12 +52,7 @@ export const ClientLayout = ({ children }: { children: ReactNode }) => {
           </RecoilRoot>
         </LockContextProvider>
       </WalletContextProvider>
-
-      <Toaster
-        toastOptions={{
-          duration: 3000,
-        }}
-      />
+      <Toaster />
 
       <Tooltip
         id="tooltip"

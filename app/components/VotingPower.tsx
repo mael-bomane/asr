@@ -234,10 +234,11 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: 
           }
           </span>
         </div>
-        <p className="px-2 text-base-content text-xs text-center mt-4">Lock
+        <div className="px-2 text-base-content text-xs text-center mt-4">Lock
           <Link href={`https://explorer.solana.com/address/${account.config.mint.toString()}?cluster=devnet`}
             className="underline font-extrabold">{' '}{account.config.symbol}{' '}</Link>
-          tokens to receive your voting power. <Link href="/docs" className="underline">Learn more</Link></p>
+          tokens to receive your voting power. <Link href="/docs" className="underline">Learn more</Link>
+        </div>
         {wallet.publicKey && currentUser ? (
           <div
             className="w-full bg-base-100 p-4 flex flex-col mt-4 rounded-xl"

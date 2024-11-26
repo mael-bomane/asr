@@ -3,12 +3,12 @@
 import React, { createContext, useState, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { MONOLITH_ID, program } from '@/constants'
+import { MONOLITH_ID } from '@/constants'
 import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js'
 import { IDL } from "@/constants/idl";
-import idl from "@/constants/idl/lock.json";
+import idl from "@/constants/idl/asr.json";
 
-import type { Analytics, Lock, LockMap, User, UserMap } from '@/types'
+import type { Analytics, Lock, LockMap, ProposalMap, User, UserMap } from '@/types'
 import { Program } from '@coral-xyz/anchor'
 
 interface LockInterface {
@@ -17,6 +17,7 @@ interface LockInterface {
   analytics: Analytics | null
   locks: LockMap[]
   currentLock: LockMap | null
+  currentLockProposals: ProposalMap[]
   core: LockMap | null
   setCurrentLock: React.Dispatch<React.SetStateAction<LockMap | null>>
   address: string | null
@@ -35,6 +36,7 @@ export const LockContext = createContext<LockInterface>({
   analytics: null,
   locks: [],
   currentLock: null,
+  currentLockProposals: [],
   core: null,
   setCurrentLock: () => null,
   address: null,
@@ -58,6 +60,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [locks, setLocks] = useState<LockMap[]>([]);
   const [currentLock, setCurrentLock] = useState<LockMap | null>(null);
+  const [currentLockProposals, setCurrentLockProposals] = useState<ProposalMap[]>([]);
   const [core, setCore] = useState<LockMap | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
@@ -72,6 +75,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
     locks,
     core,
     currentLock,
+    currentLockProposals,
     setCurrentLock,
     address,
     setAddress,
@@ -160,6 +164,28 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [publicKey, analytics, address, program])
 
+  useEffect(() => {
+    const fetchProposals = async () => {
+      return await program.account.proposal.all([
+        {
+          memcmp: {
+            offset: 8 + 8,
+            bytes: currentLock.publicKey.toBase58(),
+          },
+        },
+      ]);
+    }
+    if (currentLock && program) {
+      fetchProposals()
+        .then(response => {
+          if (response) {
+            console.log(`Proposals : for currentLock : `, response)
+            setCurrentLockProposals(response)
+          }
+        })
+        .catch(err => console.log(err));
+    }
+  }, [currentLock, program]);
   useEffect(() => {
     const fetchUsers = async () => {
       return await program.account.user.all();

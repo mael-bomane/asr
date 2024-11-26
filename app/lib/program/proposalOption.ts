@@ -4,7 +4,7 @@ import { PublicKey, SystemProgram } from "@solana/web3.js";
 import { ProposalChoice } from "@/types";
 import type { IDL } from "@/constants";
 
-export const proposalNewIx = async (
+export const proposalOptionIx = async (
   program: Program<IDL>,
   owner: PublicKey,
   lock: PublicKey,
@@ -35,7 +35,7 @@ export const proposalNewIx = async (
     program.programId
   )[0];
 
-  return await program.methods.proposalNew(title, content, choices)
+  return await program.methods.proposalOption(title, content, choices)
     .accountsStrict({
       owner,
       proposal,
