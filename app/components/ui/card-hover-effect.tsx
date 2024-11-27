@@ -5,6 +5,8 @@ import React from "react";
 import { useContext, useState } from "react";
 import type { LockMap } from "@/types";
 import { LockContext } from "../LockContextProvider";
+import { Gem, Layers, VoteIcon } from "lucide-react";
+import { FaCheck, FaX } from "react-icons/fa6";
 
 export const HoverEffect = ({
   locks,
@@ -50,8 +52,28 @@ export const HoverEffect = ({
             )}
           </AnimatePresence>
           <Card>
-            <CardTitle>{lock.account.config.name}</CardTitle>
-            <CardDescription><></></CardDescription>
+            <CardTitle className="w-full flex space-x-2">
+              <span>{lock.account.config.name}</span>  <span>•</span>  <span>Season {(lock.account.seasons.length - 1 < 0) ? 0 : lock.account.seasons.length}</span>
+            </CardTitle>
+            <CardDescription>
+              <div className="w-full flex flex-col space-y-4">
+                <div className="w-full flex space-x-2">
+                  <Gem className="w-5 h-5" /> <span className="font-extrabold">{lock.account.totalDeposits.toNumber() / (1 * 10 ** lock.account.config.decimals)}</span> <span className="font-semibold">{lock.account.config.symbol}</span>
+                </div>
+                <div className="w-full flex space-x-2">
+                  <div className="flex justify-center items-center space-x-2">
+                    <VoteIcon className="w-5 h-5" /> <span>{lock.account.proposals.toNumber()}</span>
+                  </div>
+                  <div className="flex justify-center items-center space-x-2">
+                    <FaCheck className="text-success" /> <span>{lock.account.approved.toNumber()}</span>
+                  </div>
+                  <div className="flex justify-center items-center space-x-2">
+                    <FaX className="text-error" /> <span>{lock.account.rejected.toNumber()}</span>
+                  </div>
+                </div>
+              </div>
+
+            </CardDescription>
           </Card>
         </Link>
       ))}

@@ -106,7 +106,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <LockSwitcher locks={locks} userRegistrations={userRegistrations} />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        {/*
+      <NavMain items={data.navMain} />
+        */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
