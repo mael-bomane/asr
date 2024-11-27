@@ -33,7 +33,6 @@ export const CreateProposalForm: FC = () => {
   const { sendTransaction } = useWallet();
   const { connection, program, locks, currentLock, setCurrentLock, currentUser, loading, setLoading } = useContext(LockContext);
   const router = useRouter();
-  const searchParams = useSearchParams()
 
   // proposal core
   const [permissionless, setPermissionless] = useState<boolean>(currentLock?.account.config.permissionless ?? false);

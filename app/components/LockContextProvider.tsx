@@ -56,7 +56,7 @@ export const LockContext = createContext<LockInterface>({
 })
 
 export const LockContextProvider = ({ children }: { children: ReactNode }) => {
-  const { publicKey, signMessage } = useWallet();
+  const { publicKey } = useWallet();
 
   const [solana, setSolana] = useState<boolean>(true);
 
@@ -74,7 +74,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [locks, setLocks] = useState<LockMap[]>([]);
   const [currentLock, setCurrentLock] = useState<LockMap | null>(null);
-  const [currentLockProposals, setCurrentLockProposals] = useState<ProposalMap[]>([]);
+  const [currentLockProposals, setCurrentLockProposals] = useState<ProposalMap[] | null>(null);
   const [core, setCore] = useState<LockMap | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
@@ -203,7 +203,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch(err => console.log(err));
     }
-  }, [currentLock, program, solana]);
+  }, [currentLock, program, solana, address]);
 
   useEffect(() => {
     const fetchUsers = async () => {

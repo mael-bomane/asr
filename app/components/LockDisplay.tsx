@@ -11,6 +11,7 @@ import { LockStaked } from "./LockStaked";
 
 import type { FC } from "react";
 import { LockContext } from "./LockContextProvider";
+import { useSearchParams } from "next/navigation";
 
 type Props = {
   address: string
