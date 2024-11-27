@@ -21,9 +21,8 @@ import { LockContext } from "./LockContextProvider";
 import { ellipsis } from "@/lib/utils";
 
 export const CreateLockForm: FC = () => {
-  const { program } = useContext(LockContext);
+  const { program, connection } = useContext(LockContext);
   const { publicKey, sendTransaction } = useWallet();
-  const { connection } = useConnection();
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [threshold, setThreshold] = useState<number>(50);
@@ -133,7 +132,8 @@ export const CreateLockForm: FC = () => {
         router.push(`/lock/${lock.toString()}`);
 
       } catch (error) {
-        console.log(error.message);
+        console.log(error);
+        console.log("rpc : ", connection.rpcEndpoint);
 
         setLoading(false);
 

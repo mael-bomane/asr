@@ -31,11 +31,9 @@ import { Slider } from "./ui/slider";
 export const CreateProposalForm: FC = () => {
   const wallet = useWallet();
   const { sendTransaction } = useWallet();
-  const { connection } = useConnection();
-  const { program, locks, currentLock, setCurrentLock, currentUser, loading, setLoading } = useContext(LockContext);
+  const { connection, program, locks, currentLock, setCurrentLock, currentUser, loading, setLoading } = useContext(LockContext);
   const router = useRouter();
   const searchParams = useSearchParams()
-  const address = searchParams.get('address');
 
   // proposal core
   const [permissionless, setPermissionless] = useState<boolean>(currentLock?.account.config.permissionless ?? false);
@@ -56,19 +54,18 @@ export const CreateProposalForm: FC = () => {
   const FormSchema = z.object({
     amount: z.string().refine((val) => !Number.isNaN(parseInt(val, 10)), {
       message: "Expected number, received a string"
-    }),
-    votingPeriod: z.number().optional(),
-    lockDuration: z.number().optional(),
-    seasonDuration: z.number().optional(),
-    threshold: z.number().optional(),
-    quorum: z.number().optional(),
+    }).nullable().optional(),
+    votingPeriod: z.number().nullable().optional(),
+    lockDuration: z.number().nullable().optional(),
+    seasonDuration: z.number().nullable().optional(),
+    threshold: z.number().nullable().optional(),
+    quorum: z.number().nullable().optional(),
     proposalType: z.string(),
-    name: z.string(),
-    symbol: z.string(),
-    permissionless: z.boolean().optional(),
+    name: z.string().nullable().optional(),
+    symbol: z.string().nullable().optional(),
+    permissionless: z.boolean().nullable().optional(),
     title: z
-      .string().min(1).max(50).optional()
-    ,
+      .string().min(1).max(50).optional(),
     content: z
       .string().min(1).max(280).optional(),
     address: z
@@ -85,6 +82,7 @@ export const CreateProposalForm: FC = () => {
   const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     console.log(data);
     let signature: TransactionSignature = '';
+    console.log("current rpc : ", connection.rpcEndpoint)
     if (program && wallet.publicKey) {
       try {
         setLoading(true)
@@ -159,7 +157,7 @@ export const CreateProposalForm: FC = () => {
 
         const proposal = PublicKey.findProgramAddressSync(
           // seeds = [b"proposal", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
-          [Buffer.from("proposal"), new PublicKey(address).toBytes(), new BN(currentLock.account.proposals.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
+          [Buffer.from("proposal"), currentLock.publicKey.toBytes(), new BN(currentLock.account.proposals.toNumber() + 1).toArrayLike(Buffer, 'le', 8)],
           program.programId
         )[0];
 

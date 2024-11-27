@@ -1,3 +1,4 @@
+import { ButtonCreateLock } from "@/components/ButtonCreateLock";
 import { LockEcosystemDisplay } from "@/components/LockEcosystemDisplay";
 import { getSEOTags } from "@/lib/seo";
 import Image from "next/image";
@@ -33,9 +34,10 @@ export default async function LockPage() {
   return (
     <main className="my-6 md:my-10 w-full flex flex-col items-center">
       <h1 className="text-3xl md:text-3xl font-extrabold flex text-center">
-        ASR Ecosystem
+        Lock Ecosystem
       </h1>
-      <div className="overflow-x-auto w-full mx-auto mt-8">
+      <ButtonCreateLock />
+      <div className="overflow-x-auto w-full mx-auto">
         <LockEcosystemDisplay />
       </div>
     </main>

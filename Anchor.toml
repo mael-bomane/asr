@@ -11,8 +11,9 @@ asr = "ASRwFhKHjzF96q6BAvWcjCQQT8WpBU9XTkWDKe5ttmUX"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
-wallet = "~/.config/solana/id.json"
+cluster = "https://rpc.testnet.soo.network/rpc"
+#cluster = "localnet"
+wallet = "~/.config/solana/soon.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

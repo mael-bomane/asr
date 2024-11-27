@@ -3,19 +3,10 @@
 import * as React from "react"
 import {
   AudioWaveform,
-  BookOpen,
-  Bot,
   Command,
-  Frame,
-  GalleryVerticalEnd,
   SquareIcon,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
   LockIcon,
   VoteIcon,
-  GemIcon,
   GiftIcon
 } from "lucide-react"
 
@@ -60,7 +51,7 @@ const data = {
   navMain: [
     {
       title: "Lock",
-      url: "#",
+      url: "/lock",
       icon: LockIcon,
       isActive: true,
       items: [

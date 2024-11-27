@@ -27,7 +27,7 @@ export const HoverEffect = ({
         <Link
           href={`/lock/${lock.publicKey.toString()}`}
           key={lock.publicKey.toString()}
-          className="relative group  block p-2 h-full w-full"
+          className="relative group block p-2 h-full w-full"
           onClick={() => setCurrentLock(lock)}
           onMouseEnter={() => setHoveredIndex(idx)}
           onMouseLeave={() => setHoveredIndex(null)}

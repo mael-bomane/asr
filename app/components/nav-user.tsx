@@ -1,17 +1,13 @@
 "use client"
 
 import {
-  Bell,
   ChevronsUpDown,
   Plug,
-  CreditCard,
   LogOut,
 } from "lucide-react"
 
 import {
   Avatar,
-  AvatarFallback,
-  AvatarImage,
 } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -30,7 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 
 import Blockies from 'react-blockies';
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { ellipsis } from "@/lib/utils";
 import { useContext } from "react";
@@ -49,7 +45,6 @@ export function NavUser() {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <span className="truncate font-semibold text-xs">{endpoint}</span>
         <DropdownMenu>
           {wallet.publicKey ? (
             <DropdownMenuTrigger asChild>
@@ -61,7 +56,7 @@ export function NavUser() {
                   <BlockiesAvatar />
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">{solana ? 'Solana' : 'SOON'} Network</span>
+                  <span className="truncate font-semibold text-xs">{endpoint.split('https://')[1]}</span>
                   <span className="truncate text-xs">{ellipsis(wallet.publicKey?.toString()) ?? 'Connect Wallet'}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
@@ -79,7 +74,7 @@ export function NavUser() {
                 <BlockiesAvatar />
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{solana ? 'Solana' : 'SOON'} Network</span>
+                <span className="truncate font-semibold text-xs">{endpoint.split('https://')[1]}</span>
                 <span className="truncate text-xs">{ellipsis(wallet.publicKey?.toString()) ?? 'Connect Wallet'}</span>
               </div>
             </SidebarMenuButton>
