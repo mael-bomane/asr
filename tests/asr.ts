@@ -407,9 +407,9 @@ describe("lock", () => {
       await program.methods.lockNew(
         0, //config
         false, //permissionless
-        new BN(43200), //season_duration
-        new BN(3600), // voting_period
-        new BN(43200), // lock_duration
+        new BN(15), //season_duration
+        new BN(10), // voting_period
+        new BN(5), // lock_duration
         51, //approval_threshold
         25, //quorum
         min, // amount
@@ -466,8 +466,8 @@ describe("lock", () => {
         0, //config
         false, //permissionless
         new BN(15), //season_duration
-        new BN(5), // voting_period
-        new BN(5), // lock_duration
+        new BN(10), // voting_period
+        new BN(10), // lock_duration
         51, //approval_threshold
         25, //quorum
         min, // amount

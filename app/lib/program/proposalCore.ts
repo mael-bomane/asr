@@ -9,23 +9,26 @@ export type ProposalCore = {
   lock: PublicKey,
   id: BN
   config: number
-  permissionless?: boolean
-  seasonDuration?: BN
-  votingPeriod?: BN
-  lockDuration?: BN
-  threshold?: number
-  quorum?: number
-  amount?: BN
-  name?: string
-  symbol?: string
+  permissionless: boolean
+  seasonDuration: BN
+  votingPeriod: BN
+  lockDuration: BN
+  threshold: number
+  quorum: number
+  amount: BN
+  name: string
+  symbol: string
 }
 
 export const proposalCoreIx = async (
   props: ProposalCore
 ) => {
+  console.log(props);
   const { signer, lock, program, id } = props;
   console.log("signer : ", signer.toString());
   console.log("lock : ", lock.toString());
+  console.log("id : ", id.toNumber());
+  console.log("season duration : ", props.seasonDuration?.toNumber());
 
   const analytics = PublicKey.findProgramAddressSync(
     [Buffer.from("analytics")],
@@ -39,24 +42,11 @@ export const proposalCoreIx = async (
   )[0];
 
   const proposal = PublicKey.findProgramAddressSync(
-    // seeds = [b"proposal", lock.key().as_ref(), (locker.polls + 1).to_le_bytes().as_ref()]
+    // seeds = [b"proposal", lock.key().as_ref(), (lock.polls + 1).to_le_bytes().as_ref()]
     [Buffer.from("proposal"), lock.toBytes(), id.toArrayLike(Buffer, 'le', 8)],
     program.programId
   )[0];
 
-
-  type ProposalCore = {
-    config: number
-    permissionless?: boolean
-    seasonDuration?: BN
-    votingPeriod?: BN
-    lockDuration?: BN
-    threshold?: number
-    quorum?: number
-    amount?: BN
-    name?: string
-    symbol?: string
-  }
   return await program.methods.proposalCore(
     props.config,
     props.permissionless ?? null, // permissionless

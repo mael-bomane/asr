@@ -11,8 +11,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { Checkbox } from "@/components/ui/checkbox"
 
-import { ellipsis } from "@/lib/utils";
+import { ellipsis, getDuration } from "@/lib/utils";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { toast } from "sonner"
 import type { FC } from "react";
@@ -24,6 +25,9 @@ import { Textarea } from "./ui/textarea";
 import { proposalStandardIx } from "@/lib/program/proposalStandard";
 import { proposalOptionIx } from "@/lib/program/proposalOption";
 import { ProposalCore, proposalCoreIx } from "@/lib/program/proposalCore";
+import { LockDetails } from "./LockDetails";
+import { FaBolt, FaCalendar, FaCheck, FaLock, FaPencil, FaUsers } from "react-icons/fa6";
+import { Slider } from "./ui/slider";
 
 export const CreateProposalForm: FC = () => {
   const wallet = useWallet();
@@ -35,11 +39,12 @@ export const CreateProposalForm: FC = () => {
   const address = searchParams.get('address');
 
   // proposal core
-  const [permissionless, setPermissionless] = useState<boolean>(currentLock.account.config.permissionless ?? false);
-  const [threshold, setThreshold] = useState<number>(currentLock.account.config.threshold ?? 50);
-  const [quorum, setQuorum] = useState<number>(currentLock.account.config.quorum ?? 25);
-  const [votingPeriod, setVotingPeriod] = useState<number>(currentLock.account.config.votingPeriod.toNumber() ?? (86400 * 1000));
-  const [seasonDuration, setSeasonDuration] = useState<number>(currentLock.account.config.seasonDuration.toNumber() ?? (86400 * 1000));
+  const [permissionless, setPermissionless] = useState<boolean>(currentLock?.account.config.permissionless ?? false);
+  const [threshold, setThreshold] = useState<number>(currentLock?.account.config.threshold ?? 50);
+  const [quorum, setQuorum] = useState<number>(currentLock?.account.config.quorum ?? 25);
+  const [votingPeriod, setVotingPeriod] = useState<number>(currentLock?.account.config.votingPeriod.toNumber() ?? (86400 * 1000));
+  const [seasonDuration, setSeasonDuration] = useState<number>(currentLock?.account.config.seasonDuration.toNumber() ?? (86400 * 1000));
+  const [lockDuration, setLockDuration] = useState<number>(currentLock?.account.config.lockDuration.toNumber() ?? (86400 * 1000));
 
   const [choices, setChoices] = useState<ProposalChoice[]>([
     { id: 0, title: 'Option 1', votingPower: new BN(0) },
@@ -49,36 +54,36 @@ export const CreateProposalForm: FC = () => {
     { id: 4, title: 'Option 5', votingPower: new BN(0) },
   ]);
 
-  type Inputs = {
-    title: string
-  }
-
   const FormSchema = z.object({
+    amount: z.string().refine((val) => !Number.isNaN(parseInt(val, 10)), {
+      message: "Expected number, received a string"
+    }),
     votingPeriod: z.number().optional(),
+    lockDuration: z.number().optional(),
     seasonDuration: z.number().optional(),
     threshold: z.number().optional(),
     quorum: z.number().optional(),
     proposalType: z.string(),
+    name: z.string(),
+    symbol: z.string(),
+    permissionless: z.boolean().optional(),
     title: z
-      .string({
-        required_error: "Please input Title",
-      }).min(1).max(50)
+      .string().min(1).max(50).optional()
     ,
     content: z
-      .string({
-        required_error: "Please input Content",
-      }).min(1).max(280),
+      .string().min(1).max(280).optional(),
     address: z
-      .string({
-        required_error: "Please input Lock",
-      }).min(1).max(280)
+      .string().min(1).max(280)
   })
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+      permissionless: currentLock?.account.config.permissionless ?? false,
+    }
   })
 
-  const onSubmit: SubmitHandler<Inputs> = async (data: z.infer<typeof FormSchema>) => {
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
     console.log(data);
     let signature: TransactionSignature = '';
     if (program && wallet.publicKey) {
@@ -87,51 +92,47 @@ export const CreateProposalForm: FC = () => {
 
         let instruction: TransactionInstruction;
 
-        switch (data.proposalType) {
-          case 'Settings': {
-            const props: ProposalCore = {
-              program,
-              signer: wallet.publicKey,
-              lock: new PublicKey(data.address),
-              id: new BN(currentLock.account.proposals.toNumber() + 1),
-              config: currentLock.account.config.config,
-              votingPeriod: data.votingPeriod ? new BN(data.votingPeriod) : null,
-              seasonDuration: data.seasonDuration ? new BN(data.seasonDuration) : null,
-              threshold: data.threshold ? data.threshold : null,
-              quorum: data.quorum ? data.quorum : null,
-            }
-            instruction = await proposalCoreIx(props);
+        if (data.proposalType.valueOf() == "Settings") {
+          const props: ProposalCore = {
+            program,
+            signer: wallet.publicKey,
+            lock: currentLock.publicKey,
+            id: new BN(currentLock.account.proposals.toNumber() + 1),
+            config: currentLock.account.config.config,
+            permissionless: data.permissionless ?? null,
+            votingPeriod: data.votingPeriod ? new BN(data.votingPeriod / 1000) : null,
+            seasonDuration: data.seasonDuration ? new BN(data.seasonDuration / 1000) : null,
+            lockDuration: data.lockDuration ? new BN(data.lockDuration / 1000) : null,
+            threshold: data.threshold ? data.threshold : null,
+            quorum: data.quorum ? data.quorum : null,
+            name: data.name ? data.name : null,
+            amount: data.amount ? new BN(data.amount) : null,
+            symbol: data.symbol ? data.symbol : null,
           }
-          case 'Standard': {
-            instruction = await proposalStandardIx(
-              program,
-              wallet.publicKey,
-              new PublicKey(data.address),
-              data.title,
-              data.content,
-              new BN(currentLock.account.proposals.toNumber() + 1),
-            );
-          }
-          case 'Option': {
-            instruction = await proposalOptionIx(
-              program,
-              wallet.publicKey,
-              new PublicKey(data.address),
-              data.title,
-              data.content,
-              choices,
-              new BN(currentLock.account.proposals.toNumber() + 1),
-            );
-          }
+          console.log("props", props)
+          instruction = await proposalCoreIx(props);
+        } else if (data.proposalType.valueOf() == "Standard") {
+          instruction = await proposalStandardIx(
+            program,
+            wallet.publicKey,
+            new PublicKey(data.address),
+            data.title,
+            data.content,
+            new BN(currentLock.account.proposals.toNumber() + 1),
+          );
+        } else if (data.proposalType.valueOf() == "Option") {
+          instruction = await proposalOptionIx(
+            program,
+            wallet.publicKey,
+            new PublicKey(data.address),
+            data.title,
+            data.content,
+            choices,
+            new BN(currentLock.account.proposals.toNumber() + 1),
+          );
+        } else {
+          console.log('error')
         }
-
-        // owner: PublicKey,
-        // lock: PublicKey,
-        // title: string,
-        // choices: ProposalChoice[],
-        // id: BN
-
-
 
         let latestBlockhash = await connection.getLatestBlockhash()
 
@@ -172,10 +173,6 @@ export const CreateProposalForm: FC = () => {
 
         toast.error("Error :", {
           description: error.message,
-          action: {
-            label: "Undo",
-            onClick: () => console.log("Undo"),
-          },
         })
       }
 
@@ -331,6 +328,328 @@ export const CreateProposalForm: FC = () => {
                 )}
               />
             </>
+          )}
+          {form.watch('proposalType') == "Settings" && (
+            <div className="w-full flex flex-col space-y-4 pt-8">
+              <div className="w-full flex justify-start items-center space-x-2">
+                <FormItem className="flex flex-col items-center w-full">
+                  <FormLabel>
+                    <span>Current : {`${currentLock?.account.config.name}`}</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      defaultValue={currentLock?.account.config.name}
+                      disabled
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+                <div className="flex justify-center items-center w-full space-x-2">
+                  <FaPencil />
+                  <span>Lock Name</span>
+                </div>
+                <div className="flex flex-col items-center w-full">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>
+                          <span>Proposed : {field.value == (currentLock?.account.config.name || undefined) ? `Unchanged` : `${field.value}`}</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            defaultValue={currentLock?.account.config.name}
+                            placeholder={currentLock?.account.config.name} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="w-full flex justify-start items-center space-x-2">
+                <FormItem className="flex flex-col items-center w-full">
+                  <FormLabel>
+                    <span>Current : {`${currentLock?.account.config.symbol}`}</span>
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      defaultValue={currentLock?.account.config.name}
+                      disabled
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+                <div className="flex justify-center items-center w-full space-x-2">
+                  <FaPencil />
+                  <span>Lock Symbol</span>
+                </div>
+                <div className="flex flex-col items-center w-full">
+                  <FormField
+                    control={form.control}
+                    name="symbol"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <FormLabel>
+                          <span>Proposed : {field.value == (currentLock?.account.config.name || undefined) ? `Unchanged` : `${field.value}`}</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            defaultValue={currentLock?.account.config.name}
+                            placeholder={currentLock?.account.config.name} {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+
+
+              <div className="w-full flex justify-start items-center space-x-2">
+                <FormItem className="flex flex-col items-center w-full">
+                  <span>Current : {`${currentLock?.account.config.permissionless}`}</span>
+                  <FormControl>
+                    <Checkbox
+                      checked={currentLock?.account.config.permissionless ?? false}
+                      className="border border-white"
+                      disabled
+                    />
+                  </FormControl>
+                </FormItem>
+                <div className="flex justify-center items-center w-full space-x-2">
+                  <FaLock />
+                  <span>Permissionless</span>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="permissionless"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col items-center w-full">
+                      <span>Proposed : {field.value == currentLock?.account.config.permissionless ? `Unchanged` : `${field.value}`}</span>
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                          className="border border-white"
+                        />
+                      </FormControl>
+                      {form.formState.errors.permissionless && <>error !</>}
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="w-full flex justify-start items-center space-x-2">
+                <div className="flex flex-col items-center w-full">
+                  <span>Current : {getDuration(currentLock?.account.config.seasonDuration.toNumber() * 1000).value} {getDuration(currentLock?.account.config.seasonDuration.toNumber() * 1000).unit} </span>
+                  <Slider id="seasonDuration"
+                    defaultValue={[currentLock?.account.config.seasonDuration.toNumber() * 1000]}
+                    onValueChange={(e) => {
+                      console.log(e[0]);
+                      setSeasonDuration(e[0])
+                      form.setValue('seasonDuration', e[0])
+                    }}
+                    min={43200 * 1000}
+                    max={86400 * 7 * 1000}
+                    step={43200 * 1000}
+                    disabled
+                  />
+                </div>
+                <div className="flex justify-center items-center w-full space-x-2">
+                  <FaCalendar />
+                  <span>Season Duration </span>
+                </div>
+                <div className="flex flex-col items-center w-full">
+                  <span>Proposed : {seasonDuration == (currentLock?.account.config.seasonDuration.toNumber() * 1000) || undefined ? `Unchanged` : `${getDuration(seasonDuration).value} ${getDuration(seasonDuration).unit}`}</span>
+                  <Slider id="seasonDuration"
+                    defaultValue={[currentLock?.account.config.votingPeriod.toNumber() * 1000]}
+                    onValueChange={(e) => {
+                      console.log(e[0]);
+                      setSeasonDuration(e[0])
+                      form.setValue('seasonDuration', e[0])
+                    }}
+                    {...form.register("seasonDuration")}
+                    min={43200 * 1000}
+                    max={86400 * 30 * 1000}
+                    step={43200 * 1000}
+                  />
+                  {form.formState.errors.seasonDuration && <>error !</>}
+                </div>
+              </div>
+              <div className="w-full flex justify-start items-center space-x-2">
+                <div className="flex flex-col items-center w-full">
+                  <span>Current : {getDuration(currentLock?.account.config.votingPeriod.toNumber() * 1000).value} {getDuration(currentLock?.account.config.lockDuration.toNumber() * 1000).unit} </span>
+                  <Slider id="votingPeriod"
+                    defaultValue={[currentLock?.account.config.votingPeriod.toNumber() * 1000]}
+                    min={43200 * 1000}
+                    max={86400 * 7 * 1000}
+                    step={43200 * 1000}
+                    disabled
+                  />
+                </div>
+                <div className="flex justify-center items-center w-full space-x-2">
+                  <FaCalendar />
+                  <span>Voting Period </span>
+                </div>
+                <div className="flex flex-col items-center w-full">
+                  <span>Proposed : {votingPeriod == (currentLock?.account.config.votingPeriod.toNumber() * 1000) ? `Unchanged` : `${getDuration(votingPeriod).value} ${getDuration(votingPeriod).unit}`}</span>
+                  <Slider id="votingPeriod"
+                    defaultValue={[currentLock?.account.config.votingPeriod.toNumber() * 1000]}
+                    onValueChange={(e) => {
+                      console.log(e[0]);
+                      setVotingPeriod(e[0])
+                      form.setValue('votingPeriod', e[0])
+                    }}
+                    {...form.register("votingPeriod")}
+                    min={43200 * 1000}
+                    max={86400 * 7 * 1000}
+                    step={43200 * 1000}
+                  />
+                  {form.formState.errors.threshold && <>error !</>}
+                </div>
+              </div>
+              <div className="w-full flex justify-start items-center space-x-2">
+                <div className="flex flex-col items-center w-full">
+                  <span>Current : {getDuration(currentLock?.account.config.lockDuration.toNumber() * 1000).value} {getDuration(currentLock?.account.config.votingPeriod.toNumber() * 1000).unit} </span>
+                  <Slider id="lockDuration"
+                    defaultValue={[currentLock?.account.config.lockDuration.toNumber() * 1000]}
+                    disabled
+                  />
+                </div>
+                <div className="flex justify-center items-center w-full space-x-2">
+                  <FaLock />
+                  <span>Lock Duration</span>
+                </div>
+                <div className="flex flex-col items-center w-full">
+                  <span>Proposed : {lockDuration == (currentLock?.account.config.lockDuration.toNumber() * 1000) ? `Unchanged` : `${getDuration(lockDuration).value} ${getDuration(lockDuration).unit}`}</span>
+                  <Slider id="lockDuration"
+                    defaultValue={[currentLock?.account.config.lockDuration.toNumber() * 1000]}
+                    onValueChange={(e) => {
+                      console.log(e[0]);
+                      setLockDuration(e[0])
+                      form.setValue('lockDuration', e[0])
+                    }}
+                    {...form.register("lockDuration")}
+                    min={43200 * 1000}
+                    max={86400 * 7 * 1000}
+                    step={43200 * 1000}
+                  />
+                  {form.formState.errors.lockDuration && <>error !</>}
+                </div>
+              </div>
+              <div className="w-full flex justify-center items-center space-x-2">
+                <div className="flex flex-col items-center w-full">
+                  <span>Current : {currentLock?.account.config.threshold}% </span>
+                  <Slider id="threshold"
+                    defaultValue={[currentLock.account.config.threshold]}
+                    onValueChange={(e) => {
+                      console.log(e[0]);
+                      setThreshold(e[0])
+                      form.setValue('threshold', e[0])
+                    }}
+                    min={50}
+                    max={100}
+                    step={1}
+                    disabled
+                  />
+                </div>
+                <div className="flex items-center justify-center w-full space-x-2">
+                  <FaCheck />
+                  <span>Approval Threshold </span>
+                </div>
+                <div className="flex flex-col items-center w-full">
+                  <span>Proposed : {threshold == currentLock?.account.config.threshold ? `Unchanged` : `${threshold}%`}</span>
+                  <Slider id="threshold"
+                    defaultValue={[currentLock?.account.config.threshold]}
+                    onValueChange={(e) => {
+                      console.log(e[0]);
+                      setThreshold(e[0])
+                      form.setValue('threshold', e[0])
+                    }}
+                    {...form.register("threshold")}
+                    min={50}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+              </div>
+              <div className="w-full flex justify-center items-center space-x-2">
+                <div className="flex flex-col items-center w-full">
+                  <span>Current : {currentLock?.account.config.quorum}% </span>
+                  <Slider id="threshold"
+                    defaultValue={[currentLock.account.config.quorum]}
+                    onValueChange={(e) => {
+                      console.log(e[0]);
+                      setThreshold(e[0])
+                      form.setValue('quorum', e[0])
+                    }}
+                    min={0}
+                    max={100}
+                    step={1}
+                    disabled
+                  />
+                </div>
+                <div className="flex items-center justify-center w-full space-x-2">
+                  <FaUsers />
+                  <span>Quorum </span>
+                </div>
+                <div className="flex flex-col items-center w-full">
+                  <span>Proposed : {quorum == currentLock?.account.config.quorum ? `Unchanged` : `${quorum}%`}</span>
+                  <Slider id="quorum"
+                    defaultValue={[currentLock?.account.config.quorum]}
+                    onValueChange={(e) => {
+                      console.log(e[0]);
+                      setQuorum(e[0])
+                      form.setValue('quorum', e[0])
+                    }}
+                    {...form.register("quorum")}
+                    min={0}
+                    max={100}
+                    step={1}
+                  />
+                </div>
+              </div>
+              <div className="w-full flex justify-center items-center space-x-2">
+                <div className="flex flex-col items-center w-full">
+                  <span>Current : {currentLock?.account.config.amount.toNumber() / (1 * 10 ** currentLock?.account.config.decimals)}
+                    <span className="font-semibold ml-1">{currentLock?.account.config.symbol}</span>
+
+                  </span>
+                  <Input id="amount"
+                    defaultValue={currentLock ?
+                      currentLock?.account.config.amount.toNumber() / (1 * 10 ** currentLock?.account.config.decimals)
+                      : 0}
+                    disabled
+                  />
+                </div>
+                <div className="flex items-center justify-center w-full space-x-2">
+                  <FaBolt />
+                  <span>Start Proposal </span>
+                </div>
+                <div className="flex flex-col items-center w-full">
+                  <FormField
+                    control={form.control}
+                    name="amount"
+                    render={({ field }) => (
+                      <FormItem className="w-full">
+                        <span>Proposed : {parseInt(field.value) == (currentLock?.account.config.amount.toNumber() / (1 * 10 ** currentLock?.account.config.decimals)) || !field.value ? `Unchanged` : `${field.value}`}</span>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            defaultValue={currentLock?.account.config.amount.toNumber() / (1 * 10 ** currentLock?.account.config.decimals)}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                </div>
+              </div>
+            </div>
           )}
           {form.watch('proposalType') == "Option" && (
             <>
