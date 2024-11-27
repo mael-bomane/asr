@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import type { FC } from "react";
 import WordRotate from "./ui/word-rotate";
+import { FaGithub } from "react-icons/fa6";
 
 export const Hero: FC = () => {
   const router = useRouter();
@@ -38,11 +39,22 @@ export const Hero: FC = () => {
               </div>
               {/* Buttons */}
               <div className="mt-8 gap-3 flex justify-center">
-                <Button size={"lg"}>Contribute</Button>
-                <Button size={"lg"} variant={"outline"} onClick={() => {
-                  router.push('/lock/create')
-                }}>
-                  Create Lock
+                <Button
+                  size={"lg"}
+                  onClick={() => {
+                    router.push('/lock/create')
+                  }}
+                >
+                  Create ASR Lock
+                </Button>
+                <Button
+                  size={"lg"}
+                  variant={"outline"}
+                  onClick={() => {
+                    router.push('https://github.com/mael-bomane/asr')
+                  }}
+                >
+                  <FaGithub /> Documentation
                 </Button>
               </div>
               {/* End Buttons */}

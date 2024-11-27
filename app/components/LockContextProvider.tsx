@@ -74,7 +74,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [locks, setLocks] = useState<LockMap[]>([]);
   const [currentLock, setCurrentLock] = useState<LockMap | null>(null);
-  const [currentLockProposals, setCurrentLockProposals] = useState<ProposalMap[] | null>(null);
+  const [currentLockProposals, setCurrentLockProposals] = useState<ProposalMap[]>([]);
   const [core, setCore] = useState<LockMap | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>([]);
