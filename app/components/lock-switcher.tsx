@@ -28,16 +28,12 @@ import type { LockMap, UserMap } from "@/types";
 import type { FC } from "react";
 import { LockContext } from "./LockContextProvider";
 import Skeleton from "react-loading-skeleton";
-import { MONOLITH_ID } from "@/constants";
 
-type Props = {
-  locks: LockMap[]
-  userRegistrations: UserMap[]
-}
-
-export const LockSwitcher: FC<Props> = ({ locks, userRegistrations }) => {
-  const { currentLock, setCurrentLock, setAddress, userLocks } = React.useContext(LockContext)
+export const LockSwitcher: FC = () => {
+  const { currentLock, setCurrentLock, setAddress, userLocks, solana } = React.useContext(LockContext)
   const { isMobile } = useSidebar()
+
+  const MONOLITH_ID = solana ? '2uUucnEPQZ8kUbG5aKoKpjcQHQFucgAAzPGwx6EDbokb' : '6dCRxboxUW657q68SxdzcdztZMyX6uRBoYULrf8Vr9dF'
 
   return (
     <SidebarMenu>

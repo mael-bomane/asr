@@ -3,7 +3,6 @@
 import React, { createContext, useState, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { MONOLITH_ID } from '@/constants'
 import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js'
 import { IDL } from "@/constants/idl";
 import idl from "@/constants/idl/asr.json";
@@ -67,6 +66,8 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
       return new Connection('https://rpc.testnet.soo.network/rpc')
     }
   }, [solana])
+
+  const MONOLITH_ID = solana ? '2uUucnEPQZ8kUbG5aKoKpjcQHQFucgAAzPGwx6EDbokb' : '6dCRxboxUW657q68SxdzcdztZMyX6uRBoYULrf8Vr9dF'
 
   const [program, setProgram] = useState<Program<IDL> | null>(null);
   const [endpoint, setEndpoint] = useState<string>("");
