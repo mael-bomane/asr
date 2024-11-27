@@ -40,8 +40,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: 
   const wallet = useWallet();
   const { sendTransaction } = useWallet();
   const { connection } = useConnection();
-  const { program } = useContext(LockContext);
-  const [loading, setLoading] = useState<boolean>(false);
+  const { program, loading, setLoading } = useContext(LockContext);
   const [isStake, setIsStake] = useState<boolean>(true);
   const [isUnStake, setIsUnStake] = useState<boolean>(false);
 

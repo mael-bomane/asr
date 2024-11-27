@@ -26,6 +26,8 @@ interface LockInterface {
   currentUser: User | null
   userRegistrations: UserMap[]
   userLocks: LockMap[]
+  loading: boolean
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>
   solana: boolean
   setSolana: React.Dispatch<React.SetStateAction<boolean>>
 }
@@ -45,6 +47,8 @@ export const LockContext = createContext<LockInterface>({
   currentUser: null,
   userRegistrations: [],
   userLocks: [],
+  loading: true,
+  setLoading: () => null,
   solana: true,
   setSolana: () => null,
 })
@@ -67,6 +71,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userRegistrations, setUserRegistrations] = useState<UserMap[]>([]);
   const [userLocks, setUserLocks] = useState<LockMap[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const value = {
     program,
@@ -83,6 +88,8 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
     currentUser,
     userRegistrations,
     userLocks,
+    loading,
+    setLoading,
     solana,
     setSolana
   }
@@ -217,7 +224,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
       )[0]
       return await program.account.user.fetch(user);
     }
-    if (publicKey && currentLock && program) {
+    if (publicKey && currentLock && program && !loading) {
       fetchUser()
         .then(response => {
           if (response) {
@@ -227,7 +234,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
         })
         .catch(err => console.log(err));
     }
-  }, [publicKey, currentLock, program]);
+  }, [publicKey, currentLock, program, loading]);
 
   useEffect(() => {
     const fetchUserRegistrations = async () => {

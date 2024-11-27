@@ -37,6 +37,7 @@ import { FaCheck } from "react-icons/fa6";
 import { proposalExecuteIx } from "@/lib/program/proposalExecute";
 import { BadgeProposalStatus } from "./BadgeProposalStatus";
 import { LockContext } from "./LockContextProvider";
+import { StackedProgress } from "./ui/stacked-progress";
 
 type Props = {
   address: string
@@ -45,7 +46,8 @@ type Props = {
 export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   const { connection } = useConnection();
-  const { publicKey, sendTransaction } = useWallet();
+  const wallet = useWallet();
+  const { sendTransaction } = useWallet();
   const { program, currentLock, currentUser } = useContext(LockContext);
 
   const formSchema = z.object({
@@ -70,7 +72,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
     const fetchProposal = async () => {
       return await program.account.proposal.fetch(new PublicKey(address));
     }
-    if (address) {
+    if (program && address) {
       fetchProposal()
         .then(async response => {
           if (response) {
@@ -80,7 +82,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
         })
         .catch(err => console.log(err));
     }
-  }, []);
+  }, [address]);
 
   useEffect(() => {
     if (proposal) {
@@ -93,7 +95,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     let signature: TransactionSignature = '';
-    if (publicKey) {
+    if (program && wallet.publicKey) {
       const choice = parseInt(values.choice);
       console.log(choice);
       // owner: PublicKey,
@@ -103,7 +105,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
       // choice: number,
       const instruction = await proposalVoteIx(
         program,
-        publicKey,
+        wallet.publicKey,
         proposal.lock,
         new PublicKey(address),
         proposal.id,
@@ -113,7 +115,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
       let latestBlockhash = await connection.getLatestBlockhash()
 
       const messageV0 = new TransactionMessage({
-        payerKey: publicKey,
+        payerKey: wallet.publicKey,
         recentBlockhash: latestBlockhash.blockhash,
         instructions: [instruction],
       }).compileToV0Message();
@@ -133,13 +135,13 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
   const onClick = useCallback(async () => {
     let signature: TransactionSignature = '';
-    if (publicKey) {
+    if (program && wallet.publicKey) {
       try {
-        const instruction = await proposalExecuteIx(program, publicKey, proposal.lock, new PublicKey(address));
+        const instruction = await proposalExecuteIx(program, wallet.publicKey, proposal.lock, new PublicKey(address));
         let latestBlockhash = await connection.getLatestBlockhash()
 
         const messageV0 = new TransactionMessage({
-          payerKey: publicKey,
+          payerKey: wallet.publicKey,
           recentBlockhash: latestBlockhash.blockhash,
           instructions: [instruction],
         }).compileToV0Message();
@@ -157,7 +159,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
         console.log(error);
       }
     }
-  }, [publicKey])
+  }, [wallet.publicKey, address])
 
   return (
     <section className="my-6 md:my-10 w-full max-w-7xl flex flex-col md:flex-row justify-center items-start md:p-4 text-base-content md:space-x-4">
@@ -176,7 +178,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
               </h1>
               <p className="mt-4">{proposal.content}</p>
             </div>
-            {publicKey && (
+            {wallet.publicKey && (
               <form onSubmit={form.handleSubmit(onSubmit)}
                 className="w-full bg-primary text-white rounded-box p-8">
                 <Form {...form}>
@@ -218,7 +220,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                     </div>
                   )}
                   <button type="submit" className="btn w-full mt-4"
-                    disabled={!publicKey || !currentUser || (currentUser.deposits.reduce((acc: any, obj: any) => {
+                    disabled={!wallet.publicKey || !currentUser || (currentUser.deposits.reduce((acc: any, obj: any) => {
                       return acc + obj.amount.toNumber();
                     }, 0) / (1 * 10 ** currentLock.account.config.decimals) == 0) || currentUser.votes.filter((vote) => vote.proposal.toNumber() == proposal.id.toNumber()).length > 0}
                   >
@@ -246,6 +248,7 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
               {proposal.executed ? (
                 <>
                   <div>Results</div>
+                  <StackedProgress segments={[]} className="bg-base-100" />
                   {proposal.choices.map(choice => {
                     return (
                       <div className="w-full flex justify-between" key={choice.id}>

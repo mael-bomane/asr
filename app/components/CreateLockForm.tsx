@@ -5,7 +5,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync, getMint, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { toast } from "react-hot-toast";
+import { toast } from "sonner"
 import { BN } from "bn.js";
 
 import { Slider } from "./ui/slider";
@@ -16,9 +16,9 @@ import { Button } from "./ui/button";
 import type { FC } from "react";
 import { useRouter } from "next/navigation";
 import { lockNewIx } from "@/lib/program/lockNew";
-import { program } from "@/constants";
 import { WalletConnectButton } from "@solana/wallet-adapter-react-ui";
 import { LockContext } from "./LockContextProvider";
+import { ellipsis } from "@/lib/utils";
 
 export const CreateLockForm: FC = () => {
   const { program } = useContext(LockContext);
@@ -119,15 +119,29 @@ export const CreateLockForm: FC = () => {
           program.programId
         )[0];
 
-        toast.success(`success, redirecting you shortly :\ntx : ${signature}`);
+        toast("Success :", {
+          description: `tx : ${ellipsis(signature)}`,
+          action: {
+            label: "Explorer",
+            onClick: () => router.push(`https://explorer.solana.com/tx/${signature}?cluster=devnet`),
+          },
+        })
 
         router.push(`/lock/${lock.toString()}`);
 
       } catch (error) {
-        console.log(error);
+        console.log(error.message);
 
         setLoading(false);
-        toast.error(`error :\n ${error}`);
+
+        toast.error("Error :", {
+          description: error.message,
+          action: {
+            label: "Undo",
+            onClick: () => console.log("Undo"),
+          },
+        })
+
       }
 
     } else {

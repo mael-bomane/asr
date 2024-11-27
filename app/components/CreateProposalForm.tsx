@@ -1,7 +1,6 @@
 "use client"
 
-import { useContext, useEffect, useState } from "react";
-import Link from "next/link";
+import { useContext, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { PublicKey, TransactionInstruction, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
@@ -11,7 +10,6 @@ import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { Input } from "./ui/input";
-import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 
 import { ellipsis } from "@/lib/utils";
@@ -31,16 +29,24 @@ export const CreateProposalForm: FC = () => {
   const wallet = useWallet();
   const { sendTransaction } = useWallet();
   const { connection } = useConnection();
-  const { program, locks, currentLock, setCurrentLock, currentUser } = useContext(LockContext);
+  const { program, locks, currentLock, setCurrentLock, currentUser, loading, setLoading } = useContext(LockContext);
   const router = useRouter();
   const searchParams = useSearchParams()
   const address = searchParams.get('address');
 
-  const [loading, setLoading] = useState<boolean>(false);
+  // proposal core
+  const [permissionless, setPermissionless] = useState<boolean>(currentLock.account.config.permissionless ?? false);
+  const [threshold, setThreshold] = useState<number>(currentLock.account.config.threshold ?? 50);
+  const [quorum, setQuorum] = useState<number>(currentLock.account.config.quorum ?? 25);
+  const [votingPeriod, setVotingPeriod] = useState<number>(currentLock.account.config.votingPeriod.toNumber() ?? (86400 * 1000));
+  const [seasonDuration, setSeasonDuration] = useState<number>(currentLock.account.config.seasonDuration.toNumber() ?? (86400 * 1000));
 
   const [choices, setChoices] = useState<ProposalChoice[]>([
-    { id: 0, title: 'Approve', votingPower: new BN(0) },
-    { id: 1, title: 'Reject', votingPower: new BN(0) },
+    { id: 0, title: 'Option 1', votingPower: new BN(0) },
+    { id: 1, title: 'Option 2', votingPower: new BN(0) },
+    { id: 2, title: 'Option 3', votingPower: new BN(0) },
+    { id: 3, title: 'Option 4', votingPower: new BN(0) },
+    { id: 4, title: 'Option 5', votingPower: new BN(0) },
   ]);
 
   type Inputs = {
@@ -48,10 +54,10 @@ export const CreateProposalForm: FC = () => {
   }
 
   const FormSchema = z.object({
-    votingPeriod: z.number(),
-    seasonDuration: z.number(),
-    threshold: z.number(),
-    quorum: z.number(),
+    votingPeriod: z.number().optional(),
+    seasonDuration: z.number().optional(),
+    threshold: z.number().optional(),
+    quorum: z.number().optional(),
     proposalType: z.string(),
     title: z
       .string({
@@ -75,7 +81,7 @@ export const CreateProposalForm: FC = () => {
   const onSubmit: SubmitHandler<Inputs> = async (data: z.infer<typeof FormSchema>) => {
     console.log(data);
     let signature: TransactionSignature = '';
-    if (wallet.publicKey) {
+    if (program && wallet.publicKey) {
       try {
         setLoading(true)
 
@@ -186,195 +192,196 @@ export const CreateProposalForm: FC = () => {
         <h1 className="text-xl md:text-3xl font-extrabold flex justify-center items-center w-full text-center">
           Proposal
         </h1>
-        <div className="w-full flex flex-col items-center justify-center space-y-4 grow">
-          <div className="w-full flex flex-col items-center justify-center space-y-2 grow">
-            <FormField
-              control={form.control}
-              name="proposalType"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Type: {field.value}</FormLabel>
-                  <Select onValueChange={field.onChange} >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem
-                        value={"Settings"}
+        <div className="w-full flex flex-col items-center space-y-2 grow">
+          <FormField
+            control={form.control}
+            name="proposalType"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Type:</FormLabel>
+                <Select onValueChange={field.onChange} >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem
+                      value={"Settings"}
+                    >
+                      Settings
+                    </SelectItem>
+                    <SelectItem
+                      value={"Standard"}
+                    >
+                      Standard
+                    </SelectItem>
+                    <SelectItem
+                      value={"Option"}
+                    >
+                      Option
+                    </SelectItem>
+                    {!currentLock?.account.config.permissionless && (
+                      <><SelectItem
+                        value={"AddManager"}
                       >
-                        Settings
+                        Add Manager
                       </SelectItem>
-                      <SelectItem
-                        value={"Standard"}
-                      >
-                        Standard
-                      </SelectItem>
-                      <SelectItem
-                        value={"Option"}
-                      >
-                        Option
-                      </SelectItem>
-                      {!currentLock?.account.config.permissionless && (
-                        <><SelectItem
-                          value={"AddManager"}
-                        >
-                          Add Manager
-                        </SelectItem>
-                          <SelectItem
-                            value={"RemoveManager"}
-                          >
-                            Remove Manager
-                          </SelectItem>
-                        </>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    {field.value == "Settings" && (
-                      <>
-                        Proposal to change ASR lock settings : (name, approval threshold, quorum, permissionless/council, etc..)
-                      </>
-                    )}
-                    {field.value == "Standard" && (
-                      <>
-                        Proposal Standard with 3 choices "Approve", "Against" & "Abstain"
-                      </>
-                    )}
-                    {field.value == "Option" && (
-                      <>
-                        Proposal with up to 255 Options (please don&apos;t try..)
-                      </>
-                    )}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Lock</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Lock" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {locks?.map(({ account, publicKey }) => (
                         <SelectItem
-
-                          value={publicKey.toString()}
-                          onClick={() => setCurrentLock({ account, publicKey })}
-                          key={publicKey.toString()}>
-                          {account.config.name} {ellipsis(publicKey.toString())}
+                          value={"RemoveManager"}
+                        >
+                          Remove Manager
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    {currentLock && (
-                      <>
-                        You need <span className="font-extrabold text-white">{currentLock.account.config.amount.toNumber() / (1 * 10 ** currentLock.account.config.decimals)} Staked {currentLock.account.config.symbol}</span> to create a Proposal.
                       </>
                     )}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ex : Ready For Mainnet !" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Max 50 Characters
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem className="w-full">
-                  <FormLabel>Body</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Ex : Make the Button Blue"
-                      className="resize-none"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Max 280 Characters
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {form.watch('proposalType') == "Option" && (
-              <>
-                <div className="w-full flex flex-col items-center justify-center space-y-2">
-                  <FormLabel className="w-full flex items-center space-x-2"><span>Choices</span>
-                    <FaPlus
-                      className="cursor-pointer w-3 h-3"
-                      onClick={() => {
-                        console.log("choices : ", choices);
-                        setChoices([...choices, {
-                          id: choices.length,
-                          title: '',
-                          votingPower: new BN(0),
-                        }])
-                      }}
-                    />
-                  </FormLabel>
-                </div>
-                <div className="w-full flex flex-col mt-4 space-y-2">
-                  {choices?.map((choice, index) => (
-                    <div className="w-full flex justify-center space-x-2" key={index}>
-                      <Input
-                        type="text"
-                        defaultValue={choice.title ?? ''}
-                        onChange={(e) => {
-                          e.preventDefault();
-                          choices[index].title = e.target.value;
-                          setChoices(choices)
-                        }}
-                        placeholder="choice title"
-                        className="w-full p-2"
-                      />
-                      <div className="w-[25%] h-9 flex justify-center items-center cursor-pointer group bg-primary rounded-lg hover:bg-base-100 border"
-                        onClick={() => {
-                          const newChoices = choices.filter((cx) => cx.id !== choice.id).map(cx => {
-                            if (cx.id > choice.id) {
-                              cx.id -= 1
-                            }
-                            return cx
-                          });
-                          console.log("new choices : ", newChoices);
-                          setChoices(newChoices);
-                        }}
-                      >
-                        <FaTrash className="group-hover:text-error" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  {field.value == "Settings" && (
+                    <>
+                      Proposal to change ASR lock settings : (name, approval threshold, quorum, permissionless/council, etc..)
+                    </>
+                  )}
+                  {field.value == "Standard" && (
+                    <>
+                      Proposal Standard with 3 choices "Approve", "Against" & "Abstain"
+                    </>
+                  )}
+                  {field.value == "Option" && (
+                    <>
+                      Proposal with up to 255 Options (please don&apos;t try..)
+                    </>
+                  )}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
+          />
+
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel>Lock</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Lock" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {locks?.map(({ account, publicKey }) => (
+                      <SelectItem
+                        value={publicKey.toString()}
+                        onClick={() => setCurrentLock({ account, publicKey })}
+                        key={publicKey.toString()}>
+                        {account.config.name} {ellipsis(publicKey.toString())}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  {currentLock && (
+                    <>
+                      You need <span className="font-extrabold text-white">{currentLock.account.config.amount.toNumber() / (1 * 10 ** currentLock.account.config.decimals)} Staked {currentLock.account.config.symbol}</span> to create a Proposal.
+                    </>
+                  )}
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {form.watch('proposalType') !== "Settings" && (
+            <>
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex : Ready For Mainnet !" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Max 50 Characters
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem className="w-full">
+                    <FormLabel>Body</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Ex : Make the Button Blue"
+                        className="resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Max 280 Characters
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
+          {form.watch('proposalType') == "Option" && (
+            <>
+              <div className="w-full flex flex-col items-center justify-center space-y-2">
+                <FormLabel className="w-full flex items-center space-x-2"><span>Choices</span>
+                  <FaPlus
+                    className="cursor-pointer w-3 h-3"
+                    onClick={() => {
+                      console.log("choices : ", choices);
+                      setChoices([...choices, {
+                        id: choices.length,
+                        title: '',
+                        votingPower: new BN(0),
+                      }])
+                    }}
+                  />
+                </FormLabel>
+              </div>
+              <div className="w-full flex flex-col mt-4 space-y-2">
+                {choices?.map((choice, index) => (
+                  <div className="w-full flex justify-center space-x-2" key={index}>
+                    <Input
+                      type="text"
+                      defaultValue={choice.title ?? ''}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        choices[index].title = e.target.value;
+                        setChoices(choices)
+                      }}
+                      placeholder="choice title"
+                      className="w-full p-2"
+                    />
+                    <div className="w-[25%] h-9 flex justify-center items-center cursor-pointer group bg-primary rounded-lg hover:bg-base-100 border"
+                      onClick={() => {
+                        const newChoices = choices.filter((cx) => cx.id !== choice.id).map(cx => {
+                          if (cx.id > choice.id) {
+                            cx.id -= 1
+                          }
+                          return cx
+                        });
+                        console.log("new choices : ", newChoices);
+                        setChoices(newChoices);
+                      }}
+                    >
+                      <FaTrash className="group-hover:text-error" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <Button className="cursor-pointer mt-8" size="lg" variant="secondary" type="submit">Start Proposal</Button>
