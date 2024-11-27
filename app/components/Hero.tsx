@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { FC } from "react";
 import WordRotate from "./ui/word-rotate";
 import { FaGithub } from "react-icons/fa6";
+import Link from "next/link";
 
 export const Hero: FC = () => {
   const router = useRouter();
@@ -50,11 +51,11 @@ export const Hero: FC = () => {
                 <Button
                   size={"lg"}
                   variant={"outline"}
-                  onClick={() => {
-                    router.push('https://github.com/mael-bomane/asr')
-                  }}
+
                 >
-                  <FaGithub /> Documentation
+                  <Link href="https://github.com/mael-bomane/asr" target="_blank" className="w-full flex justify-center items-center space-x-2">
+                    <FaGithub /> <span>Documentation</span>
+                  </Link>
                 </Button>
               </div>
               {/* End Buttons */}
