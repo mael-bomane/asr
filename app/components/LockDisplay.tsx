@@ -1,9 +1,6 @@
 "use client"
 
 import { useContext, useEffect, useState } from "react";
-import { useWallet } from "@solana/wallet-adapter-react";
-import { PublicKey } from "@solana/web3.js";
-import { Lock, Proposal, User } from "@/types/state";
 import { Proposals } from "./Proposals";
 import { VotingPower } from "./VotingPower";
 import { RewardsList } from "./RewardsList";
@@ -22,7 +19,6 @@ type Props = {
 
 export const LockDisplay: FC<Props> = ({ address }) => {
 
-  const { publicKey } = useWallet();
   const { currentUser, currentLock, users, setAddress } = useContext(LockContext);
 
   const [season, setSeason] = useState<number>(0);

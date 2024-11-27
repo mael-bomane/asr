@@ -163,13 +163,13 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
       fetchLock()
         .then((response) => {
           if (response) {
-            console.log('locks : ', response)
+            console.log('current lock : ', response)
             setCurrentLock({ account: response, publicKey: new PublicKey(address) });
           }
         })
         .catch((error) => console.log(error))
     }
-  }, [publicKey, analytics, address, program])
+  }, [publicKey, address, program])
 
   useEffect(() => {
     const fetchProposals = async () => {
@@ -182,7 +182,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
         },
       ]);
     }
-    if (currentLock && program) {
+    if (currentLock && program && !currentLockProposals) {
       fetchProposals()
         .then(response => {
           if (response) {
@@ -193,9 +193,15 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
         .catch(err => console.log(err));
     }
   }, [currentLock, program]);
+
   useEffect(() => {
     const fetchUsers = async () => {
-      return await program.account.user.all();
+      return await program.account.user.all([{
+        memcmp: {
+          offset: 8 + 32,
+          bytes: currentLock.publicKey.toString()
+        }
+      }]);
     }
     if (currentLock && program) {
       fetchUsers()
@@ -208,6 +214,8 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
             console.log(`Users : for currentLock : `, usersMap)
             console.log("total users : ", usersMap);
             setUsers(usersMap)
+          } else {
+            setUsers([])
           }
         })
         .catch(err => console.log(err));
@@ -230,9 +238,14 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
           if (response) {
             console.log("current user : ", response);
             setCurrentUser(response)
+          } else {
+            setCurrentUser(null)
           }
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+          console.log(err);
+          setCurrentUser(null);
+        });
     }
   }, [publicKey, currentLock, program, loading]);
 
@@ -246,7 +259,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
       }]);
     }
     const getUserLocks = (users: UserMap[], locks: LockMap[]): LockMap[] => {
-      return locks.filter(lock => new Set(users.map(user => user.account.lock)).has(lock.publicKey));
+      return locks.filter(lock => new Set(users.map(user => user.account.lock.toString())).has(lock.publicKey.toString()));
     }
 
     if (publicKey && locks && core && program) {
@@ -255,7 +268,7 @@ export const LockContextProvider = ({ children }: { children: ReactNode }) => {
           if (response) {
             console.log("current user registrations : ", response);
             setUserRegistrations(response);
-            setUserLocks(getUserLocks(response, locks).concat(core));
+            setUserLocks(getUserLocks(response, locks));
           }
         })
         .catch(err => console.log(err));

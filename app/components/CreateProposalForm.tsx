@@ -25,7 +25,6 @@ import { Textarea } from "./ui/textarea";
 import { proposalStandardIx } from "@/lib/program/proposalStandard";
 import { proposalOptionIx } from "@/lib/program/proposalOption";
 import { ProposalCore, proposalCoreIx } from "@/lib/program/proposalCore";
-import { LockDetails } from "./LockDetails";
 import { FaBolt, FaCalendar, FaCheck, FaLock, FaPencil, FaUsers } from "react-icons/fa6";
 import { Slider } from "./ui/slider";
 

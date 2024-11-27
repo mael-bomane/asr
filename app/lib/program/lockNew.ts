@@ -10,6 +10,7 @@ export const lockNewIx = async (
   signerAta: PublicKey,
   config: number,
   permissionless: boolean,
+  seasonDuration: BN,
   votingPeriod: BN,
   lockDuration: BN,
   threshold: number,
@@ -60,7 +61,7 @@ export const lockNewIx = async (
   //  quorum: u8,
   //  min: u64,
   //  name: String,
-  return await program.methods.lockNew(config, permissionless, votingPeriod, lockDuration, threshold, quorum, amount, name, symbol)
+  return await program.methods.lockNew(config, permissionless, seasonDuration, votingPeriod, lockDuration, threshold, quorum, amount, name, symbol)
     .accountsStrict({
       signer,
       auth,

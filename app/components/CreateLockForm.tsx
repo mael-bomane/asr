@@ -29,6 +29,7 @@ export const CreateLockForm: FC = () => {
   const [threshold, setThreshold] = useState<number>(50);
   const [quorum, setQuorum] = useState<number>(25);
   const [votingPeriod, setVotingPeriod] = useState<number>(86400 * 1000);
+  const [seasonDuration, setSeasonDuration] = useState<number>(86400 * 1000 * 7);
 
   type Inputs = {
     signer: PublicKey
@@ -36,6 +37,7 @@ export const CreateLockForm: FC = () => {
     symbol: string
     config: number
     permissionless: boolean
+    seasonDuration: number
     votingPeriod: number
     lockDuration: number
     threshold: number
@@ -87,8 +89,9 @@ export const CreateLockForm: FC = () => {
           signerAta,
           inputs.config ?? 0,
           inputs.permissionless ?? true,
-          new BN(inputs.votingPeriod ? (inputs.votingPeriod / 1000) : 86400),
-          new BN(inputs.lockDuration ? inputs.lockDuration : new BN(0)),
+          new BN(inputs.seasonDuration / 1000),
+          new BN(inputs.votingPeriod / 1000),
+          new BN(inputs.lockDuration / 1000),
           inputs.threshold,
           inputs.quorum ?? 25,
           new BN(inputs.amount * 1 * 10 ** mintInfo.decimals),
@@ -120,7 +123,7 @@ export const CreateLockForm: FC = () => {
         )[0];
 
         toast("Success :", {
-          description: `tx : ${ellipsis(signature)}`,
+          description: `${ellipsis(signature)}`,
           action: {
             label: "Explorer",
             onClick: () => router.push(`https://explorer.solana.com/tx/${signature}?cluster=devnet`),
@@ -234,12 +237,27 @@ export const CreateLockForm: FC = () => {
           max={86400 * 7 * 1000}
           step={86400 * 1000}
         />
+        <Label htmlFor="seasonDuration" className="self-start md:text-xl font-extrabold">Season Duration : {getDuration(seasonDuration).value} {getDuration(seasonDuration).unit} {errors.seasonDuration && <span className="text-error ml-4 text-sm">this field is required</span>}</Label>
+        <Slider id="seasonDuration"
+          defaultValue={[86400 * 1000 * 7]}
+          onValueChange={(e) => {
+            console.log(e[0]);
+            setSeasonDuration(e[0])
+            setValue('seasonDuration', e[0])
+          }}
+          {...register("votingPeriod", { required: true })}
+          min={86400 * 1000}
+          max={86400 * 30 * 1000}
+          step={86400 * 1000}
+        />
       </div>
-      {publicKey ? (
-        <Button className="cursor-pointer mt-8 w-full font-extrabold text-lg hover:bg-base-100 border" size="lg" type="submit">Create</Button>
-      ) : (
-        <><WalletConnectButton /></>
-      )}
-    </form>
+      {
+        publicKey ? (
+          <Button className="cursor-pointer mt-8 w-full font-extrabold text-lg hover:bg-base-100 border" size="lg" type="submit">Create</Button>
+        ) : (
+          <><WalletConnectButton /></>
+        )
+      }
+    </form >
   );
 }

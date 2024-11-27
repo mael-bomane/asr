@@ -8,7 +8,6 @@ import { Lock, Proposal, User } from "@/types/state";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { toast } from "react-hot-toast";
 
 import {
   Form,
@@ -24,6 +23,7 @@ import type { FC } from "react";
 import Link from "next/link";
 import { cn, ellipsis, getDuration } from "@/lib/utils";
 
+import { toast } from "sonner"
 import { DepositPopup } from "./DepositPopup";
 import Skeleton from "react-loading-skeleton";
 import { FaCalendar, FaWallet, FaWaveSquare } from "react-icons/fa";
@@ -39,6 +39,7 @@ import { BadgeProposalStatus } from "./BadgeProposalStatus";
 import { LockContext } from "./LockContextProvider";
 import { StackedProgress } from "./ui/stacked-progress";
 import { Table, TableBody, HeaderTableRow, TableHeader, TableRow, TableCell, TableHead, TableCaption } from "./ui/table";
+import { useRouter } from "next/navigation";
 
 type Props = {
   address: string
@@ -46,6 +47,7 @@ type Props = {
 
 export const ProposalDisplay: FC<Props> = ({ address }) => {
 
+  const router = useRouter();
   const { connection } = useConnection();
   const wallet = useWallet();
   const { sendTransaction } = useWallet();
@@ -129,14 +131,17 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
       console.log(signature);
 
-      toast.success(`success, redirecting you shortly :\ntx : ${signature}`);
+      toast("Success", {
+        description: `${ellipsis(signature)}`,
+      });
 
     }
   }
 
   const onClick = useCallback(async () => {
     let signature: TransactionSignature = '';
-    if (program && wallet.publicKey) {
+    console.log("proposal", proposal);
+    if (program && wallet.publicKey && proposal) {
       try {
         const instruction = await proposalExecuteIx(program, wallet.publicKey, proposal.lock, new PublicKey(address));
         let latestBlockhash = await connection.getLatestBlockhash()
@@ -155,7 +160,13 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
 
         console.log(signature);
 
-        toast.success(`success : ${ellipsis(signature)}`);
+        toast("Success", {
+          description: `${ellipsis(signature)}`,
+          action: {
+            label: "Explorer",
+            onClick: () => router.push(`https://explorer.solana.com/tx/${signature}?cluster=devnet`),
+          },
+        });
       } catch (error) {
         console.log(error);
       }

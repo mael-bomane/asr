@@ -8,7 +8,7 @@ import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { PublicKey, TransactionMessage, TransactionSignature, VersionedTransaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 
-import { toast } from "react-hot-toast";
+import { toast } from "sonner"
 
 import { registerIx } from "@/lib/program/register";
 
@@ -21,13 +21,14 @@ import { Input } from "@/components/ui/input";
 
 import type { FC } from "react"
 import type { User, LockMap } from "@/types";
-import { cn } from "@/lib/utils";
+import { cn, ellipsis } from "@/lib/utils";
 import { stakeIx } from "@/lib/program/stake";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { unstakeIx } from "@/lib/program/unstake";
 import { stakeDeactivateIx } from "@/lib/program/deactivate";
 import { UNSTAKING_TIME } from "@/constants";
 import { LockContext } from "./LockContextProvider";
+import { useRouter } from "next/navigation";
 
 type Props = {
   currentUser: User | null
@@ -39,6 +40,7 @@ type Props = {
 export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: { account, publicKey }, address }) => {
   const wallet = useWallet();
   const { sendTransaction } = useWallet();
+  const router = useRouter();
   const { connection } = useConnection();
   const { program, loading, setLoading } = useContext(LockContext);
   const [isStake, setIsStake] = useState<boolean>(true);
@@ -140,10 +142,19 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: 
 
           console.log(signature);
 
-          toast.success(`success:\ntx : ${signature}`);
+          toast("Success", {
+            description: `${ellipsis(signature)}`,
+            action: {
+              label: "Explorer",
+              onClick: () => router.push(`https://explorer.solana.com/tx/${signature}?cluster=devnet`),
+            },
+          });
           setLoading(false)
         } catch (error) {
           console.log(error);
+          toast.error("Error :", {
+            description: error.message,
+          })
           setLoading(false);
         }
 
@@ -175,10 +186,22 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: 
 
           console.log(signature);
 
-          toast.success(`success:\ntx : ${signature}`);
+          toast("Success", {
+            description: `${ellipsis(signature)}`,
+            action: {
+              label: "Explorer",
+              onClick: () => router.push(`https://explorer.solana.com/tx/${signature}?cluster=devnet`),
+            },
+          });
+
           setLoading(false)
         } catch (error) {
           console.log(error);
+
+          toast.error("Error :", {
+            description: error.message,
+          })
+
           setLoading(false);
         }
       }
@@ -322,7 +345,10 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: 
         ) : (
           <>
             <button className={cn("w-full btn btn-lg mx-auto")} disabled={!wallet.publicKey}
-              onClick={onClickRegister}
+              onClick={(e) => {
+                e.preventDefault()
+                onClickRegister()
+              }}
             >
               {wallet.publicKey ? "Register To Locker" : "Connect Your Wallet"}
             </button>
@@ -342,7 +368,7 @@ export const VotingPower: FC<Props> = ({ currentUser, currentUserLoading, lock: 
                 <span className={cn('', {
                   "bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-500": isStake || isUnStake,
                 })}>
-                  {userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : 'insufficient MONO'}
+                  {userTokenAmount && userTokenAmount.uiAmount > 0 ? `${isStake ? 'stake' : isUnStake ? 'unstake' : 'error'}` : `Insufficient ${account.config.symbol}`}
                 </span>
               </button>
             ) : (
