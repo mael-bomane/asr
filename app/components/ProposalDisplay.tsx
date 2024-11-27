@@ -22,7 +22,7 @@ import {
 
 import type { FC } from "react";
 import Link from "next/link";
-import { cn, ellipsis } from "@/lib/utils";
+import { cn, ellipsis, getDuration } from "@/lib/utils";
 
 import { DepositPopup } from "./DepositPopup";
 import Skeleton from "react-loading-skeleton";
@@ -38,6 +38,7 @@ import { proposalExecuteIx } from "@/lib/program/proposalExecute";
 import { BadgeProposalStatus } from "./BadgeProposalStatus";
 import { LockContext } from "./LockContextProvider";
 import { StackedProgress } from "./ui/stacked-progress";
+import { Table, TableBody, HeaderTableRow, TableHeader, TableRow, TableCell, TableHead, TableCaption } from "./ui/table";
 
 type Props = {
   address: string
@@ -173,10 +174,91 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                   {currentLock.account.config.name}
                 </Link> &gt; Proposal
               </div>
-              <h1 className="text-3xl md:text-3xl font-extrabold flex">
+              <h1 className="text-3xl md:text-3xl font-extrabold flex mt-2">
                 {proposal.title}
               </h1>
-              <p className="mt-4">{proposal.content}</p>
+              {proposal.proposalType !== 0 ? (
+                <p className="mt-4">{proposal.content}</p>
+              ) : (
+                <Table className="overflow-x-scroll">
+                  <TableCaption>Proposed Changes</TableCaption>
+                  <TableHeader>
+                    <HeaderTableRow>
+                      <TableHead className="text-center">Config</TableHead>
+                      <TableHead className="text-center">Current</TableHead>
+                      <TableHead className="text-center">Proposed</TableHead>
+                    </HeaderTableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {currentLock.account.config.name !== proposal.config.name && (
+                      <TableRow>
+                        <TableCell className="text-center">Name</TableCell>
+                        <TableCell className="text-center">{currentLock.account.config.name}</TableCell>
+                        <TableCell className="text-center">{proposal.config.name}</TableCell>
+                      </TableRow>
+                    )}
+                    {currentLock.account.config.symbol != proposal.config.symbol && (
+                      <TableRow>
+                        <TableCell className="text-center">Symbol</TableCell>
+                        <TableCell className="text-center">{currentLock.account.config.symbol}</TableCell>
+                        <TableCell className="text-center">{proposal.config.symbol}</TableCell>
+                      </TableRow>
+                    )}
+                    {currentLock.account.config.permissionless !== proposal.config.permissionless && (
+                      <TableRow>
+                        <TableCell className="text-center">Council</TableCell>
+                        <TableCell className="text-center">{currentLock.account.config.permissionless ? 'True' : 'False'}</TableCell>
+                        <TableCell className="text-center">{proposal.config.permissionless ? 'True' : 'False'}</TableCell>
+                      </TableRow>
+                    )}
+                    {currentLock.account.config.seasonDuration.toNumber() != proposal.config.seasonDuration.toNumber() && (
+                      <TableRow>
+                        <TableCell className="text-center">Season Duration</TableCell>
+                        <TableCell className="text-center">{getDuration(currentLock.account.config.seasonDuration.toNumber() * 1000).value} {getDuration(currentLock?.account.config.seasonDuration.toNumber() * 1000).unit}</TableCell>
+                        <TableCell className="text-center">{getDuration(proposal.config.seasonDuration.toNumber() * 1000).value} {getDuration(proposal.config.seasonDuration.toNumber() * 1000).unit}</TableCell>
+                      </TableRow>
+                    )}
+                    {currentLock.account.config.votingPeriod.toNumber() != proposal.config.votingPeriod.toNumber() && (
+                      <TableRow>
+                        <TableCell className="text-center">Voting Period</TableCell>
+                        <TableCell className="text-center">{getDuration(currentLock.account.config.votingPeriod.toNumber() * 1000).value} {getDuration(currentLock?.account.config.votingPeriod.toNumber() * 1000).unit}</TableCell>
+                        <TableCell className="text-center">{getDuration(proposal.config.votingPeriod.toNumber() * 1000).value} {getDuration(proposal.config.votingPeriod.toNumber() * 1000).unit}</TableCell>
+                      </TableRow>
+                    )}
+                    {currentLock.account.config.lockDuration.toNumber() != proposal.config.lockDuration.toNumber() && (
+                      <TableRow>
+                        <TableCell className="text-center">Lock Duration</TableCell>
+                        <TableCell className="text-center">{getDuration(currentLock.account.config.lockDuration.toNumber() * 1000).value} {getDuration(currentLock?.account.config.lockDuration.toNumber() * 1000).unit}</TableCell>
+                        <TableCell className="text-center">{getDuration(proposal.config.lockDuration.toNumber() * 1000).value} {getDuration(proposal.config.lockDuration.toNumber() * 1000).unit}</TableCell>
+                      </TableRow>
+                    )}
+                    {currentLock.account.config.threshold != proposal.config.threshold && (
+                      <TableRow>
+                        <TableCell className="text-center">Approval Threshold</TableCell>
+                        <TableCell className="text-center">{currentLock.account.config.threshold}</TableCell>
+                        <TableCell className="text-center">{proposal.config.threshold}</TableCell>
+                      </TableRow>
+                    )}
+                    {currentLock.account.config.quorum != proposal.config.quorum && (
+                      <TableRow>
+                        <TableCell className="text-center">Quorum</TableCell>
+                        <TableCell className="text-center">{currentLock.account.config.quorum}</TableCell>
+                        <TableCell className="text-center">{proposal.config.quorum}</TableCell>
+                      </TableRow>
+                    )}
+                    {(currentLock.account.config.amount.toNumber() / (1 * 10 ** currentLock.account.config.decimals))
+                      !=
+                      (proposal.config.amount.toNumber() / (1 * 10 ** proposal.config.decimals)) && (
+                        <TableRow>
+                          <TableCell className="text-center">Start Proposal</TableCell>
+                          <TableCell className="text-center">{(currentLock.account.config.amount.toNumber() / (1 * 10 ** currentLock.account.config.decimals))}</TableCell>
+                          <TableCell className="text-center">{(proposal.config.amount.toNumber() / (1 * 10 ** proposal.config.decimals))}</TableCell>
+                        </TableRow>
+                      )}
+
+                  </TableBody>
+                </Table>
+              )}
             </div>
             {wallet.publicKey && (
               <form onSubmit={form.handleSubmit(onSubmit)}
@@ -335,10 +417,14 @@ export const ProposalDisplay: FC<Props> = ({ address }) => {
                     </svg>
                   </div>
                   <div className="timeline-end timeline-box text-sm">Created</div>
-                  <hr className="bg-info" />
+                  <hr className={cn('h-5 w-5', {
+                    "text-info": (proposal.endsAt.toNumber() * 1000) < new Date().getTime()
+                  })} />
                 </li>
                 <li>
-                  <hr className="bg-info" />
+                  <hr className={cn('h-5 w-5', {
+                    "text-info": (proposal.endsAt.toNumber() * 1000) < new Date().getTime()
+                  })} />
                   <div className="timeline-middle">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"

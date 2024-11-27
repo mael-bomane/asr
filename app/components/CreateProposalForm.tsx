@@ -106,7 +106,7 @@ export const CreateProposalForm: FC = () => {
             threshold: data.threshold ? data.threshold : null,
             quorum: data.quorum ? data.quorum : null,
             name: data.name ? data.name : null,
-            amount: data.amount ? new BN(data.amount) : null,
+            amount: data.amount ? new BN(parseInt(data.amount) * (1 * 10 ** currentLock?.account.config.decimals)) : null,
             symbol: data.symbol ? data.symbol : null,
           }
           console.log("props", props)
