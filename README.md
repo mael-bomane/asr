@@ -67,23 +67,41 @@ Claim deposits who are both deactivating, and `now > (deposit.deactivation_start
 Vote on a proposal
 
 ### Proposal Core
+(restricted to managers if lock is not permissionless)
 
 Proposal to change all lock configuration values except the mint.
 
 All values are optional, the program clones the previous config and create a proposal with requested changes, changes are applied on proposal execution.
 
 ### Proposal Standard
+(restricted to managers if lock is not permissionless)
 
 Standard Proposal with 3 default Choices : "For", "Against" & "Abstain".
 
 Best for Yes/No question/answer, and for B2C Power-User Feedback.
 
 ### Proposal Option
+(restricted to managers if lock is not permissionless)
 
 Proposal with choices between 0 and 255 defined by user.
 
 ### Proposal Manager Add/Remove
+(restricted to managers if lock is not permissionless)
 
 Add or remove a manager based on his registered user pda owner (still requires registration on lock & staked token).
 
 Only managers can vote on these proposal types, quorum isn't checked but they don't contribute to voter season rewards.
+
+### Proposal Execute
+(restricted to managers if lock is not permissionless)
+
+Execute a proposal
+
+### ASR Deposit
+(restricted to managers if lock is not permissionless)
+
+Deposit a token to be claimed at current season_end for users who voted this season.
+
+### ASR Claim 
+
+Claim ASR Tokens for previous Season (impossible at Season 0), your share is relative to your share of the lock total deposits.
