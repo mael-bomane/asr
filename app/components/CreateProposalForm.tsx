@@ -241,7 +241,7 @@ export const CreateProposalForm: FC = () => {
                   )}
                   {field.value == "Standard" && (
                     <>
-                      Proposal Standard with 3 choices "Approve", "Against" & "Abstain"
+                      Proposal Standard with 3 choices &apos;Approve&apos;, &apos;Against&apos; & &apos;Abstain&apos;
                     </>
                   )}
                   {field.value == "Option" && (
